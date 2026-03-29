@@ -1,721 +1,826 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>AGORA — 독서 아카이브</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-/* ─────────────────────────────────────────────
-   여기에 Supabase 정보를 입력하세요
-   (아래 JS 설정 부분에도 동일하게 있습니다)
-───────────────────────────────────────────── */
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:#F3EBD8;font-family:'Crimson Pro',Georgia,serif;color:#26180D;min-height:100vh;}
-.nav{background:#1E1410;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25);}
-.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#D4A843;letter-spacing:4px;cursor:pointer;user-select:none;}
-.nav-links{display:flex;gap:2px;}
-.nl{color:#B0A090;font-size:14px;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .2s;font-family:'Crimson Pro',serif;}
-.nl:hover,.nl.on{color:#F3EBD8;background:rgba(212,168,67,.2);}
-.nav-r{display:flex;align-items:center;gap:10px;color:#B0A090;font-size:13px;}
-.btn-sm{background:none;border:1px solid #4A3A2A;color:#B0A090;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Crimson Pro',serif;transition:all .2s;}
-.btn-sm:hover{background:#4A3A2A;color:#F3EBD8;}
-.admbadge{background:#B03020;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;}
-.pg{max-width:840px;margin:0 auto;padding:40px 20px;}
-.pg-sm{max-width:600px;margin:0 auto;padding:40px 20px;}
-.h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:1px;margin-bottom:5px;}
-.sub{color:#8A7565;font-size:15px;margin-bottom:28px;}
-.card{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:20px 24px;margin-bottom:12px;transition:box-shadow .2s;}
-.card:hover{box-shadow:0 4px 18px rgba(38,24,13,.08);}
-.bk{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:16px 20px;margin-bottom:10px;display:flex;gap:16px;align-items:flex-start;cursor:pointer;transition:all .2s;}
-.bk:hover{box-shadow:0 4px 18px rgba(38,24,13,.1);border-color:#C8B898;}
-.spine{width:6px;min-height:66px;border-radius:3px;flex-shrink:0;}
-.bt{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;margin-bottom:2px;}
-.bm{font-size:13px;color:#8A7565;margin-bottom:5px;}
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;}
-.b-pub{background:#EAF4EC;color:#3D7A4E;border:1px solid #C3E6CB;}
-.b-prv{background:#FEF8ED;color:#B8820A;border:1px solid #FAE5B0;}
-label{display:block;font-size:13px;color:#6A5A48;margin-bottom:5px;letter-spacing:.3px;}
-input,textarea,select{width:100%;background:#FAF4E8;border:1px solid #DDD0B5;border-radius:6px;padding:9px 13px;font-family:'Crimson Pro',serif;font-size:15px;color:#26180D;outline:none;transition:border-color .2s;}
-input:focus,textarea:focus{border-color:#B8860B;box-shadow:0 0 0 3px rgba(184,134,11,.1);}
-textarea{resize:vertical;min-height:110px;line-height:1.7;}
-.fg{margin-bottom:18px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.btn{background:#1E1410;color:#F3EBD8;border:none;padding:10px 24px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:background .2s;letter-spacing:.3px;}
-.btn:hover{background:#352418;}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn2{background:transparent;color:#6A5A48;border:1px solid #DDD0B5;padding:9px 20px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:all .2s;}
-.btn2:hover{background:#EAE0CC;}
-.btnd{background:transparent;color:#B03020;border:1px solid #F5C6C0;padding:4px 11px;border-radius:4px;font-family:'Crimson Pro',serif;font-size:12px;cursor:pointer;transition:all .2s;}
-.btnd:hover{background:#FDECEA;}
-.hrt{background:none;border:1px solid #DDD0B5;cursor:pointer;display:flex;align-items:center;gap:5px;color:#8A7565;font-size:14px;padding:5px 13px;border-radius:20px;transition:all .2s;font-family:'Crimson Pro',serif;white-space:nowrap;}
-.hrt:hover{border-color:#C03020;color:#C03020;background:#FEF5F3;}
-.hrt.on{color:#C03020;border-color:#C03020;background:#FEF5F3;}
-hr{border:none;border-top:1px solid #DDD0B5;margin:20px 0;}
-.cm{padding:12px 0;border-bottom:1px solid #EDE3CC;}
-.notif{position:fixed;top:64px;right:18px;padding:11px 18px;border-radius:8px;font-family:'Crimson Pro',serif;font-size:14px;z-index:999;animation:sli .3s ease;box-shadow:0 4px 18px rgba(0,0,0,.15);}
-.notif.ok{background:#1E1410;color:#F3EBD8;}
-.notif.err{background:#B03020;color:#fff;}
-@keyframes sli{from{transform:translateX(80px);opacity:0;}to{transform:translateX(0);opacity:1;}}
-.empty{text-align:center;padding:56px 20px;color:#8A7565;}
-.ei{font-size:40px;margin-bottom:12px;}
-.et{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:#6A5A48;margin-bottom:5px;}
-.es{font-size:14px;margin-bottom:18px;}
-.fc{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:16px 20px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
-.fc:hover{box-shadow:0 4px 18px rgba(38,24,13,.1);border-color:#C8B898;}
-.ftag{display:inline-block;background:#1E1410;color:#D4A843;padding:2px 10px;border-radius:4px;font-size:11px;margin-bottom:8px;letter-spacing:.5px;}
-.tgl{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
-.trk{width:42px;height:22px;border-radius:11px;background:#DDD0B5;position:relative;transition:background .2s;flex-shrink:0;}
-.trk.on{background:#4A7C59;}
-.thm{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-.trk.on .thm{transform:translateX(20px);}
-.warn-box{background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:12px 16px;margin-bottom:18px;color:#8A2010;font-size:14px;}
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1E1410;}
-.lcard{background:#F3EBD8;border-radius:12px;padding:44px 36px;width:100%;max-width:380px;box-shadow:0 20px 56px rgba(0,0,0,.35);}
-.ltitle{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:#1E1410;text-align:center;letter-spacing:6px;margin-bottom:3px;}
-.lsub{text-align:center;color:#8A7565;font-size:13px;margin-bottom:32px;letter-spacing:1.5px;}
-.atog{text-align:center;margin-top:16px;color:#8A7565;font-size:14px;}
-.atog span{color:#B8860B;cursor:pointer;text-decoration:underline;}
-.err-msg{color:#B03020;font-size:13px;margin-bottom:12px;}
-.loading-ov{position:fixed;inset:0;background:rgba(30,20,16,.5);display:flex;align-items:center;justify-content:center;z-index:500;}
-.spinner{width:36px;height:36px;border:3px solid rgba(212,168,67,.3);border-top-color:#D4A843;border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.stat-box{flex:1 1 110px;background:#FAF4E8;border:1px solid #DDD0B5;border-radius:8px;padding:14px 16px;text-align:center;}
-.stat-n{font-size:20px;font-weight:600;font-family:'Cormorant Garamond',serif;}
-.stat-l{font-size:12px;color:#8A7565;margin-top:3px;}
-.row-flex{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;}
-@media(max-width:580px){
-  .g2{grid-template-columns:1fr;}
-  .pg,.pg-sm{padding:24px 14px;}
-  .lcard{padding:32px 20px;}
-  .nav{padding:0 14px;}
-  .nl{padding:4px 7px;font-size:13px;}
-  .nav-r span:first-child{display:none;}
-  .row-flex{flex-direction:column;gap:12px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --g:#1E5C38;--g2:#174D2F;--gl:#EBF5EF;--gb:#C8DFD1;
+  --br:#3B1F0E;--brl:#F5EFE9;--brb:#D9C4B5;
+  --card:#fff;--border:#EAEAEA;--txt:#3B1F0E;--muted:#7A6A5E;--red:#C0392B;
+  --nav-h:56px;--tab-h:60px;
 }
-/* 숨김/보임 */
+body{background:#fff;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;color:var(--txt);min-height:100vh;}
+.serif{font-family:'Cormorant Garamond',Georgia,serif;}
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--br);letter-spacing:4px;cursor:pointer;user-select:none;}
+.nav-links{display:flex;gap:2px;}
+.nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
+.nl:hover{color:var(--g);background:var(--gl);}
+.nl.on{color:var(--g);background:var(--gl);font-weight:600;}
+.nav-r{display:flex;align-items:center;gap:10px;}
+.nav-pts{font-size:13px;font-weight:600;color:var(--g);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;}
+.btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;}
+.btn-sm:hover{background:var(--gl);color:var(--g);}
+.admbadge{background:var(--red);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+/* 하단탭 */
+.btab{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:#fff;border-top:1px solid var(--border);z-index:200;flex-direction:row;}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;padding-bottom:4px;}
+.ti svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.ti.on{color:var(--g);}
+.ti.on svg{stroke:var(--g);}
+/* 레이아웃 */
+.pg{max-width:840px;margin:0 auto;padding:32px 20px;}
+.pg-sm{max-width:600px;margin:0 auto;padding:32px 20px;}
+.h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:.5px;margin-bottom:4px;}
+.sub{color:var(--muted);font-size:14px;margin-bottom:22px;}
+.rf{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+/* 카드 */
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:12px;transition:box-shadow .2s;}
+.card:hover{box-shadow:0 2px 16px rgba(0,0,0,.06);}
+/* 책 그리드 */
+.bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px;}
+.bi{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.bi:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
+.bc{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+.bph{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;font-size:32px;background:linear-gradient(135deg,var(--gl),var(--gb));}
+.bin{padding:10px 12px 12px;}
+.bt2{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ba{font-size:11px;color:var(--muted);}
+.bb{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+/* 배지 */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+.bpub{background:var(--gl);color:var(--g);border:1px solid var(--gb);}
+.bprv{background:var(--brl);color:var(--br);border:1px solid var(--brb);}
+.banon{background:#F0F0F0;color:#666;border:1px solid #DDD;}
+/* 폼 */
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+input,textarea{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Pretendard',sans-serif;font-size:15px;color:var(--txt);outline:none;transition:border-color .2s;}
+input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(30,92,56,.08);}
+textarea{resize:vertical;min-height:110px;line-height:1.7;}
+.fg{margin-bottom:16px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* 버튼 */
+.btn{background:var(--g);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;}
+.btn:hover{background:var(--g2);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn2{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn2:hover{background:var(--gl);color:var(--g);}
+.btnd{background:transparent;color:var(--red);border:1px solid #F5C6C0;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;}
+.btnd:hover{background:#FDECEA;}
+.btnbr{background:var(--br);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+/* 소셜 버튼 */
+.bg-btn{width:100%;background:#fff;border:1px solid var(--border);color:#3c4043;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;transition:box-shadow .2s;}
+.bg-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.bn-btn{width:100%;background:#03C75A;border:none;color:#fff;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+.bk-btn{width:100%;background:#FEE500;border:none;color:#3C1E1E;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+.bk-btn:hover{opacity:.9;}
+.bn-btn:hover{opacity:.9;}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:13px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+/* 하트 */
+.hrt{background:none;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--muted);font-size:14px;padding:6px 14px;border-radius:20px;transition:all .2s;white-space:nowrap;}
+.hrt:hover{border-color:#E87878;color:#C03020;background:#FEF5F3;}
+.hrt.on{color:#C03020;border-color:#E87878;background:#FEF5F3;}
+/* 토글 */
+.tgl{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.trk{width:42px;height:24px;border-radius:12px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0;}
+.trk.on{background:var(--g);}
+.thm{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.trk.on .thm{transform:translateX(18px);}
+/* 이미지 */
+.iua{border:2px dashed var(--brb);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--brl);}
+.iua:hover{border-color:var(--br);}
+.iua input{display:none;}
+.ipl{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.ipw{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.ipw img{width:100%;height:100%;object-fit:cover;}
+.idl{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:19px;height:19px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+/* 뷰어 */
+.vov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:center;}
+.vov.open{display:flex;}
+.vcl{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.viw{position:relative;display:flex;align-items:center;justify-content:center;width:100%;flex:1;overflow:hidden;}
+.vim{max-width:92vw;max-height:78vh;object-fit:contain;border-radius:6px;transition:transform .1s;transform-origin:center;user-select:none;}
+.var{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;}
+.var.l{left:10px;}
+.var.r{right:10px;}
+.vdots{display:flex;gap:7px;justify-content:center;padding:12px 0 6px;}
+.vdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;}
+.vdot.on{background:#fff;}
+.vcnt{color:rgba(255,255,255,.5);font-size:13px;text-align:center;padding-bottom:6px;}
+/* 슬라이더 */
+.isl{position:relative;overflow:hidden;border-radius:10px;margin-top:10px;background:#f0f0f0;}
+.ist{display:flex;transition:transform .3s ease;}
+.isd{flex:0 0 100%;}
+.isd img{width:100%;height:200px;object-fit:cover;cursor:pointer;}
+.sar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;}
+.sar.l{left:8px;}
+.sar.r{right:8px;}
+.sdots{position:absolute;bottom:7px;left:0;right:0;display:flex;gap:5px;justify-content:center;}
+.sdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);}
+.sdot.on{background:#fff;}
+/* 포럼 */
+.fc{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+.fc:hover{box-shadow:0 2px 16px rgba(0,0,0,.08);}
+.ftag{display:inline-block;background:var(--brl);color:var(--br);padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;margin-bottom:8px;}
+hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.cm{padding:12px 0;border-bottom:1px solid var(--border);}
+/* 포인트/결제 */
+.pts-box{background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:20px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.pts-num{font-size:28px;font-weight:700;color:var(--g);font-family:'Cormorant Garamond',serif;}
+.ppkg{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s;}
+.ppkg:hover{border-color:var(--g);}
+/* 게이트 모달 */
+.gov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;}
+.gov.open{display:flex;}
+.gcard{background:#fff;border-radius:16px;padding:32px 28px;max-width:340px;width:100%;text-align:center;}
+/* 알림 */
+.notif{position:fixed;top:66px;right:18px;padding:11px 18px;border-radius:10px;font-size:14px;font-weight:500;z-index:999;animation:sli .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.15);}
+.notif.ok{background:var(--g);color:#fff;}
+.notif.err{background:var(--red);color:#fff;}
+@keyframes sli{from{transform:translateX(80px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+/* 빈화면 */
+.empty{text-align:center;padding:52px 20px;color:var(--muted);}
+.et{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;margin-bottom:4px;color:#4A6B55;}
+.es{font-size:14px;margin-bottom:16px;}
+/* 경고/안내 */
+.warn{background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#8A2010;font-size:14px;}
+.info{border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;}
+/* 로그인 */
+.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;}
+.lcard{background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 34px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.ltitle{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--br);text-align:center;letter-spacing:6px;margin-bottom:3px;}
+.lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:1.5px;}
+.atog{text-align:center;margin-top:14px;color:var(--muted);font-size:14px;}
+.atog span{color:var(--g);cursor:pointer;font-weight:600;}
+.err-msg{color:var(--red);font-size:13px;margin-bottom:12px;}
+/* 로딩 */
+.lov{position:fixed;inset:0;background:rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;z-index:500;}
+.sp{width:34px;height:34px;border:3px solid var(--gb);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* 통계 */
+.sb{flex:1 1 100px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;}
+.sn{font-size:20px;font-weight:700;font-family:'Cormorant Garamond',serif;}
+.sl{font-size:12px;color:var(--muted);margin-top:3px;}
+/* 포인트 요청 */
+.preq{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.preq.ok{border-left:3px solid var(--g);}
+.preq.rej{border-left:3px solid var(--red);opacity:.6;}
+/* 페이지 */
 .page{display:none;}
 .page.active{display:block;}
-#loginWrap{display:none;}
-#loginWrap.active{display:flex;}
+#lw{display:none;}
+#lw.active{display:flex;}
+@media(max-width:600px){
+  .nav .nav-links,.uname{display:none;}
+  .btab{display:flex;}
+  .pg,.pg-sm{padding:18px 14px 76px;}
+  .g2{grid-template-columns:1fr;}
+  .lcard{padding:30px 20px;}
+  .nav{padding:0 16px;}
+  .rf{flex-direction:column;gap:10px;}
+  .bg{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+}
+@media(min-width:601px){.btab{display:none!important;}}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ 로그인 ══════════════════ -->
-<div id="loginWrap" class="login-wrap active">
+<!-- 로그인 -->
+<div id="lw" class="lw active">
   <div class="lcard">
     <div class="ltitle">AGORA</div>
     <div class="lsub">독서 아카이브</div>
-    <div class="fg">
-      <label>아이디</label>
-      <input id="authId" placeholder="아이디를 입력하세요" />
+    <button class="bk-btn" onclick="loginKakao()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
+      카카오로 계속하기
+    </button>
+    <div style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.7">카카오 계정으로 간편하게 시작하세요<br>별도 회원가입이 필요 없습니다</div>
+    <div id="aErr" class="err-msg" style="display:none;margin-top:12px"></div>
+    <div id="adminArea" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
+      <div class="fg"><label style="color:var(--muted)">관리자 아이디</label><input id="aId" placeholder="admin"/></div>
+      <div class="fg"><label style="color:var(--muted)">비밀번호</label><input id="aPw" type="password" placeholder="비밀번호"/></div>
+      <button class="btn2" style="width:100%" onclick="doAuth()">관리자 로그인</button>
     </div>
-    <div class="fg">
-      <label>비밀번호</label>
-      <input id="authPw" type="password" placeholder="비밀번호를 입력하세요" />
-    </div>
-    <div id="authErr" class="err-msg" style="display:none"></div>
-    <button class="btn" style="width:100%" id="authBtn" onclick="doAuth()">로그인</button>
-    <div class="atog" id="authToggle">
-      아직 계정이 없으신가요? <span onclick="toggleAuthMode()">회원가입</span>
-    </div>
+    <div style="text-align:center;margin-top:14px"><span onclick="toggleAdminArea()" style="font-size:11px;color:#ccc;cursor:pointer">관리자</span></div>
   </div>
 </div>
 
-<!-- ══════════════════ 앱 본체 ══════════════════ -->
-<div id="appWrap" style="display:none">
-  <!-- NAV -->
+<!-- 앱 -->
+<div id="app" style="display:none">
   <nav class="nav">
-    <div class="logo" onclick="goPage('library')">AGORA</div>
+    <div class="logo" onclick="go('library')">AGORA</div>
     <div class="nav-links">
-      <span class="nl" id="nav-library" onclick="goPage('library')">내 서재</span>
-      <span class="nl" id="nav-public"  onclick="goPage('public')">공개 서재</span>
-      <span class="nl" id="nav-forum"   onclick="goPage('forum')">광장</span>
-      <span class="nl" id="nav-admin"   onclick="goPage('admin')" style="display:none">관리</span>
+      <span class="nl" id="n-library" onclick="go('library')">내 서재</span>
+      <span class="nl" id="n-public" onclick="go('public')">공개 서재</span>
+      <span class="nl" id="n-forum" onclick="go('forum')">광장</span>
+      <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
     </div>
     <div class="nav-r">
-      <span id="navUsername"></span>
-      <span class="admbadge" id="navAdminBadge" style="display:none">관리자</span>
+      <span class="nav-pts" id="navPts" onclick="go('points')">🍃 0P</span>
+      <span class="uname" id="navUser" style="font-size:13px;color:var(--muted)"></span>
+      <span class="admbadge" id="navAdm" style="display:none">관리자</span>
       <button class="btn-sm" onclick="logout()">로그아웃</button>
     </div>
   </nav>
+  <div class="btab">
+    <div class="ti on" id="t-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>내 서재</div>
+    <div class="ti" id="t-public" onclick="go('public')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>공개 서재</div>
+    <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>광장</div>
+    <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>포인트</div>
+    <div class="ti" id="t-admin" onclick="go('admin')" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>관리</div>
+  </div>
 
-  <!-- 내 서재 -->
-  <div class="page" id="page-library">
-    <div class="pg">
-      <div class="row-flex">
-        <div><div class="h1">내 서재</div><div class="sub" id="libSub">나의 독서 기록</div></div>
-        <button class="btn" onclick="goPage('addBook')">+ 기록 추가</button>
+  <div class="page" id="p-library"><div class="pg">
+    <div class="rf"><div><div class="h1 serif">내 서재</div><div class="sub" id="libSub">나의 독서 기록</div></div><button class="btn" onclick="go('addBook')">+ 기록 추가</button></div>
+    <div id="bookList"></div>
+  </div></div>
+
+  <div class="page" id="p-addBook"><div class="pg-sm">
+    <div class="h1 serif" id="abTitle">독서 기록 추가</div>
+    <div class="sub" id="abSub" style="margin-bottom:18px">새로운 독서 기록을 남겨보세요</div>
+    <div class="card" style="padding:22px 24px">
+      <input type="hidden" id="editId"/>
+      <div class="fg"><label>책 제목 *</label><input id="bTitle" placeholder="책 제목을 입력하세요"/></div>
+      <div class="g2">
+        <div class="fg"><label>글쓴이</label><input id="bAuthor" placeholder="저자명"/></div>
+        <div class="fg"><label>출판사</label><input id="bPub" placeholder="출판사명"/></div>
       </div>
-      <div id="bookList"></div>
-    </div>
-  </div>
-
-  <!-- 기록 추가/수정 -->
-  <div class="page" id="page-addBook">
-    <div class="pg-sm">
-      <div class="h1" id="addBookTitle">독서 기록 추가</div>
-      <div class="sub" style="margin-bottom:22px" id="addBookSub">새로운 독서 기록을 남겨보세요</div>
-      <div class="card" style="padding:26px 28px">
-        <input type="hidden" id="editBookId" />
-        <div class="fg"><label>책 제목 *</label><input id="bfTitle" placeholder="책 제목을 입력하세요" /></div>
-        <div class="g2">
-          <div class="fg"><label>글쓴이</label><input id="bfAuthor" placeholder="저자명" /></div>
-          <div class="fg"><label>출판사</label><input id="bfPublisher" placeholder="출판사명" /></div>
-        </div>
-        <div class="g2">
-          <div class="fg"><label>읽기 시작한 날</label><input type="date" id="bfStart" /></div>
-          <div class="fg"><label>완독한 날</label><input type="date" id="bfEnd" /></div>
-        </div>
-        <div class="fg"><label>감상평</label><textarea id="bfReview" style="min-height:150px" placeholder="책에 대한 생각을 자유롭게 적어보세요..."></textarea></div>
-        <div class="fg">
-          <label>공개 설정</label>
-          <div class="tgl" onclick="togglePublic()">
-            <div class="trk" id="pubTrack"><div class="thm"></div></div>
-            <span id="pubLabel" style="font-size:14px;color:#8A7565">비공개 — 나만 볼 수 있습니다</span>
-          </div>
-          <input type="hidden" id="bfPublic" value="false" />
-        </div>
-        <div style="display:flex;gap:10px;justify-content:flex-end">
-          <button class="btn2" onclick="goPage('library')">취소</button>
-          <button class="btn" id="saveBookBtn" onclick="saveBook()">기록 저장</button>
-        </div>
+      <div class="g2">
+        <div class="fg"><label>읽기 시작한 날</label><input type="date" id="bStart"/></div>
+        <div class="fg"><label>완독한 날</label><input type="date" id="bEnd"/></div>
       </div>
-    </div>
-  </div>
-
-  <!-- 공개 서재 -->
-  <div class="page" id="page-public">
-    <div class="pg">
-      <div class="h1">공개 서재</div>
-      <div class="sub">아고라 회원들의 독서 감상평 · 하트로 공감을 전해보세요</div>
-      <div id="pubList"></div>
-    </div>
-  </div>
-
-  <!-- 광장 목록 -->
-  <div class="page" id="page-forum">
-    <div class="pg">
-      <div class="row-flex">
-        <div><div class="h1">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 모든 참여는 익명으로 이루어집니다</div></div>
-        <button class="btn" id="newPostBtn" onclick="goPage('addPost')">토론 시작</button>
-      </div>
-      <div id="forumBanMsg" class="warn-box" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
-      <div id="postList"></div>
-    </div>
-  </div>
-
-  <!-- 토론 작성 -->
-  <div class="page" id="page-addPost">
-    <div class="pg-sm">
-      <div class="h1">토론 시작하기</div>
-      <div class="sub">책에 대한 질문이나 생각을 공유해보세요 · 익명으로 게시됩니다</div>
-      <div class="card" style="padding:26px 28px">
-        <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?" /></div>
-        <div class="fg"><label>질문 또는 주제</label><textarea id="pfQuestion" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점, 나누고 싶은 이야기를 적어보세요..."></textarea></div>
-        <div style="display:flex;gap:10px;justify-content:flex-end">
-          <button class="btn2" onclick="goPage('forum')">취소</button>
-          <button class="btn" onclick="savePost()">익명으로 게시하기</button>
+      <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:140px" placeholder="책에 대한 생각을 자유롭게 적어보세요..."></textarea></div>
+      <div class="fg">
+        <label>사진 첨부 (여러 장 가능)</label>
+        <div class="iua" onclick="document.getElementById('imgIn').click()">
+          <input type="file" id="imgIn" accept="image/*" multiple onchange="onImgSel(event)"/>
+          <div style="font-size:26px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px;color:var(--br);font-weight:600">사진 추가하기</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">탭하여 갤러리에서 선택</div>
         </div>
+        <div id="ipl" class="ipl"></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div><label>공개 설정</label><div class="tgl" onclick="togPub()"><div class="trk" id="pubTrk"><div class="thm"></div></div><span id="pubLbl" style="font-size:13px;color:var(--muted)">비공개</span></div><input type="hidden" id="bPubV" value="false"/></div>
+        <div><label>익명 공개</label><div class="tgl" onclick="togAnon()"><div class="trk" id="anonTrk"><div class="thm"></div></div><span id="anonLbl" style="font-size:13px;color:var(--muted)">이름 표시</span></div><input type="hidden" id="bAnonV" value="false"/></div>
+      </div>
+      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 독서 기록 추가 시 <strong>1,000P</strong> 신청 가능 (하루 2회 한도)</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn2" onclick="go('library')">취소</button>
+        <button class="btn" id="saveBBtn" onclick="saveBook()">기록 저장</button>
       </div>
     </div>
-  </div>
+  </div></div>
 
-  <!-- 토론 상세 -->
-  <div class="page" id="page-postDetail">
-    <div class="pg-sm" style="max-width:680px">
-      <button class="btn2" style="margin-bottom:18px;font-size:13px;padding:6px 14px" onclick="goPage('forum')">← 광장으로</button>
-      <div id="postDetailContent"></div>
-      <hr />
-      <div id="cmtBanMsg" class="warn-box" style="display:none">⚠️ 이용이 제한된 계정입니다.</div>
-      <div id="cmtForm">
-        <div class="fg">
-          <textarea id="cmtText" placeholder="익명으로 답변을 작성해보세요..." style="margin-bottom:6px"></textarea>
-          <div style="font-size:11px;color:#AAA;margin-bottom:8px">Ctrl+Enter로 빠르게 전송</div>
-        </div>
-        <div style="display:flex;justify-content:flex-end">
-          <button class="btn" onclick="addCmt()">익명으로 답변하기</button>
-        </div>
+  <div class="page" id="p-public"><div class="pg">
+    <div class="h1 serif">공개 서재</div>
+    <div class="sub">아고라 회원들의 독서 감상평 · 하트로 공감을 전해보세요</div>
+    <div id="rdInfoB" class="info" style="display:none"></div>
+    <div id="pubList"></div>
+  </div></div>
+
+  <div class="page" id="p-bookDetail"><div class="pg-sm" style="max-width:680px">
+    <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('public')">← 공개 서재로</button>
+    <div id="bdContent"></div>
+  </div></div>
+
+  <div class="page" id="p-forum"><div class="pg">
+    <div class="rf"><div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div><button class="btn" id="nPostBtn" onclick="go('addPost')">토론 시작</button></div>
+    <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
+    <div id="rdInfoP" class="info" style="display:none"></div>
+    <div id="postList"></div>
+  </div></div>
+
+  <div class="page" id="p-addPost"><div class="pg-sm">
+    <div class="h1 serif">토론 시작하기</div>
+    <div class="sub">익명으로 게시됩니다</div>
+    <div class="card" style="padding:22px 24px">
+      <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?"/></div>
+      <div class="fg"><label>질문 또는 주제</label><textarea id="pfQ" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점..."></textarea></div>
+      <div style="margin-bottom:16px"><label>익명 설정</label><div class="tgl" onclick="togPostAnon()"><div class="trk on" id="pAnonTrk"><div class="thm"></div></div><span id="pAnonLbl" style="font-size:13px;color:var(--g)">익명으로 게시</span></div><input type="hidden" id="pfAnon" value="true"/></div>
+      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 토론 시작 시 <strong>1,000P</strong> 신청 가능 (하루 2회 한도)</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn2" onclick="go('forum')">취소</button>
+        <button class="btn" onclick="savePost()">게시하기</button>
       </div>
     </div>
-  </div>
+  </div></div>
 
-  <!-- 관리자 패널 -->
-  <div class="page" id="page-admin">
-    <div class="pg">
-      <div class="h1">관리자 패널</div>
-      <div class="sub">커뮤니티 관리 · 계정 관리</div>
-      <div style="display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap" id="adminStats"></div>
-      <div style="font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:12px">회원 목록</div>
-      <div id="userList"></div>
-      <hr />
-      <div style="font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:12px">최근 토론 게시글</div>
-      <div id="adminPostList"></div>
+  <div class="page" id="p-postDetail"><div class="pg-sm" style="max-width:680px">
+    <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('forum')">← 광장으로</button>
+    <div id="pdContent"></div>
+    <hr/>
+    <div id="cmtBan" class="warn" style="display:none">⚠️ 이용이 제한된 계정입니다.</div>
+    <div id="cmtForm">
+      <div class="fg"><textarea id="cmtTxt" placeholder="익명으로 답변을 작성해보세요..." style="margin-bottom:6px"></textarea><div style="font-size:11px;color:#aaa;margin-bottom:8px">Ctrl+Enter로 빠르게 전송</div></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn" onclick="addCmt()">답변하기</button></div>
+    </div>
+  </div></div>
+
+  <div class="page" id="p-points"><div class="pg-sm">
+    <div class="h1 serif">포인트</div>
+    <div class="sub">독서 기록을 남기고 포인트를 모아보세요</div>
+    <div class="pts-box"><div><div style="font-size:13px;color:var(--g);font-weight:600;margin-bottom:4px">보유 포인트</div><div class="pts-num" id="myPtsNum">0 P</div></div><button class="btn" onclick="go('payment')">포인트 충전</button></div>
+    <div style="background:var(--brl);border:1px solid var(--brb);border-radius:12px;padding:16px 18px;margin-bottom:20px">
+      <div style="font-size:14px;font-weight:600;color:var(--br);margin-bottom:10px">포인트 안내</div>
+      <div style="font-size:13px;color:var(--muted);line-height:2">📖 독서 기록 추가 시 <strong style="color:var(--g)">+1,000P</strong> 신청 (하루 2회)<br>💬 광장 토론 시작 시 <strong style="color:var(--g)">+1,000P</strong> 신청 (하루 2회)<br>👀 공개 서재·광장 하루 각 2회 무료 열람<br>🔓 추가 열람 시 <strong style="color:var(--br)">1,000P</strong> 차감</div>
+    </div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px">포인트 신청 내역</div>
+    <div id="myReqs"></div>
+  </div></div>
+
+  <div class="page" id="p-payment"><div class="pg-sm">
+    <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('points')">← 포인트로</button>
+    <div class="h1 serif">포인트 충전</div>
+    <div class="sub">토스페이먼츠로 안전하게 결제하세요</div>
+    <div class="ppkg" onclick="pay(5000,5000)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">5,000 P</div><div style="font-size:12px;color:var(--muted);margin-top:2px">공개 서재 5회 추가 열람</div></div><div style="font-size:15px;color:var(--muted)">5,000원</div></div>
+    <div class="ppkg" onclick="pay(10000,10000)" style="border-color:var(--g)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">10,000 P</div><div style="font-size:12px;color:var(--g);font-weight:600;margin-top:2px">가장 인기</div></div><div style="font-size:15px;color:var(--muted)">10,000원</div></div>
+    <div class="ppkg" onclick="pay(30000,30000)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">30,000 P</div><div style="font-size:12px;color:var(--muted);margin-top:2px">넉넉하게 충전</div></div><div style="font-size:15px;color:var(--muted)">30,000원</div></div>
+    <div style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">결제는 토스페이먼츠를 통해 안전하게 처리됩니다.</div>
+  </div></div>
+
+  <div class="page" id="p-admin"><div class="pg">
+    <div class="h1 serif">관리자 패널</div>
+    <div class="sub">커뮤니티 관리 · 포인트 승인</div>
+    <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">⏳ 포인트 승인 대기</div>
+    <div id="pendPts"></div>
+    <hr/>
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">회원 목록</div>
+    <div id="uList"></div>
+    <hr/>
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">최근 토론</div>
+    <div id="admPosts"></div>
+  </div></div>
+</div>
+
+<div class="lov" id="lov" style="display:none"><div class="sp"></div></div>
+
+<!-- 열람 게이트 -->
+<div class="gov" id="gov">
+  <div class="gcard">
+    <div style="font-size:36px;margin-bottom:12px">🔒</div>
+    <div style="font-size:18px;font-weight:600;margin-bottom:8px">오늘 무료 열람을 모두 사용했어요</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.6">하루 2회 무료 열람이 가능합니다.<br>추가 열람은 포인트를 사용해주세요.</div>
+    <div style="font-size:15px;font-weight:600;color:var(--g);margin-bottom:20px" id="gPts"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" id="gUseBtn" onclick="gUsePts()">1,000P 사용하여 열람</button>
+      <button class="btnbr" onclick="closeG();go('payment')">포인트 충전하기</button>
+      <button class="btn2" onclick="closeG()">닫기</button>
     </div>
   </div>
 </div>
 
-<!-- 로딩 오버레이 -->
-<div class="loading-ov" id="loadingOv" style="display:none"><div class="spinner"></div></div>
+<!-- 이미지 뷰어 -->
+<div class="vov" id="vov" onclick="vBgClick(event)">
+  <button class="vcl" onclick="closeV()">✕</button>
+  <div class="viw" id="viw">
+    <button class="var l" id="vLeft" onclick="vMove(-1)">‹</button>
+    <img class="vim" id="vim" src="" alt=""/>
+    <button class="var r" id="vRight" onclick="vMove(1)">›</button>
+  </div>
+  <div class="vcnt" id="vcnt"></div>
+  <div class="vdots" id="vdots"></div>
+</div>
 
 <script>
-// ════════════════════════════════════════════
-//  ⚡ 여기에 Supabase 정보를 입력하세요
-// ════════════════════════════════════════════
-const SUPABASE_URL  = 'https://xtgfidsgcawfrlrzcmxf.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0Z2ZpZHNnY2F3ZnJscnpjbXhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3OTUyNzcsImV4cCI6MjA5MDM3MTI3N30.xotPU7iBBCph35lG8ohfBmLpZzC2s4kMHKaj8ntMgUo';
-// ════════════════════════════════════════════
+// ══ 설정 ══
+const SB_URL='https://xtgfidsgcawfrlrzcmxf.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0Z2ZpZHNnY2F3ZnJscnpjbXhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3OTUyNzcsImV4cCI6MjA5MDM3MTI3N30.xotPU7iBBCph35lG8ohfBmLpZzC2s4kMHKaj8ntMgUo';
+const TOSS_KEY='test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq'; // 실제 키로 교체
+const NV_ID='YOUR_NAVER_CLIENT_ID'; // 네이버 개발자센터에서 발급
+const KK_JS_KEY='YOUR_KAKAO_JS_KEY';   // 카카오 JavaScript 키
+const KK_REST_KEY='YOUR_KAKAO_REST_KEY'; // 카카오 REST API 키 (카카오 로그인용)
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const ID=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
+const today=()=>new Date().toISOString().slice(0,10);
+const ago=d=>{const m=Math.floor((Date.now()-new Date(d))/60000);if(m<1)return'방금 전';if(m<60)return m+'분 전';if(m<1440)return Math.floor(m/60)+'시간 전';return Math.floor(m/1440)+'일 전';};
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-// 유틸
-const ID = () => Date.now().toString(36) + Math.random().toString(36).substr(2,5);
-const ago = d => {
-  const m = Math.floor((Date.now() - new Date(d)) / 60000);
-  if (m < 1) return '방금 전';
-  if (m < 60) return m + '분 전';
-  if (m < 1440) return Math.floor(m/60) + '시간 전';
-  return Math.floor(m/1440) + '일 전';
-};
-const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const SC = ['#B8860B','#4A7C59','#C0392B','#2980B9','#7D3C98','#2C3E50','#D35400','#1A6B4A'];
-const SD = ['#8A6508','#2D5C3A','#922B21','#1A6090','#5B2C6F','#1A252F','#A04000','#0E4D32'];
-const si = s => s.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SC.length;
+let CU=null,aMode='login',isPub=false,isAnon=false,isPAnon=true;
+let pFiles=[],eUrls=[],aPid=null,gCb=null;
 
-// 상태
-let CU = null; // 현재 유저
-let isPublicToggle = false;
-let activePostId = null;
-let authMode = 'login';
+const load=v=>document.getElementById('lov').style.display=v?'flex':'none';
+function nt(msg,t='ok'){document.querySelectorAll('.notif').forEach(e=>e.remove());const el=document.createElement('div');el.className='notif '+t;el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);}
+function upPts(p){document.getElementById('navPts').textContent='🍃 '+(p||0).toLocaleString()+'P';}
 
-// 로딩
-const setLoad = v => document.getElementById('loadingOv').style.display = v ? 'flex' : 'none';
-
-// 알림
-function notify(msg, type='ok') {
-  document.querySelectorAll('.notif').forEach(e=>e.remove());
-  const el = document.createElement('div');
-  el.className = `notif ${type}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 3000);
+// ══ 소셜 로그인 ══
+async function loginGoogle(){load(true);await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});}
+function loginNaver(){
+  if(NV_ID==='YOUR_NAVER_CLIENT_ID'){nt('setup-guide.md 를 참고해 네이버 Client ID를 설정해주세요','err');return;}
+  if(!window.naver){nt('네이버 SDK 로딩 실패','err');return;}
+  const nl=new naver.LoginWithNaverId({clientId:NV_ID,callbackUrl:location.origin+location.pathname,isPopup:false,loginButton:{}});
+  nl.init();const btn=document.querySelector('#nvBtn a');if(btn)btn.click();
 }
-
-// ── 인증 모드 토글 ─────────────────────────
-function toggleAuthMode() {
-  authMode = authMode === 'login' ? 'register' : 'login';
-  document.getElementById('authBtn').textContent = authMode === 'login' ? '로그인' : '가입하기';
-  document.getElementById('authToggle').innerHTML = authMode === 'login'
-    ? '아직 계정이 없으신가요? <span onclick="toggleAuthMode()">회원가입</span>'
-    : '이미 계정이 있으신가요? <span onclick="toggleAuthMode()">로그인</span>';
-  document.getElementById('authErr').style.display = 'none';
-}
-
-function showAuthErr(msg) {
-  const el = document.getElementById('authErr');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-async function doAuth() {
-  const id = document.getElementById('authId').value.trim();
-  const pw = document.getElementById('authPw').value;
-  if (!id || !pw) { showAuthErr('모든 항목을 입력해주세요.'); return; }
-  setLoad(true);
-  if (authMode === 'login') {
-    const { data, error } = await sb.from('agora_users').select('*').eq('username',id).eq('password',pw).single();
-    setLoad(false);
-    if (error || !data) { showAuthErr('아이디 또는 비밀번호를 확인해주세요.'); return; }
-    if (data.banned) { showAuthErr('이용이 제한된 계정입니다. 운영자에게 문의하세요.'); return; }
-    loginSuccess({ ...data, isAdmin: data.is_admin });
-  } else {
-    if (pw.length < 4) { setLoad(false); showAuthErr('비밀번호는 4자 이상이어야 합니다.'); return; }
-    const nu = { id: ID(), username: id, password: pw, strikes: 0, banned: false, is_admin: false };
-    const { error } = await sb.from('agora_users').insert(nu);
-    setLoad(false);
-    if (error) { showAuthErr(error.code==='23505' ? '이미 사용 중인 아이디입니다.' : '가입 중 오류가 발생했습니다.'); return; }
-    loginSuccess({ ...nu, isAdmin: false });
+async function handleOAuth(session){
+  const aid=session.user.id;
+  const{data:eu}=await sb.from('agora_users').select('*').eq('auth_id',aid).single();
+  if(eu){if(eu.banned){nt('이용이 제한된 계정입니다.','err');await sb.auth.signOut();load(false);return;}await ok({...eu,isAdmin:eu.is_admin});}
+  else{
+    const m=session.user.user_metadata||{};
+    const un=m.full_name||m.name||session.user.email?.split('@')[0]||'user_'+ID().slice(0,6);
+    const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null};
+    const{error}=await sb.from('agora_users').insert(nu);
+    if(error){nt('계정 생성 오류: '+error.message,'err');load(false);return;}
+    await ok({...nu,isAdmin:false});
   }
 }
 
-function loginSuccess(u) {
-  CU = u;
-  localStorage.setItem('agora_sess', JSON.stringify(u));
-  document.getElementById('loginWrap').classList.remove('active');
-  document.getElementById('loginWrap').style.display = 'none';
-  document.getElementById('appWrap').style.display = 'block';
-  document.getElementById('navUsername').textContent = u.username;
-  if (u.isAdmin) {
-    document.getElementById('navAdminBadge').style.display = 'inline';
-    document.getElementById('nav-admin').style.display = 'inline';
-  }
-  goPage('library');
+function loginKakao(){
+  if(KK_REST_KEY==='YOUR_KAKAO_REST_KEY'){nt('카카오 REST API 키를 설정해주세요','err');return;}
+  // 카카오 인가 코드 요청 (REST API 방식)
+  const params=new URLSearchParams({
+    client_id:KK_REST_KEY,
+    redirect_uri:location.origin+location.pathname,
+    response_type:'code',
+    scope:'profile_nickname,profile_image'
+  });
+  location.href='https://kauth.kakao.com/oauth/authorize?'+params.toString();
 }
-
-function logout() {
-  localStorage.removeItem('agora_sess');
-  CU = null;
-  document.getElementById('appWrap').style.display = 'none';
-  document.getElementById('loginWrap').style.display = 'flex';
-  document.getElementById('authId').value = '';
-  document.getElementById('authPw').value = '';
-  document.getElementById('authErr').style.display = 'none';
+async function handleKakao(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get('code');
+  // 네이버 콜백(hash)이나 토스 콜백과 구분
+  if(!code||params.get('payment')||location.hash.includes('access_token'))return false;
+  load(true);
+  try{
+    // Supabase Edge Function 호출
+    const res=await fetch(`${SB_URL}/functions/v1/kakao-auth`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({code})
+    });
+    const data=await res.json();
+    if(!data.user){nt('카카오 로그인 실패: '+(data.error||'알 수 없는 오류'),'err');load(false);history.replaceState({},'',location.pathname);return true;}
+    const u=data.user;
+    if(u.banned){nt('이용이 제한된 계정입니다.','err');load(false);history.replaceState({},'',location.pathname);return true;}
+    history.replaceState({},'',location.pathname);
+    await ok({...u,isAdmin:u.is_admin});
+  }catch(e){nt('카카오 로그인 오류: '+e.message,'err');load(false);history.replaceState({},'',location.pathname);}
+  return true;
 }
-
-// Enter 키 로그인
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('loginWrap').style.display !== 'none') doAuth();
-});
-
-// ── 페이지 이동 ────────────────────────────
-function goPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nl').forEach(n => n.classList.remove('on'));
-  document.getElementById('page-' + name).classList.add('active');
-  const navEl = document.getElementById('nav-' + (
-    name === 'addBook' ? 'library' :
-    name === 'addPost' || name === 'postDetail' ? 'forum' : name
-  ));
-  if (navEl) navEl.classList.add('on');
-
-  if (name === 'library')    renderLibrary();
-  if (name === 'public')     renderPublic();
-  if (name === 'forum')      renderForum();
-  if (name === 'admin')      renderAdmin();
-  if (name === 'addBook') {
-    document.getElementById('addBookTitle').textContent = '독서 기록 추가';
-    document.getElementById('addBookSub').textContent = '새로운 독서 기록을 남겨보세요';
-    document.getElementById('saveBookBtn').textContent = '기록 저장';
-    document.getElementById('editBookId').value = '';
-    ['bfTitle','bfAuthor','bfPublisher','bfStart','bfEnd','bfReview'].forEach(id => document.getElementById(id).value = '');
-    isPublicToggle = false;
-    document.getElementById('bfPublic').value = 'false';
-    document.getElementById('pubTrack').classList.remove('on');
-    document.getElementById('pubLabel').textContent = '비공개 — 나만 볼 수 있습니다';
-    document.getElementById('pubLabel').style.color = '#8A7565';
-  }
-}
-
-// ── 내 서재 ────────────────────────────────
-async function renderLibrary() {
-  setLoad(true);
-  const [{ data: bd }, { data: hd }] = await Promise.all([
-    sb.from('agora_books').select('*').eq('user_id', CU.id).order('created_at',{ascending:false}),
-    sb.from('agora_hearts').select('*'),
-  ]);
-  setLoad(false);
-  const books = (bd||[]).map(b => ({ ...b, hearts: (hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id) }));
-  document.getElementById('libSub').textContent = `나의 독서 기록${books.length > 0 ? ` · ${books.length}권` : ''}`;
-  const el = document.getElementById('bookList');
-  if (!books.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">📚</div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="goPage('addBook')">첫 번째 책 기록하기</button></div>`;
-    return;
-  }
-  el.innerHTML = books.map(b => {
-    const ci = si(b.title);
-    return `<div class="bk" onclick="openEdit('${b.id}')">
-      <div class="spine" style="background:linear-gradient(180deg,${SC[ci]},${SD[ci]})"></div>
-      <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <div class="bt">${esc(b.title)}</div>
-            <div class="bm">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
-            <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-              ${b.start_date ? `<span style="font-size:12px;color:#8A7565">📖 ${b.start_date}</span>` : ''}
-              ${b.end_date ? `<span style="font-size:12px;color:#8A7565">✓ ${b.end_date}</span>` : ''}
-              <span class="badge ${b.is_public ? 'b-pub' : 'b-prv'}">${b.is_public ? '공개' : '비공개'}</span>
-              ${b.is_public && b.hearts.length > 0 ? `<span style="font-size:12px;color:#C03020">♥ ${b.hearts.length}</span>` : ''}
-            </div>
-          </div>
-          <button class="btnd" onclick="event.stopPropagation();delBook('${b.id}')">삭제</button>
-        </div>
-        ${b.review ? `<div style="margin-top:9px;font-size:14px;color:#4A3828;line-height:1.65;border-left:3px solid #DDD0B5;padding-left:11px">${esc(b.review.length>110 ? b.review.slice(0,110)+'…' : b.review)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function openEdit(id) {
-  setLoad(true);
-  const { data: b } = await sb.from('agora_books').select('*').eq('id',id).single();
-  setLoad(false);
-  if (!b) return;
-  document.getElementById('addBookTitle').textContent = '독서 기록 수정';
-  document.getElementById('addBookSub').textContent = '기록을 수정합니다';
-  document.getElementById('saveBookBtn').textContent = '수정 완료';
-  document.getElementById('editBookId').value = id;
-  document.getElementById('bfTitle').value = b.title || '';
-  document.getElementById('bfAuthor').value = b.author || '';
-  document.getElementById('bfPublisher').value = b.publisher || '';
-  document.getElementById('bfStart').value = b.start_date || '';
-  document.getElementById('bfEnd').value = b.end_date || '';
-  document.getElementById('bfReview').value = b.review || '';
-  isPublicToggle = b.is_public;
-  document.getElementById('bfPublic').value = String(b.is_public);
-  document.getElementById('pubTrack').classList.toggle('on', b.is_public);
-  document.getElementById('pubLabel').textContent = b.is_public ? '공개 — 다른 사람이 감상평을 볼 수 있습니다 (하트만 가능)' : '비공개 — 나만 볼 수 있습니다';
-  document.getElementById('pubLabel').style.color = b.is_public ? '#3D7A4E' : '#8A7565';
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-addBook').classList.add('active');
-  document.getElementById('nav-library').classList.add('on');
-}
-
-function togglePublic() {
-  isPublicToggle = !isPublicToggle;
-  document.getElementById('bfPublic').value = String(isPublicToggle);
-  document.getElementById('pubTrack').classList.toggle('on', isPublicToggle);
-  document.getElementById('pubLabel').textContent = isPublicToggle ? '공개 — 다른 사람이 감상평을 볼 수 있습니다 (하트만 가능)' : '비공개 — 나만 볼 수 있습니다';
-  document.getElementById('pubLabel').style.color = isPublicToggle ? '#3D7A4E' : '#8A7565';
-}
-
-async function saveBook() {
-  const title = document.getElementById('bfTitle').value.trim();
-  if (!title) { notify('책 제목을 입력해주세요.', 'err'); return; }
-  const editId = document.getElementById('editBookId').value;
-  const payload = {
-    title, author: document.getElementById('bfAuthor').value,
-    publisher: document.getElementById('bfPublisher').value,
-    start_date: document.getElementById('bfStart').value,
-    end_date: document.getElementById('bfEnd').value,
-    review: document.getElementById('bfReview').value,
-    is_public: document.getElementById('bfPublic').value === 'true',
-  };
-  setLoad(true);
-  const { error } = editId
-    ? await sb.from('agora_books').update(payload).eq('id',editId)
-    : await sb.from('agora_books').insert({ id: ID(), user_id: CU.id, ...payload });
-  setLoad(false);
-  if (error) { notify('저장 중 오류가 발생했습니다.', 'err'); return; }
-  notify(editId ? '수정되었습니다.' : '독서 기록이 추가되었습니다.');
-  goPage('library');
-}
-
-async function delBook(id) {
-  if (!confirm('이 독서 기록을 삭제할까요?')) return;
-  await sb.from('agora_books').delete().eq('id',id);
-  notify('삭제되었습니다.');
-  renderLibrary();
-}
-
-// ── 공개 서재 ───────────────────────────────
-async function renderPublic() {
-  setLoad(true);
-  const [{ data: bd }, { data: hd }] = await Promise.all([
-    sb.from('agora_books').select('*').eq('is_public',true),
-    sb.from('agora_hearts').select('*'),
-  ]);
-  setLoad(false);
-  const books = (bd||[]).map(b => ({ ...b, hearts: (hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id) }))
-    .sort((a,b) => b.hearts.length - a.hearts.length);
-  const el = document.getElementById('pubList');
-  if (!books.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">🌿</div><div class="et">아직 공개된 감상평이 없습니다</div><div class="es">내 서재에서 감상평을 공개해보세요</div></div>`;
-    return;
-  }
-  el.innerHTML = books.map(b => {
-    const ci = si(b.title);
-    const hasH = b.hearts.includes(CU.id);
-    const isOwn = b.user_id === CU.id;
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="display:flex;gap:14px">
-          <div class="spine" style="background:linear-gradient(180deg,${SC[ci]},${SD[ci]});min-height:56px"></div>
-          <div>
-            <div class="bt">${esc(b.title)}</div>
-            <div class="bm">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
-            ${(b.start_date||b.end_date) ? `<div style="font-size:12px;color:#8A7565">${b.start_date||''}${b.start_date&&b.end_date?' → ':''}${b.end_date||''}</div>` : ''}
-          </div>
-        </div>
-        <button class="hrt ${hasH?'on':''}" onclick="toggleHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.5" title="내 책에는 하트를 누를 수 없습니다"':''}>
-          ${hasH?'♥':'♡'} ${b.hearts.length}
-        </button>
-      </div>
-      ${b.review ? `<div style="margin-top:14px;font-size:15px;color:#3A2A1E;line-height:1.85;border-top:1px solid #EDE3CC;padding-top:14px;font-style:italic">"${esc(b.review)}"</div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-async function toggleHeart(bookId, ownerId) {
-  if (ownerId === CU.id) return;
-  const { data: hd } = await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bookId);
-  if (hd && hd.length > 0) {
-    await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bookId);
-  } else {
-    await sb.from('agora_hearts').insert({ user_id: CU.id, book_id: bookId });
-  }
-  renderPublic();
-}
-
-// ── 광장 ────────────────────────────────────
-async function renderForum() {
-  setLoad(true);
-  const { data } = await sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false});
-  setLoad(false);
-  const posts = (data||[]).map(p => ({ ...p, comments: (p.agora_comments||[]).filter(c=>!c.is_deleted) }));
-  document.getElementById('newPostBtn').style.display = CU.banned ? 'none' : 'inline-block';
-  document.getElementById('forumBanMsg').style.display = CU.banned ? 'block' : 'none';
-  const el = document.getElementById('postList');
-  if (!posts.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">💬</div><div class="et">아직 토론이 없습니다</div><div class="es">첫 번째 토론을 시작해보세요</div></div>`;
-    return;
-  }
-  el.innerHTML = posts.map(p => `
-    <div class="fc" onclick="openPost('${p.id}')">
-      <div class="ftag">📖 ${esc(p.book_title)}</div>
-      <div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500;color:#26180D;margin-bottom:8px;line-height:1.5">${esc(p.question)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:12px;color:#8A7565">익명 · ${ago(p.created_at)}</span>
-        <span style="font-size:13px;color:#8A7565">💬 ${p.comments.length}개의 답변</span>
-      </div>
-    </div>`).join('');
-}
-
-async function savePost() {
-  const bookTitle = document.getElementById('pfBook').value.trim();
-  const question  = document.getElementById('pfQuestion').value.trim();
-  if (!bookTitle || !question) { notify('모든 항목을 입력해주세요.', 'err'); return; }
-  setLoad(true);
-  const { error } = await sb.from('agora_posts').insert({ id: ID(), user_id: CU.id, book_title: bookTitle, question });
-  setLoad(false);
-  if (error) { notify('게시 중 오류가 발생했습니다.', 'err'); return; }
-  document.getElementById('pfBook').value = '';
-  document.getElementById('pfQuestion').value = '';
-  notify('토론이 등록되었습니다.');
-  goPage('forum');
-}
-
-async function openPost(id) {
-  activePostId = id;
-  setLoad(true);
-  const { data: p } = await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
-  setLoad(false);
-  if (!p) return;
-  const cmts = (p.agora_comments||[]);
-  const visible = cmts.filter(c=>!c.is_deleted);
-  document.getElementById('postDetailContent').innerHTML = `
-    <div class="card" style="margin-bottom:20px">
-      <div class="ftag">📖 ${esc(p.book_title)}</div>
-      <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div>
-      <div style="font-size:12px;color:#8A7565">익명 · ${ago(p.created_at)}</div>
-    </div>
-    <div style="font-size:14px;color:#6A5A48;margin-bottom:10px;font-weight:500">답변 ${visible.length}개</div>
-    ${visible.length === 0 ? `<div style="text-align:center;padding:28px 0;color:#8A7565;font-size:14px;border-bottom:1px solid #DDD0B5;margin-bottom:20px">아직 답변이 없습니다. 첫 번째 답변을 남겨보세요.</div>` : ''}
-    ${visible.map(c => `
-      <div class="cm">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-          <div style="flex:1">
-            <div style="font-size:15px;color:#26180D;line-height:1.75;margin-bottom:5px">${esc(c.content)}</div>
-            <div style="font-size:12px;color:#8A7565">익명 · ${ago(c.created_at)}</div>
-          </div>
-          ${CU.isAdmin ? `<button class="btnd" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button>` : ''}
-        </div>
-      </div>`).join('')}
-  `;
-  document.getElementById('cmtBanMsg').style.display  = CU.banned ? 'block' : 'none';
-  document.getElementById('cmtForm').style.display    = CU.banned ? 'none' : 'block';
-  document.getElementById('cmtText').value = '';
-  goPage('postDetail');
-}
-
-async function addCmt() {
-  const content = document.getElementById('cmtText').value.trim();
-  if (!content || !activePostId) return;
-  await sb.from('agora_comments').insert({ id: ID(), post_id: activePostId, user_id: CU.id, content, is_deleted: false });
-  await openPost(activePostId);
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    const cmtText = document.getElementById('cmtText');
-    if (document.activeElement === cmtText) addCmt();
-  }
-});
-
-async function delCmt(cmtId, cmtUserId) {
-  await sb.from('agora_comments').update({ is_deleted: true }).eq('id',cmtId);
-  if (cmtUserId && cmtUserId !== 'admin') {
-    const { data: tu } = await sb.from('agora_users').select('*').eq('id',cmtUserId).single();
-    if (tu) {
-      const ns = (tu.strikes||0) + 1;
-      await sb.from('agora_users').update({ strikes: ns, banned: ns>=3 }).eq('id',cmtUserId);
-      if (ns >= 3) notify('해당 사용자가 3회 경고로 자동 이용 제한되었습니다.');
+async function handleNaver(){
+  if(!window.naver)return;
+  const nl=new naver.LoginWithNaverId({clientId:NV_ID,callbackUrl:location.origin+location.pathname,isPopup:false,loginButton:{}});
+  nl.init();
+  nl.getLoginStatus(async function(st){
+    if(!st)return;
+    const nu=nl.user,nid='naver_'+nu.getId();
+    const{data:eu}=await sb.from('agora_users').select('*').eq('auth_id',nid).single();
+    if(eu){if(eu.banned){nt('이용이 제한된 계정입니다.','err');nl.logout();return;}await ok({...eu,isAdmin:eu.is_admin});}
+    else{
+      const un=nu.getName()||nu.getEmail()?.split('@')[0]||'user_'+ID().slice(0,6);
+      const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null};
+      const{error}=await sb.from('agora_users').insert(newU);
+      if(error){nt('계정 생성 오류','err');return;}
+      await ok({...newU,isAdmin:false});
     }
-  }
-  notify('댓글이 삭제되었습니다.');
-  await openPost(activePostId);
+  });
 }
 
-// ── 관리자 패널 ─────────────────────────────
-async function renderAdmin() {
-  setLoad(true);
-  const [{ data: ud }, { data: bd }, { data: pd }, { data: hd }] = await Promise.all([
-    sb.from('agora_users').select('*'),
-    sb.from('agora_books').select('*').eq('is_public',true),
-    sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false}).limit(10),
-    sb.from('agora_hearts').select('*'),
-  ]);
-  setLoad(false);
-  const normal = (ud||[]).filter(u=>!u.is_admin);
-  const banned = normal.filter(u=>u.banned).length;
-  document.getElementById('adminStats').innerHTML = [
-    { l:'전체 회원', v: normal.length+'명' },
-    { l:'이용제한',  v: banned+'명', c:'#B03020' },
-    { l:'토론 게시글', v: (pd||[]).length+'개' },
-    { l:'공개 감상평', v: (bd||[]).length+'개' },
-  ].map(s=>`<div class="stat-box"><div class="stat-n" style="color:${s.c||'#26180D'}">${s.v}</div><div class="stat-l">${s.l}</div></div>`).join('');
+// ══ 일반 로그인 ══
 
-  document.getElementById('userList').innerHTML = !normal.length
-    ? `<div class="empty"><div class="et">가입된 회원이 없습니다</div></div>`
-    : normal.map(u=>`
-      <div class="card" style="padding:12px 20px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:500;font-size:16px;margin-bottom:3px">${esc(u.username)}</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <span style="font-size:12px;color:#8A7565">경고 ${u.strikes}회</span>
-              ${[...Array(Math.min(u.strikes,3))].map(()=>`<span style="width:7px;height:7px;background:#E74C3C;border-radius:50%;display:inline-block"></span>`).join('')}
-              ${u.banned ? `<span style="background:#FDECEA;color:#8A2010;font-size:11px;padding:1px 7px;border-radius:10px">이용제한</span>` : ''}
-            </div>
-          </div>
-          ${u.banned
-            ? `<button class="btn2" style="font-size:12px;padding:5px 12px" onclick="unbanUser('${u.id}')">제한 해제</button>`
-            : `<button class="btnd" onclick="banUser('${u.id}')">이용 제한</button>`}
-        </div>
-      </div>`).join('');
+function toggleAdminArea(){
+  const a=document.getElementById('adminArea');
+  a.style.display=a.style.display==='none'?'block':'none';
+}
+function togMode(){aMode=aMode==='login'?'register':'login';document.getElementById('aBtn').textContent=aMode==='login'?'로그인':'가입하기';document.getElementById('aTog').innerHTML=aMode==='login'?'아직 계정이 없으신가요? <span onclick="togMode()">회원가입</span>':'이미 계정이 있으신가요? <span onclick="togMode()">로그인</span>';document.getElementById('aErr').style.display='none';}
+function shErr(msg){const e=document.getElementById('aErr');e.textContent=msg;e.style.display='block';}
+async function doAuth(){
+  const id=document.getElementById('aId').value.trim(),pw=document.getElementById('aPw').value;
+  if(!id||!pw){shErr('아이디와 비밀번호를 입력해주세요.');return;}
+  load(true);
+  const{data,error}=await sb.from('agora_users').select('*').eq('username',id).eq('password',pw).single();
+  load(false);
+  if(error||!data){shErr('아이디 또는 비밀번호를 확인해주세요.');return;}
+  if(data.banned){shErr('이용이 제한된 계정입니다.');return;}
+  await ok({...data,isAdmin:data.is_admin});
+}
+async function ok(u){
+  CU=u;localStorage.setItem('agora_sess',JSON.stringify(u));
+  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('navUser').textContent=u.username;upPts(u.points||0);
+  if(u.isAdmin){document.getElementById('navAdm').style.display='inline';document.getElementById('n-admin').style.display='inline';document.getElementById('t-admin').style.display='flex';}
+  load(false);go('library');
+}
+function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('lw').style.display='flex';document.getElementById('aId').value='';document.getElementById('aPw').value='';}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('lw').style.display!=='none')doAuth();});
 
-  document.getElementById('adminPostList').innerHTML = !(pd||[]).length
-    ? `<div class="empty"><div class="et">게시글이 없습니다</div></div>`
-    : pd.map(p=>{
-        const vis = (p.agora_comments||[]).filter(c=>!c.is_deleted).length;
-        return `<div class="card" style="padding:12px 18px">
+// ══ 페이지 이동 ══
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('active');
+  const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name;
+  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
+  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
+  if(name==='library')rLib();
+  if(name==='public')rPub();
+  if(name==='forum')rForum();
+  if(name==='admin')rAdmin();
+  if(name==='points')rPoints();
+  if(name==='addBook'){
+    document.getElementById('abTitle').textContent='독서 기록 추가';
+    document.getElementById('abSub').textContent='새로운 독서 기록을 남겨보세요';
+    document.getElementById('saveBBtn').textContent='기록 저장';
+    document.getElementById('editId').value='';
+    ['bTitle','bAuthor','bPub','bStart','bEnd','bReview'].forEach(i=>document.getElementById(i).value='');
+    isPub=false;isAnon=false;
+    ['bPubV','bAnonV'].forEach(i=>document.getElementById(i).value='false');
+    ['pubTrk','anonTrk'].forEach(i=>document.getElementById(i).classList.remove('on'));
+    document.getElementById('pubLbl').textContent='비공개';document.getElementById('pubLbl').style.color='var(--muted)';
+    document.getElementById('anonLbl').textContent='이름 표시';document.getElementById('anonLbl').style.color='var(--muted)';
+    pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';
+  }
+}
+
+// ══ 이미지 ══
+function onImgSel(e){Array.from(e.target.files).forEach(f=>{if(!pFiles.find(p=>p.name===f.name&&p.size===f.size))pFiles.push(f);});rImgPrev();e.target.value='';}
+function rImgPrev(){const w=document.getElementById('ipl');w.innerHTML=eUrls.map((u,i)=>`<div class="ipw"><img src="${u}"/><button class="idl" onclick="rmEImg(${i})">✕</button></div>`).join('')+pFiles.map((f,i)=>`<div class="ipw"><img src="${URL.createObjectURL(f)}"/><button class="idl" onclick="rmPImg(${i})">✕</button></div>`).join('');}
+function rmEImg(i){eUrls.splice(i,1);rImgPrev();}
+function rmPImg(i){pFiles.splice(i,1);rImgPrev();}
+async function upImgs(bid){const urls=[];for(const f of pFiles){const ext=f.name.split('.').pop();const path=`${bid}/${ID()}.${ext}`;const{error}=await sb.storage.from('book-images').upload(path,f,{upsert:true});if(!error){const{data:pd}=sb.storage.from('book-images').getPublicUrl(path);urls.push(pd.publicUrl);}}return urls;}
+
+// ══ 토글 ══
+function togPub(){isPub=!isPub;document.getElementById('bPubV').value=String(isPub);document.getElementById('pubTrk').classList.toggle('on',isPub);document.getElementById('pubLbl').textContent=isPub?'공개':'비공개';document.getElementById('pubLbl').style.color=isPub?'var(--g)':'var(--muted)';}
+function togAnon(){isAnon=!isAnon;document.getElementById('bAnonV').value=String(isAnon);document.getElementById('anonTrk').classList.toggle('on',isAnon);document.getElementById('anonLbl').textContent=isAnon?'익명 표시':'이름 표시';document.getElementById('anonLbl').style.color=isAnon?'var(--g)':'var(--muted)';}
+function togPostAnon(){isPAnon=!isPAnon;document.getElementById('pfAnon').value=String(isPAnon);document.getElementById('pAnonTrk').classList.toggle('on',isPAnon);document.getElementById('pAnonLbl').textContent=isPAnon?'익명으로 게시':'이름으로 게시';document.getElementById('pAnonLbl').style.color=isPAnon?'var(--g)':'var(--muted)';}
+
+// ══ 열람 게이트 ══
+async function gate(type,refId,cb){
+  const{data:al}=await sb.from('agora_daily_reads').select('id').eq('user_id',CU.id).eq('ref_type',type).eq('ref_id',refId).eq('read_date',today()).maybeSingle();
+  if(al){cb();return;}
+  const{count}=await sb.from('agora_daily_reads').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type',type).eq('read_date',today());
+  if((count||0)<2){await sb.from('agora_daily_reads').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,read_date:today()});cb();}
+  else{
+    document.getElementById('gPts').textContent=`현재 보유: ${(CU.points||0).toLocaleString()}P`;
+    document.getElementById('gUseBtn').disabled=(CU.points||0)<1000;
+    gCb=async()=>{await sb.from('agora_daily_reads').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,read_date:today()});closeG();cb();};
+    document.getElementById('gov').classList.add('open');
+  }
+}
+async function gUsePts(){
+  if((CU.points||0)<1000){nt('포인트가 부족합니다.','err');return;}
+  const np=(CU.points||0)-1000;await sb.from('agora_users').update({points:np}).eq('id',CU.id);
+  CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
+  if(gCb)await gCb();
+}
+function closeG(){document.getElementById('gov').classList.remove('open');gCb=null;}
+document.getElementById('gov').addEventListener('click',e=>{if(e.target===document.getElementById('gov'))closeG();});
+
+// ══ 내 서재 ══
+async function rLib(){
+  load(true);
+  const[{data:bd},{data:hd},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),sb.from('agora_hearts').select('*'),sb.from('agora_book_images').select('*').order('sort_order',{ascending:true})]);
+  load(false);
+  const books=(bd||[]).map(b=>({...b,hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),images:(imgd||[]).filter(i=>i.book_id===b.id)}));
+  document.getElementById('libSub').textContent=`나의 독서 기록${books.length>0?` · ${books.length}권`:''}`;
+  const el=document.getElementById('bookList');
+  if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px">📚</div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="go('addBook')">첫 번째 책 기록하기</button></div>`;return;}
+  el.innerHTML=`<div class="bg">${books.map(b=>{const th=b.images[0]?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:`<div class="bph">📖</div>`;return`<div class="bi" onclick="openEdit('${b.id}')">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span>${b.is_anonymous?'<span class="badge banon">익명</span>':''}${b.is_public&&b.hearts.length>0?`<span style="font-size:10px;color:#C03020;font-weight:600">♥ ${b.hearts.length}</span>`:''}</div></div></div>`;}).join('')}</div>`;
+}
+async function openEdit(id){
+  load(true);
+  const[{data:b},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('id',id).single(),sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true})]);
+  load(false);if(!b)return;
+  document.getElementById('abTitle').textContent='독서 기록 수정';document.getElementById('abSub').textContent='기록을 수정합니다';document.getElementById('saveBBtn').textContent='수정 완료';
+  document.getElementById('editId').value=id;
+  document.getElementById('bTitle').value=b.title||'';document.getElementById('bAuthor').value=b.author||'';document.getElementById('bPub').value=b.publisher||'';document.getElementById('bStart').value=b.start_date||'';document.getElementById('bEnd').value=b.end_date||'';document.getElementById('bReview').value=b.review||'';
+  isPub=b.is_public;isAnon=b.is_anonymous||false;
+  document.getElementById('bPubV').value=String(isPub);document.getElementById('bAnonV').value=String(isAnon);
+  document.getElementById('pubTrk').classList.toggle('on',isPub);document.getElementById('anonTrk').classList.toggle('on',isAnon);
+  document.getElementById('pubLbl').textContent=isPub?'공개':'비공개';document.getElementById('pubLbl').style.color=isPub?'var(--g)':'var(--muted)';
+  document.getElementById('anonLbl').textContent=isAnon?'익명 표시':'이름 표시';document.getElementById('anonLbl').style.color=isAnon?'var(--g)':'var(--muted)';
+  pFiles=[];eUrls=(imgd||[]).map(i=>i.url);rImgPrev();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('p-addBook').classList.add('active');
+  const ne=document.getElementById('n-library');if(ne)ne.classList.add('on');const te=document.getElementById('t-library');if(te)te.classList.add('on');
+}
+async function saveBook(){
+  const title=document.getElementById('bTitle').value.trim();if(!title){nt('책 제목을 입력해주세요.','err');return;}
+  const eid=document.getElementById('editId').value,bid=eid||ID(),isNew=!eid;
+  load(true);
+  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
+  const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',is_anonymous:document.getElementById('bAnonV').value==='true'};
+  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
+  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
+  await sb.from('agora_book_images').delete().eq('book_id',bid);
+  if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));
+  if(isNew)await reqPts('book',bid);
+  load(false);nt(eid?'수정되었습니다.':'독서 기록이 추가되었습니다.');
+  pFiles=[];eUrls=[];go('library');
+}
+async function delBook(id){if(!confirm('이 독서 기록을 삭제할까요?'))return;await sb.from('agora_books').delete().eq('id',id);nt('삭제되었습니다.');rLib();}
+
+// ══ 공개 서재 ══
+async function rPub(){
+  load(true);
+  const[{data:bd},{data:hd},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('is_public',true),sb.from('agora_hearts').select('*'),sb.from('agora_book_images').select('*').order('sort_order',{ascending:true})]);
+  const{count:rc}=await sb.from('agora_daily_reads').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type','book').eq('read_date',today());
+  load(false);
+  const fl=Math.max(0,2-(rc||0));const iEl=document.getElementById('rdInfoB');
+  iEl.style.display='block';iEl.style.background=fl>0?'var(--gl)':'var(--brl)';iEl.style.border=`1px solid ${fl>0?'var(--gb)':'var(--brb)'}`;iEl.style.color=fl>0?'var(--g)':'var(--br)';
+  iEl.textContent=fl>0?`오늘 공개 서재 무료 열람 ${fl}회 남았습니다`:'오늘 무료 열람을 모두 사용했습니다. 열람 시 1,000P가 차감됩니다.';
+  const books=(bd||[]).map(b=>({...b,hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),images:(imgd||[]).filter(i=>i.book_id===b.id)})).sort((a,b)=>b.hearts.length-a.hearts.length);
+  const el=document.getElementById('pubList');
+  if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px">🌿</div><div class="et">아직 공개된 감상평이 없습니다</div></div>`;return;}
+  el.innerHTML=books.map(b=>{
+    const hasH=b.hearts.includes(CU.id),isOwn=b.user_id===CU.id;
+    const dn=b.is_anonymous?'익명의 독서가':esc(b.username||'');
+    const th=b.images[0]?`<img src="${b.images[0].url}" style="width:56px;height:72px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:`<div style="width:56px;height:72px;background:var(--gl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📖</div>`;
+    return`<div class="card" style="cursor:pointer" onclick="openBook('${b.id}')">
+      <div style="display:flex;gap:14px;align-items:flex-start">${th}
+        <div style="flex:1;min-width:0">
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div>
-              <div style="font-size:12px;color:#8A7565;margin-bottom:3px">📖 ${esc(p.book_title)}</div>
-              <div style="font-size:15px;font-family:'Cormorant Garamond',serif">${esc(p.question.length>80?p.question.slice(0,80)+'…':p.question)}</div>
-              <div style="font-size:12px;color:#8A7565;margin-top:3px">답변 ${vis}개 · ${ago(p.created_at)}</div>
-            </div>
-            <button class="btn2" style="font-size:12px;padding:5px 12px;flex-shrink:0" onclick="openPost('${p.id}')">보기</button>
+            <div style="flex:1"><div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500">${esc(b.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div><div style="font-size:12px;color:var(--muted);margin-top:1px">${dn}</div></div>
+            <button class="hrt ${hasH?'on':''}" onclick="event.stopPropagation();togHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.4"':''}>${hasH?'♥':'♡'} ${b.hearts.length}</button>
           </div>
-        </div>`;
-      }).join('');
+          ${b.review?`<div style="margin-top:8px;font-size:13px;color:var(--muted);line-height:1.6">${esc(b.review.slice(0,80))}${b.review.length>80?'…':''}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function openBook(id){
+  await gate('book',id,async()=>{
+    load(true);
+    const[{data:b},{data:imgd},{data:hd}]=await Promise.all([sb.from('agora_books').select('*').eq('id',id).single(),sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true}),sb.from('agora_hearts').select('*').eq('book_id',id)]);
+    load(false);if(!b)return;
+    const hasH=!!(hd&&hd.find(h=>h.user_id===CU.id)),isOwn=b.user_id===CU.id;
+    const dn=b.is_anonymous?'익명의 독서가':esc(b.username||CU.username);
+    const imgs=imgd||[];
+    document.getElementById('bdContent').innerHTML=`
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:22px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:6px">${esc(b.title)}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+          ${b.start_date?`<span style="font-size:13px;color:var(--muted)">📖 ${b.start_date}</span>`:''}
+          ${b.end_date?`<span style="font-size:13px;color:var(--muted)">✓ ${b.end_date}</span>`:''}
+          <span style="font-size:12px;color:var(--muted)">by ${dn}</span>
+        </div>
+        ${imgs.length>0?mkSlider(imgs,id):''}
+        ${b.review?`<div style="margin-top:16px;font-size:16px;line-height:1.85;color:var(--txt);border-left:3px solid var(--brb);padding-left:14px;font-style:italic">"${esc(b.review)}"</div>`:''}
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button class="hrt ${hasH?'on':''}" onclick="togHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.4"':''}>${hasH?'♥':'♡'} ${(hd||[]).length}</button>
+        </div>
+      </div>`;
+    go('bookDetail');
+  });
+}
+function mkSlider(imgs,bid){
+  if(!imgs.length)return'';
+  if(imgs.length===1)return`<div style="border-radius:10px;overflow:hidden;cursor:pointer" onclick="openV(${JSON.stringify(imgs.map(i=>i.url))},0)"><img src="${imgs[0].url}" style="width:100%;max-height:260px;object-fit:cover"/></div>`;
+  const sH=imgs.map((img,i)=>`<div class="isd"><img src="${img.url}" onclick="openV(${JSON.stringify(imgs.map(i=>i.url))},${i})"/></div>`).join('');
+  const dH=imgs.map((_,i)=>`<div class="sdot${i===0?' on':''}" id="sd-${bid}-${i}"></div>`).join('');
+  return`<div class="isl" id="sl-${bid}"><div class="ist" id="ist-${bid}">${sH}</div><button class="sar l" onclick="mvSlide('${bid}',-1,${imgs.length})">‹</button><button class="sar r" onclick="mvSlide('${bid}',1,${imgs.length})">›</button><div class="sdots">${dH}</div></div>`;
+}
+function mvSlide(id,dir,tot){const tr=document.getElementById('ist-'+id);if(!tr)return;const cur=parseInt(tr.dataset.cur||'0'),next=(cur+dir+tot)%tot;tr.dataset.cur=next;tr.style.transform=`translateX(-${next*100}%)`;for(let i=0;i<tot;i++){const d=document.getElementById(`sd-${id}-${i}`);if(d)d.classList.toggle('on',i===next);}}
+async function togHeart(bid,oid){if(oid===CU.id)return;const{data:hd}=await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bid);if(hd&&hd.length>0)await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bid);else await sb.from('agora_hearts').insert({user_id:CU.id,book_id:bid});rPub();}
+
+// ══ 광장 ══
+async function rForum(){
+  load(true);
+  const{data}=await sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false});
+  const{count:rc}=await sb.from('agora_daily_reads').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type','post').eq('read_date',today());
+  load(false);
+  const fl=Math.max(0,2-(rc||0));const iEl=document.getElementById('rdInfoP');
+  iEl.style.display='block';iEl.style.background=fl>0?'var(--gl)':'var(--brl)';iEl.style.border=`1px solid ${fl>0?'var(--gb)':'var(--brb)'}`;iEl.style.color=fl>0?'var(--g)':'var(--br)';
+  iEl.textContent=fl>0?`오늘 광장 무료 열람 ${fl}회 남았습니다`:'오늘 무료 열람을 모두 사용했습니다. 열람 시 1,000P가 차감됩니다.';
+  const posts=(data||[]).map(p=>({...p,comments:(p.agora_comments||[]).filter(c=>!c.is_deleted)}));
+  document.getElementById('nPostBtn').style.display=CU.banned?'none':'inline-block';
+  document.getElementById('fBanMsg').style.display=CU.banned?'block':'none';
+  const el=document.getElementById('postList');
+  if(!posts.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px">💬</div><div class="et">아직 토론이 없습니다</div></div>`;return;}
+  el.innerHTML=posts.map(p=>`<div class="fc" onclick="openPost('${p.id}')"><div class="ftag">📖 ${esc(p.book_title)}</div><div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:8px;line-height:1.5">${esc(p.question)}</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</span><span style="font-size:13px;color:var(--muted)">💬 ${p.comments.length}개의 답변</span></div></div>`).join('');
+}
+async function savePost(){
+  const bt=document.getElementById('pfBook').value.trim(),q=document.getElementById('pfQ').value.trim();
+  if(!bt||!q){nt('모든 항목을 입력해주세요.','err');return;}
+  load(true);const pid=ID();
+  const{error}=await sb.from('agora_posts').insert({id:pid,user_id:CU.id,book_title:bt,question:q,is_anonymous:document.getElementById('pfAnon').value==='true'});
+  if(error){load(false);nt('게시 중 오류가 발생했습니다.','err');return;}
+  await reqPts('post',pid);load(false);
+  document.getElementById('pfBook').value='';document.getElementById('pfQ').value='';
+  nt('토론이 등록되었습니다.');go('forum');
+}
+async function openPost(id){
+  await gate('post',id,async()=>{
+    aPid=id;load(true);
+    const{data:p}=await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
+    load(false);if(!p)return;
+    const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
+    document.getElementById('pdContent').innerHTML=`
+      <div class="card" style="margin-bottom:16px"><div class="ftag">📖 ${esc(p.book_title)}</div><div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div><div style="font-size:12px;color:var(--muted)">${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</div></div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500">답변 ${vis.length}개</div>
+      ${vis.length===0?`<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--border);margin-bottom:18px">아직 답변이 없습니다.</div>`:''}
+      ${vis.map(c=>`<div class="cm"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:15px;line-height:1.75;margin-bottom:4px">${esc(c.content)}</div><div style="font-size:12px;color:var(--muted)">익명 · ${ago(c.created_at)}</div></div>${CU.isAdmin?`<button class="btnd" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button>`:''}</div></div>`).join('')}`;
+    document.getElementById('cmtBan').style.display=CU.banned?'block':'none';
+    document.getElementById('cmtForm').style.display=CU.banned?'none':'block';
+    document.getElementById('cmtTxt').value='';go('postDetail');
+  });
+}
+async function addCmt(){const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false});await openPost(aPid);}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&document.activeElement===document.getElementById('cmtTxt'))addCmt();});
+async function delCmt(cid,cuid){
+  await sb.from('agora_comments').update({is_deleted:true}).eq('id',cid);
+  if(cuid&&cuid!=='admin'){const{data:tu}=await sb.from('agora_users').select('*').eq('id',cuid).single();if(tu){const ns=(tu.strikes||0)+1;await sb.from('agora_users').update({strikes:ns,banned:ns>=3}).eq('id',cuid);if(ns>=3)nt('해당 사용자가 3회 경고로 자동 이용 제한되었습니다.');}}
+  nt('댓글이 삭제되었습니다.');await openPost(aPid);
 }
 
-async function banUser(uid) {
-  await sb.from('agora_users').update({ banned: true }).eq('id',uid);
-  notify('이용이 제한되었습니다.'); renderAdmin();
+// ══ 포인트 ══
+async function reqPts(type,refId){
+  const{count}=await sb.from('agora_point_requests').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type',type).gte('created_at',today()+'T00:00:00');
+  if((count||0)>=2){nt('오늘 포인트 신청 한도(2회)에 도달했습니다.');return;}
+  await sb.from('agora_point_requests').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,points:1000,status:'pending'});
+  nt('포인트 1,000P 신청 완료! 관리자 승인 후 지급됩니다 🍃');
 }
-async function unbanUser(uid) {
-  await sb.from('agora_users').update({ banned: false, strikes: 0 }).eq('id',uid);
-  notify('이용 제한이 해제되었습니다.'); renderAdmin();
+async function rPoints(){
+  load(true);
+  const{data:u}=await sb.from('agora_users').select('*').eq('id',CU.id).single();
+  const{data:reqs}=await sb.from('agora_point_requests').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}).limit(20);
+  load(false);
+  if(u){CU.points=u.points||0;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(CU.points);}
+  document.getElementById('myPtsNum').textContent=(CU.points||0).toLocaleString()+' P';
+  const el=document.getElementById('myReqs');
+  if(!reqs||!reqs.length){el.innerHTML=`<div class="empty" style="padding:24px 0"><div class="et">신청 내역이 없습니다</div></div>`;return;}
+  el.innerHTML=reqs.map(r=>{const tl=r.ref_type==='book'?'📚 독서 기록':'💬 광장 토론';const sl=r.status==='pending'?'⏳ 승인 대기':r.status==='approved'?'✅ 승인됨':'❌ 반려';const cl=r.status==='approved'?' ok':r.status==='rejected'?' rej':'';return`<div class="preq${cl}"><div><div style="font-size:14px;font-weight:500">${tl}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${ago(r.created_at)}</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:600;color:var(--g)">+1,000P</div><div style="font-size:12px;color:var(--muted)">${sl}</div></div></div>`;}).join('');
 }
 
-// ── 세션 복원 ───────────────────────────────
-window.onload = () => {
-  const sess = localStorage.getItem('agora_sess');
-  if (sess) {
-    try { loginSuccess(JSON.parse(sess)); } catch { localStorage.removeItem('agora_sess'); }
+// ══ 결제 ══
+async function pay(amount,points){
+  if(!window.TossPayments){nt('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.','err');return;}
+  const oid=`agora-${CU.id.slice(0,8)}-${Date.now()}`;
+  await sb.from('agora_orders').insert({id:ID(),user_id:CU.id,order_id:oid,points,amount,status:'pending'});
+  try{
+    const tp=TossPayments(TOSS_KEY);const pm=tp.payment({customerKey:CU.id});
+    await pm.requestPayment({method:'CARD',amount:{currency:'KRW',value:amount},orderId:oid,orderName:`아고라 포인트 ${points.toLocaleString()}P`,customerName:CU.username,successUrl:`${location.origin}${location.pathname}?payment=success&orderId=${oid}&points=${points}`,failUrl:`${location.origin}${location.pathname}?payment=fail`});
+  }catch(e){nt('결제를 취소했습니다.');}
+}
+async function handlePay(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('payment')==='success'){
+    const oid=params.get('orderId'),pts=parseInt(params.get('points')||'0');
+    if(oid&&pts>0){const{data:ord}=await sb.from('agora_orders').select('*').eq('order_id',oid).eq('status','pending').single();if(ord){const np=(CU.points||0)+pts;await Promise.all([sb.from('agora_users').update({points:np}).eq('id',CU.id),sb.from('agora_orders').update({status:'paid'}).eq('order_id',oid)]);CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);nt(`${pts.toLocaleString()}P 충전 완료! 🎉`);}}
+    history.replaceState({},'',location.pathname);
+  }else if(params.get('payment')==='fail'){nt('결제에 실패했습니다.','err');history.replaceState({},'',location.pathname);}
+}
+
+// ══ 관리자 ══
+async function rAdmin(){
+  load(true);
+  const[{data:ud},{data:pd},{data:reqs}]=await Promise.all([sb.from('agora_users').select('*'),sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false}).limit(10),sb.from('agora_point_requests').select('*, agora_users(username)').eq('status','pending').order('created_at',{ascending:true})]);
+  load(false);
+  const normal=(ud||[]).filter(u=>!u.is_admin);
+  document.getElementById('admStats').innerHTML=[{l:'전체 회원',v:normal.length+'명'},{l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},{l:'대기 포인트',v:(reqs||[]).length+'건',c:'var(--br)'},{l:'토론 게시글',v:(pd||[]).length+'개'}].map(s=>`<div class="sb"><div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+  const pEl=document.getElementById('pendPts');
+  if(!(reqs||[]).length){pEl.innerHTML=`<div style="color:var(--muted);font-size:14px;padding:12px 0">대기 중인 신청이 없습니다</div>`;}
+  else{pEl.innerHTML=(reqs||[]).map(r=>`<div class="preq" style="margin-bottom:8px"><div><div style="font-size:14px;font-weight:500">${esc(r.agora_users?.username||'알 수 없음')} — ${r.ref_type==='book'?'📚 독서 기록':'💬 광장 토론'}</div><div style="font-size:12px;color:var(--muted)">${ago(r.created_at)}</div></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:600;color:var(--g)">+1,000P</span><button class="btn" style="padding:5px 12px;font-size:12px" onclick="appPt('${r.id}','${r.user_id}')">승인</button><button class="btnd" onclick="rejPt('${r.id}')">반려</button></div></div>`).join('');}
+  document.getElementById('uList').innerHTML=!normal.length?`<div class="empty"><div class="et">가입된 회원이 없습니다</div></div>`:normal.map(u=>`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px;margin-bottom:2px">${esc(u.username)} <span style="font-size:11px;color:var(--muted);font-weight:400">${u.auth_id?'(소셜)':''}</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:var(--muted)">경고 ${u.strikes}회 · ${(u.points||0).toLocaleString()}P</span>${[...Array(Math.min(u.strikes,3))].map(()=>`<span style="width:6px;height:6px;background:#E74C3C;border-radius:50%;display:inline-block"></span>`).join('')}${u.banned?`<span style="background:#FDECEA;color:#8A2010;font-size:11px;padding:1px 7px;border-radius:10px">이용제한</span>`:''}</div></div>${u.banned?`<button class="btn2" style="font-size:12px;padding:5px 12px" onclick="unban('${u.id}')">제한 해제</button>`:`<button class="btnd" onclick="ban('${u.id}')">이용 제한</button>`}</div></div>`).join('');
+  document.getElementById('admPosts').innerHTML=!(pd||[]).length?`<div class="empty"><div class="et">게시글이 없습니다</div></div>`:pd.map(p=>{const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted).length;return`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:12px;color:var(--muted);margin-bottom:2px">📖 ${esc(p.book_title)}</div><div style="font-size:14px">${esc(p.question.length>80?p.question.slice(0,80)+'…':p.question)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">답변 ${vis}개 · ${ago(p.created_at)}</div></div><button class="btn2" style="font-size:12px;padding:5px 12px;flex-shrink:0" onclick="openPost('${p.id}')">보기</button></div></div>`;}).join('');
+}
+async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select('points').eq('id',uid).single();const np=(u?.points||0)+1000;await Promise.all([sb.from('agora_point_requests').update({status:'approved'}).eq('id',rid),sb.from('agora_users').update({points:np}).eq('id',uid)]);nt('1,000P 승인 완료');rAdmin();}
+async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
+async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
+async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
+
+// ══ 뷰어 ══
+let vIs=[],vI=0,vSc=1,vLD=0;
+function openV(urls,idx){vIs=urls;vI=idx;vSc=1;upV();document.getElementById('vov').classList.add('open');document.body.style.overflow='hidden';vTouch();}
+function closeV(){document.getElementById('vov').classList.remove('open');document.body.style.overflow='';}
+function vBgClick(e){if(e.target===document.getElementById('vov'))closeV();}
+function vMove(d){vI=(vI+d+vIs.length)%vIs.length;vSc=1;upV();}
+function upV(){const img=document.getElementById('vim');img.src=vIs[vI];img.style.transform=`scale(${vSc})`;document.getElementById('vcnt').textContent=`${vI+1} / ${vIs.length}`;document.getElementById('vLeft').style.display=vIs.length>1?'flex':'none';document.getElementById('vRight').style.display=vIs.length>1?'flex':'none';document.getElementById('vdots').innerHTML=vIs.length>1?vIs.map((_,i)=>`<div class="vdot${i===vI?' on':''}" onclick="vI=${i};vSc=1;upV()"></div>`).join(''):'';}
+function vTouch(){const wrap=document.getElementById('viw');const img=document.getElementById('vim');let sx=0,sy=0,drag=false;wrap.ontouchstart=e=>{if(e.touches.length===2){vLD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}else{sx=e.touches[0].clientX;sy=e.touches[0].clientY;drag=true;}};wrap.ontouchmove=e=>{if(e.touches.length===2){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);vSc=Math.min(4,Math.max(1,vSc*(d/vLD)));vLD=d;img.style.transform=`scale(${vSc})`;}};wrap.ontouchend=e=>{if(!drag)return;drag=false;const dx=e.changedTouches[0].clientX-sx,dy=Math.abs(e.changedTouches[0].clientY-sy);if(Math.abs(dx)>50&&dy<60&&vSc<=1)vMove(dx<0?1:-1);};}
+document.addEventListener('keydown',e=>{if(!document.getElementById('vov').classList.contains('open'))return;if(e.key==='ArrowRight')vMove(1);if(e.key==='ArrowLeft')vMove(-1);if(e.key==='Escape')closeV();});
+
+// ══ 초기화 ══
+window.onload=async()=>{
+  const ts=document.createElement('script');ts.src='https://js.tosspayments.com/v2/standard';document.head.appendChild(ts);
+  // 카카오 콜백
+  const kkParams=new URLSearchParams(location.search);
+  if(kkParams.get('code')&&!kkParams.get('state')){const done=await handleKakao();if(done)return;}
+  if(location.hash.includes('access_token')){await handleNaver();return;}
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){await handleOAuth(session);return;}
+  const params=new URLSearchParams(location.search);
+  if(params.get('payment')){
+    const sess=localStorage.getItem('agora_sess');if(sess){try{CU=JSON.parse(sess);}catch{}}
+    if(CU){await handlePay();await ok(CU);return;}
   }
+  const sess=localStorage.getItem('agora_sess');
+  if(sess){try{await ok(JSON.parse(sess));}catch{localStorage.removeItem('agora_sess');}}
+  if(window.naver&&NV_ID!=='YOUR_NAVER_CLIENT_ID'){const nl=new naver.LoginWithNaverId({clientId:NV_ID,callbackUrl:location.origin+location.pathname,isPopup:false,loginButton:{color:'green',type:3,height:40}});nl.init();}
+  if(window.Kakao&&KK_JS_KEY!=='YOUR_KAKAO_JS_KEY'&&!Kakao.isInitialized()) Kakao.init(KK_JS_KEY);
 };
 </script>
 </body>
