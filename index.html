@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AGORA — 독서 아카이브</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+/* ─────────────────────────────────────────────
+   여기에 Supabase 정보를 입력하세요
+   (아래 JS 설정 부분에도 동일하게 있습니다)
+───────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F3EBD8;font-family:'Crimson Pro',Georgia,serif;color:#26180D;min-height:100vh;}
+.nav{background:#1E1410;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#D4A843;letter-spacing:4px;cursor:pointer;user-select:none;}
+.nav-links{display:flex;gap:2px;}
+.nl{color:#B0A090;font-size:14px;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .2s;font-family:'Crimson Pro',serif;}
+.nl:hover,.nl.on{color:#F3EBD8;background:rgba(212,168,67,.2);}
+.nav-r{display:flex;align-items:center;gap:10px;color:#B0A090;font-size:13px;}
+.btn-sm{background:none;border:1px solid #4A3A2A;color:#B0A090;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Crimson Pro',serif;transition:all .2s;}
+.btn-sm:hover{background:#4A3A2A;color:#F3EBD8;}
+.admbadge{background:#B03020;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;}
+.pg{max-width:840px;margin:0 auto;padding:40px 20px;}
+.pg-sm{max-width:600px;margin:0 auto;padding:40px 20px;}
+.h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;letter-spacing:1px;margin-bottom:5px;}
+.sub{color:#8A7565;font-size:15px;margin-bottom:28px;}
+.card{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:20px 24px;margin-bottom:12px;transition:box-shadow .2s;}
+.card:hover{box-shadow:0 4px 18px rgba(38,24,13,.08);}
+.bk{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:16px 20px;margin-bottom:10px;display:flex;gap:16px;align-items:flex-start;cursor:pointer;transition:all .2s;}
+.bk:hover{box-shadow:0 4px 18px rgba(38,24,13,.1);border-color:#C8B898;}
+.spine{width:6px;min-height:66px;border-radius:3px;flex-shrink:0;}
+.bt{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;margin-bottom:2px;}
+.bm{font-size:13px;color:#8A7565;margin-bottom:5px;}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;}
+.b-pub{background:#EAF4EC;color:#3D7A4E;border:1px solid #C3E6CB;}
+.b-prv{background:#FEF8ED;color:#B8820A;border:1px solid #FAE5B0;}
+label{display:block;font-size:13px;color:#6A5A48;margin-bottom:5px;letter-spacing:.3px;}
+input,textarea,select{width:100%;background:#FAF4E8;border:1px solid #DDD0B5;border-radius:6px;padding:9px 13px;font-family:'Crimson Pro',serif;font-size:15px;color:#26180D;outline:none;transition:border-color .2s;}
+input:focus,textarea:focus{border-color:#B8860B;box-shadow:0 0 0 3px rgba(184,134,11,.1);}
+textarea{resize:vertical;min-height:110px;line-height:1.7;}
+.fg{margin-bottom:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.btn{background:#1E1410;color:#F3EBD8;border:none;padding:10px 24px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:background .2s;letter-spacing:.3px;}
+.btn:hover{background:#352418;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn2{background:transparent;color:#6A5A48;border:1px solid #DDD0B5;padding:9px 20px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:all .2s;}
+.btn2:hover{background:#EAE0CC;}
+.btnd{background:transparent;color:#B03020;border:1px solid #F5C6C0;padding:4px 11px;border-radius:4px;font-family:'Crimson Pro',serif;font-size:12px;cursor:pointer;transition:all .2s;}
+.btnd:hover{background:#FDECEA;}
+.hrt{background:none;border:1px solid #DDD0B5;cursor:pointer;display:flex;align-items:center;gap:5px;color:#8A7565;font-size:14px;padding:5px 13px;border-radius:20px;transition:all .2s;font-family:'Crimson Pro',serif;white-space:nowrap;}
+.hrt:hover{border-color:#C03020;color:#C03020;background:#FEF5F3;}
+.hrt.on{color:#C03020;border-color:#C03020;background:#FEF5F3;}
+hr{border:none;border-top:1px solid #DDD0B5;margin:20px 0;}
+.cm{padding:12px 0;border-bottom:1px solid #EDE3CC;}
+.notif{position:fixed;top:64px;right:18px;padding:11px 18px;border-radius:8px;font-family:'Crimson Pro',serif;font-size:14px;z-index:999;animation:sli .3s ease;box-shadow:0 4px 18px rgba(0,0,0,.15);}
+.notif.ok{background:#1E1410;color:#F3EBD8;}
+.notif.err{background:#B03020;color:#fff;}
+@keyframes sli{from{transform:translateX(80px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.empty{text-align:center;padding:56px 20px;color:#8A7565;}
+.ei{font-size:40px;margin-bottom:12px;}
+.et{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:#6A5A48;margin-bottom:5px;}
+.es{font-size:14px;margin-bottom:18px;}
+.fc{background:#FAF4E8;border:1px solid #DDD0B5;border-radius:9px;padding:16px 20px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+.fc:hover{box-shadow:0 4px 18px rgba(38,24,13,.1);border-color:#C8B898;}
+.ftag{display:inline-block;background:#1E1410;color:#D4A843;padding:2px 10px;border-radius:4px;font-size:11px;margin-bottom:8px;letter-spacing:.5px;}
+.tgl{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.trk{width:42px;height:22px;border-radius:11px;background:#DDD0B5;position:relative;transition:background .2s;flex-shrink:0;}
+.trk.on{background:#4A7C59;}
+.thm{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.trk.on .thm{transform:translateX(20px);}
+.warn-box{background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:12px 16px;margin-bottom:18px;color:#8A2010;font-size:14px;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1E1410;}
+.lcard{background:#F3EBD8;border-radius:12px;padding:44px 36px;width:100%;max-width:380px;box-shadow:0 20px 56px rgba(0,0,0,.35);}
+.ltitle{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:#1E1410;text-align:center;letter-spacing:6px;margin-bottom:3px;}
+.lsub{text-align:center;color:#8A7565;font-size:13px;margin-bottom:32px;letter-spacing:1.5px;}
+.atog{text-align:center;margin-top:16px;color:#8A7565;font-size:14px;}
+.atog span{color:#B8860B;cursor:pointer;text-decoration:underline;}
+.err-msg{color:#B03020;font-size:13px;margin-bottom:12px;}
+.loading-ov{position:fixed;inset:0;background:rgba(30,20,16,.5);display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:36px;height:36px;border:3px solid rgba(212,168,67,.3);border-top-color:#D4A843;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.stat-box{flex:1 1 110px;background:#FAF4E8;border:1px solid #DDD0B5;border-radius:8px;padding:14px 16px;text-align:center;}
+.stat-n{font-size:20px;font-weight:600;font-family:'Cormorant Garamond',serif;}
+.stat-l{font-size:12px;color:#8A7565;margin-top:3px;}
+.row-flex{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;}
+@media(max-width:580px){
+  .g2{grid-template-columns:1fr;}
+  .pg,.pg-sm{padding:24px 14px;}
+  .lcard{padding:32px 20px;}
+  .nav{padding:0 14px;}
+  .nl{padding:4px 7px;font-size:13px;}
+  .nav-r span:first-child{display:none;}
+  .row-flex{flex-direction:column;gap:12px;}
+}
+/* 숨김/보임 */
+.page{display:none;}
+.page.active{display:block;}
+#loginWrap{display:none;}
+#loginWrap.active{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ 로그인 ══════════════════ -->
+<div id="loginWrap" class="login-wrap active">
+  <div class="lcard">
+    <div class="ltitle">AGORA</div>
+    <div class="lsub">독서 아카이브</div>
+    <div class="fg">
+      <label>아이디</label>
+      <input id="authId" placeholder="아이디를 입력하세요" />
+    </div>
+    <div class="fg">
+      <label>비밀번호</label>
+      <input id="authPw" type="password" placeholder="비밀번호를 입력하세요" />
+    </div>
+    <div id="authErr" class="err-msg" style="display:none"></div>
+    <button class="btn" style="width:100%" id="authBtn" onclick="doAuth()">로그인</button>
+    <div class="atog" id="authToggle">
+      아직 계정이 없으신가요? <span onclick="toggleAuthMode()">회원가입</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 앱 본체 ══════════════════ -->
+<div id="appWrap" style="display:none">
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="logo" onclick="goPage('library')">AGORA</div>
+    <div class="nav-links">
+      <span class="nl" id="nav-library" onclick="goPage('library')">내 서재</span>
+      <span class="nl" id="nav-public"  onclick="goPage('public')">공개 서재</span>
+      <span class="nl" id="nav-forum"   onclick="goPage('forum')">광장</span>
+      <span class="nl" id="nav-admin"   onclick="goPage('admin')" style="display:none">관리</span>
+    </div>
+    <div class="nav-r">
+      <span id="navUsername"></span>
+      <span class="admbadge" id="navAdminBadge" style="display:none">관리자</span>
+      <button class="btn-sm" onclick="logout()">로그아웃</button>
+    </div>
+  </nav>
+
+  <!-- 내 서재 -->
+  <div class="page" id="page-library">
+    <div class="pg">
+      <div class="row-flex">
+        <div><div class="h1">내 서재</div><div class="sub" id="libSub">나의 독서 기록</div></div>
+        <button class="btn" onclick="goPage('addBook')">+ 기록 추가</button>
+      </div>
+      <div id="bookList"></div>
+    </div>
+  </div>
+
+  <!-- 기록 추가/수정 -->
+  <div class="page" id="page-addBook">
+    <div class="pg-sm">
+      <div class="h1" id="addBookTitle">독서 기록 추가</div>
+      <div class="sub" style="margin-bottom:22px" id="addBookSub">새로운 독서 기록을 남겨보세요</div>
+      <div class="card" style="padding:26px 28px">
+        <input type="hidden" id="editBookId" />
+        <div class="fg"><label>책 제목 *</label><input id="bfTitle" placeholder="책 제목을 입력하세요" /></div>
+        <div class="g2">
+          <div class="fg"><label>글쓴이</label><input id="bfAuthor" placeholder="저자명" /></div>
+          <div class="fg"><label>출판사</label><input id="bfPublisher" placeholder="출판사명" /></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>읽기 시작한 날</label><input type="date" id="bfStart" /></div>
+          <div class="fg"><label>완독한 날</label><input type="date" id="bfEnd" /></div>
+        </div>
+        <div class="fg"><label>감상평</label><textarea id="bfReview" style="min-height:150px" placeholder="책에 대한 생각을 자유롭게 적어보세요..."></textarea></div>
+        <div class="fg">
+          <label>공개 설정</label>
+          <div class="tgl" onclick="togglePublic()">
+            <div class="trk" id="pubTrack"><div class="thm"></div></div>
+            <span id="pubLabel" style="font-size:14px;color:#8A7565">비공개 — 나만 볼 수 있습니다</span>
+          </div>
+          <input type="hidden" id="bfPublic" value="false" />
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn2" onclick="goPage('library')">취소</button>
+          <button class="btn" id="saveBookBtn" onclick="saveBook()">기록 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공개 서재 -->
+  <div class="page" id="page-public">
+    <div class="pg">
+      <div class="h1">공개 서재</div>
+      <div class="sub">아고라 회원들의 독서 감상평 · 하트로 공감을 전해보세요</div>
+      <div id="pubList"></div>
+    </div>
+  </div>
+
+  <!-- 광장 목록 -->
+  <div class="page" id="page-forum">
+    <div class="pg">
+      <div class="row-flex">
+        <div><div class="h1">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 모든 참여는 익명으로 이루어집니다</div></div>
+        <button class="btn" id="newPostBtn" onclick="goPage('addPost')">토론 시작</button>
+      </div>
+      <div id="forumBanMsg" class="warn-box" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
+      <div id="postList"></div>
+    </div>
+  </div>
+
+  <!-- 토론 작성 -->
+  <div class="page" id="page-addPost">
+    <div class="pg-sm">
+      <div class="h1">토론 시작하기</div>
+      <div class="sub">책에 대한 질문이나 생각을 공유해보세요 · 익명으로 게시됩니다</div>
+      <div class="card" style="padding:26px 28px">
+        <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?" /></div>
+        <div class="fg"><label>질문 또는 주제</label><textarea id="pfQuestion" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점, 나누고 싶은 이야기를 적어보세요..."></textarea></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn2" onclick="goPage('forum')">취소</button>
+          <button class="btn" onclick="savePost()">익명으로 게시하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토론 상세 -->
+  <div class="page" id="page-postDetail">
+    <div class="pg-sm" style="max-width:680px">
+      <button class="btn2" style="margin-bottom:18px;font-size:13px;padding:6px 14px" onclick="goPage('forum')">← 광장으로</button>
+      <div id="postDetailContent"></div>
+      <hr />
+      <div id="cmtBanMsg" class="warn-box" style="display:none">⚠️ 이용이 제한된 계정입니다.</div>
+      <div id="cmtForm">
+        <div class="fg">
+          <textarea id="cmtText" placeholder="익명으로 답변을 작성해보세요..." style="margin-bottom:6px"></textarea>
+          <div style="font-size:11px;color:#AAA;margin-bottom:8px">Ctrl+Enter로 빠르게 전송</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn" onclick="addCmt()">익명으로 답변하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 관리자 패널 -->
+  <div class="page" id="page-admin">
+    <div class="pg">
+      <div class="h1">관리자 패널</div>
+      <div class="sub">커뮤니티 관리 · 계정 관리</div>
+      <div style="display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap" id="adminStats"></div>
+      <div style="font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:12px">회원 목록</div>
+      <div id="userList"></div>
+      <hr />
+      <div style="font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:12px">최근 토론 게시글</div>
+      <div id="adminPostList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div class="loading-ov" id="loadingOv" style="display:none"><div class="spinner"></div></div>
+
+<script>
+// ════════════════════════════════════════════
+//  ⚡ 여기에 Supabase 정보를 입력하세요
+// ════════════════════════════════════════════
+const SUPABASE_URL  = 'https://xtgfidsgcawfrlrzcmxf.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0Z2ZpZHNnY2F3ZnJscnpjbXhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3OTUyNzcsImV4cCI6MjA5MDM3MTI3N30.xotPU7iBBCph35lG8ohfBmLpZzC2s4kMHKaj8ntMgUo';
+// ════════════════════════════════════════════
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 유틸
+const ID = () => Date.now().toString(36) + Math.random().toString(36).substr(2,5);
+const ago = d => {
+  const m = Math.floor((Date.now() - new Date(d)) / 60000);
+  if (m < 1) return '방금 전';
+  if (m < 60) return m + '분 전';
+  if (m < 1440) return Math.floor(m/60) + '시간 전';
+  return Math.floor(m/1440) + '일 전';
+};
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const SC = ['#B8860B','#4A7C59','#C0392B','#2980B9','#7D3C98','#2C3E50','#D35400','#1A6B4A'];
+const SD = ['#8A6508','#2D5C3A','#922B21','#1A6090','#5B2C6F','#1A252F','#A04000','#0E4D32'];
+const si = s => s.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SC.length;
+
+// 상태
+let CU = null; // 현재 유저
+let isPublicToggle = false;
+let activePostId = null;
+let authMode = 'login';
+
+// 로딩
+const setLoad = v => document.getElementById('loadingOv').style.display = v ? 'flex' : 'none';
+
+// 알림
+function notify(msg, type='ok') {
+  document.querySelectorAll('.notif').forEach(e=>e.remove());
+  const el = document.createElement('div');
+  el.className = `notif ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+// ── 인증 모드 토글 ─────────────────────────
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('authBtn').textContent = authMode === 'login' ? '로그인' : '가입하기';
+  document.getElementById('authToggle').innerHTML = authMode === 'login'
+    ? '아직 계정이 없으신가요? <span onclick="toggleAuthMode()">회원가입</span>'
+    : '이미 계정이 있으신가요? <span onclick="toggleAuthMode()">로그인</span>';
+  document.getElementById('authErr').style.display = 'none';
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function doAuth() {
+  const id = document.getElementById('authId').value.trim();
+  const pw = document.getElementById('authPw').value;
+  if (!id || !pw) { showAuthErr('모든 항목을 입력해주세요.'); return; }
+  setLoad(true);
+  if (authMode === 'login') {
+    const { data, error } = await sb.from('agora_users').select('*').eq('username',id).eq('password',pw).single();
+    setLoad(false);
+    if (error || !data) { showAuthErr('아이디 또는 비밀번호를 확인해주세요.'); return; }
+    if (data.banned) { showAuthErr('이용이 제한된 계정입니다. 운영자에게 문의하세요.'); return; }
+    loginSuccess({ ...data, isAdmin: data.is_admin });
+  } else {
+    if (pw.length < 4) { setLoad(false); showAuthErr('비밀번호는 4자 이상이어야 합니다.'); return; }
+    const nu = { id: ID(), username: id, password: pw, strikes: 0, banned: false, is_admin: false };
+    const { error } = await sb.from('agora_users').insert(nu);
+    setLoad(false);
+    if (error) { showAuthErr(error.code==='23505' ? '이미 사용 중인 아이디입니다.' : '가입 중 오류가 발생했습니다.'); return; }
+    loginSuccess({ ...nu, isAdmin: false });
+  }
+}
+
+function loginSuccess(u) {
+  CU = u;
+  localStorage.setItem('agora_sess', JSON.stringify(u));
+  document.getElementById('loginWrap').classList.remove('active');
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('appWrap').style.display = 'block';
+  document.getElementById('navUsername').textContent = u.username;
+  if (u.isAdmin) {
+    document.getElementById('navAdminBadge').style.display = 'inline';
+    document.getElementById('nav-admin').style.display = 'inline';
+  }
+  goPage('library');
+}
+
+function logout() {
+  localStorage.removeItem('agora_sess');
+  CU = null;
+  document.getElementById('appWrap').style.display = 'none';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('authId').value = '';
+  document.getElementById('authPw').value = '';
+  document.getElementById('authErr').style.display = 'none';
+}
+
+// Enter 키 로그인
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginWrap').style.display !== 'none') doAuth();
+});
+
+// ── 페이지 이동 ────────────────────────────
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nl').forEach(n => n.classList.remove('on'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + (
+    name === 'addBook' ? 'library' :
+    name === 'addPost' || name === 'postDetail' ? 'forum' : name
+  ));
+  if (navEl) navEl.classList.add('on');
+
+  if (name === 'library')    renderLibrary();
+  if (name === 'public')     renderPublic();
+  if (name === 'forum')      renderForum();
+  if (name === 'admin')      renderAdmin();
+  if (name === 'addBook') {
+    document.getElementById('addBookTitle').textContent = '독서 기록 추가';
+    document.getElementById('addBookSub').textContent = '새로운 독서 기록을 남겨보세요';
+    document.getElementById('saveBookBtn').textContent = '기록 저장';
+    document.getElementById('editBookId').value = '';
+    ['bfTitle','bfAuthor','bfPublisher','bfStart','bfEnd','bfReview'].forEach(id => document.getElementById(id).value = '');
+    isPublicToggle = false;
+    document.getElementById('bfPublic').value = 'false';
+    document.getElementById('pubTrack').classList.remove('on');
+    document.getElementById('pubLabel').textContent = '비공개 — 나만 볼 수 있습니다';
+    document.getElementById('pubLabel').style.color = '#8A7565';
+  }
+}
+
+// ── 내 서재 ────────────────────────────────
+async function renderLibrary() {
+  setLoad(true);
+  const [{ data: bd }, { data: hd }] = await Promise.all([
+    sb.from('agora_books').select('*').eq('user_id', CU.id).order('created_at',{ascending:false}),
+    sb.from('agora_hearts').select('*'),
+  ]);
+  setLoad(false);
+  const books = (bd||[]).map(b => ({ ...b, hearts: (hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id) }));
+  document.getElementById('libSub').textContent = `나의 독서 기록${books.length > 0 ? ` · ${books.length}권` : ''}`;
+  const el = document.getElementById('bookList');
+  if (!books.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">📚</div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="goPage('addBook')">첫 번째 책 기록하기</button></div>`;
+    return;
+  }
+  el.innerHTML = books.map(b => {
+    const ci = si(b.title);
+    return `<div class="bk" onclick="openEdit('${b.id}')">
+      <div class="spine" style="background:linear-gradient(180deg,${SC[ci]},${SD[ci]})"></div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="bt">${esc(b.title)}</div>
+            <div class="bm">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+              ${b.start_date ? `<span style="font-size:12px;color:#8A7565">📖 ${b.start_date}</span>` : ''}
+              ${b.end_date ? `<span style="font-size:12px;color:#8A7565">✓ ${b.end_date}</span>` : ''}
+              <span class="badge ${b.is_public ? 'b-pub' : 'b-prv'}">${b.is_public ? '공개' : '비공개'}</span>
+              ${b.is_public && b.hearts.length > 0 ? `<span style="font-size:12px;color:#C03020">♥ ${b.hearts.length}</span>` : ''}
+            </div>
+          </div>
+          <button class="btnd" onclick="event.stopPropagation();delBook('${b.id}')">삭제</button>
+        </div>
+        ${b.review ? `<div style="margin-top:9px;font-size:14px;color:#4A3828;line-height:1.65;border-left:3px solid #DDD0B5;padding-left:11px">${esc(b.review.length>110 ? b.review.slice(0,110)+'…' : b.review)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openEdit(id) {
+  setLoad(true);
+  const { data: b } = await sb.from('agora_books').select('*').eq('id',id).single();
+  setLoad(false);
+  if (!b) return;
+  document.getElementById('addBookTitle').textContent = '독서 기록 수정';
+  document.getElementById('addBookSub').textContent = '기록을 수정합니다';
+  document.getElementById('saveBookBtn').textContent = '수정 완료';
+  document.getElementById('editBookId').value = id;
+  document.getElementById('bfTitle').value = b.title || '';
+  document.getElementById('bfAuthor').value = b.author || '';
+  document.getElementById('bfPublisher').value = b.publisher || '';
+  document.getElementById('bfStart').value = b.start_date || '';
+  document.getElementById('bfEnd').value = b.end_date || '';
+  document.getElementById('bfReview').value = b.review || '';
+  isPublicToggle = b.is_public;
+  document.getElementById('bfPublic').value = String(b.is_public);
+  document.getElementById('pubTrack').classList.toggle('on', b.is_public);
+  document.getElementById('pubLabel').textContent = b.is_public ? '공개 — 다른 사람이 감상평을 볼 수 있습니다 (하트만 가능)' : '비공개 — 나만 볼 수 있습니다';
+  document.getElementById('pubLabel').style.color = b.is_public ? '#3D7A4E' : '#8A7565';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-addBook').classList.add('active');
+  document.getElementById('nav-library').classList.add('on');
+}
+
+function togglePublic() {
+  isPublicToggle = !isPublicToggle;
+  document.getElementById('bfPublic').value = String(isPublicToggle);
+  document.getElementById('pubTrack').classList.toggle('on', isPublicToggle);
+  document.getElementById('pubLabel').textContent = isPublicToggle ? '공개 — 다른 사람이 감상평을 볼 수 있습니다 (하트만 가능)' : '비공개 — 나만 볼 수 있습니다';
+  document.getElementById('pubLabel').style.color = isPublicToggle ? '#3D7A4E' : '#8A7565';
+}
+
+async function saveBook() {
+  const title = document.getElementById('bfTitle').value.trim();
+  if (!title) { notify('책 제목을 입력해주세요.', 'err'); return; }
+  const editId = document.getElementById('editBookId').value;
+  const payload = {
+    title, author: document.getElementById('bfAuthor').value,
+    publisher: document.getElementById('bfPublisher').value,
+    start_date: document.getElementById('bfStart').value,
+    end_date: document.getElementById('bfEnd').value,
+    review: document.getElementById('bfReview').value,
+    is_public: document.getElementById('bfPublic').value === 'true',
+  };
+  setLoad(true);
+  const { error } = editId
+    ? await sb.from('agora_books').update(payload).eq('id',editId)
+    : await sb.from('agora_books').insert({ id: ID(), user_id: CU.id, ...payload });
+  setLoad(false);
+  if (error) { notify('저장 중 오류가 발생했습니다.', 'err'); return; }
+  notify(editId ? '수정되었습니다.' : '독서 기록이 추가되었습니다.');
+  goPage('library');
+}
+
+async function delBook(id) {
+  if (!confirm('이 독서 기록을 삭제할까요?')) return;
+  await sb.from('agora_books').delete().eq('id',id);
+  notify('삭제되었습니다.');
+  renderLibrary();
+}
+
+// ── 공개 서재 ───────────────────────────────
+async function renderPublic() {
+  setLoad(true);
+  const [{ data: bd }, { data: hd }] = await Promise.all([
+    sb.from('agora_books').select('*').eq('is_public',true),
+    sb.from('agora_hearts').select('*'),
+  ]);
+  setLoad(false);
+  const books = (bd||[]).map(b => ({ ...b, hearts: (hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id) }))
+    .sort((a,b) => b.hearts.length - a.hearts.length);
+  const el = document.getElementById('pubList');
+  if (!books.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">🌿</div><div class="et">아직 공개된 감상평이 없습니다</div><div class="es">내 서재에서 감상평을 공개해보세요</div></div>`;
+    return;
+  }
+  el.innerHTML = books.map(b => {
+    const ci = si(b.title);
+    const hasH = b.hearts.includes(CU.id);
+    const isOwn = b.user_id === CU.id;
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;gap:14px">
+          <div class="spine" style="background:linear-gradient(180deg,${SC[ci]},${SD[ci]});min-height:56px"></div>
+          <div>
+            <div class="bt">${esc(b.title)}</div>
+            <div class="bm">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
+            ${(b.start_date||b.end_date) ? `<div style="font-size:12px;color:#8A7565">${b.start_date||''}${b.start_date&&b.end_date?' → ':''}${b.end_date||''}</div>` : ''}
+          </div>
+        </div>
+        <button class="hrt ${hasH?'on':''}" onclick="toggleHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.5" title="내 책에는 하트를 누를 수 없습니다"':''}>
+          ${hasH?'♥':'♡'} ${b.hearts.length}
+        </button>
+      </div>
+      ${b.review ? `<div style="margin-top:14px;font-size:15px;color:#3A2A1E;line-height:1.85;border-top:1px solid #EDE3CC;padding-top:14px;font-style:italic">"${esc(b.review)}"</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function toggleHeart(bookId, ownerId) {
+  if (ownerId === CU.id) return;
+  const { data: hd } = await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bookId);
+  if (hd && hd.length > 0) {
+    await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bookId);
+  } else {
+    await sb.from('agora_hearts').insert({ user_id: CU.id, book_id: bookId });
+  }
+  renderPublic();
+}
+
+// ── 광장 ────────────────────────────────────
+async function renderForum() {
+  setLoad(true);
+  const { data } = await sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false});
+  setLoad(false);
+  const posts = (data||[]).map(p => ({ ...p, comments: (p.agora_comments||[]).filter(c=>!c.is_deleted) }));
+  document.getElementById('newPostBtn').style.display = CU.banned ? 'none' : 'inline-block';
+  document.getElementById('forumBanMsg').style.display = CU.banned ? 'block' : 'none';
+  const el = document.getElementById('postList');
+  if (!posts.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">💬</div><div class="et">아직 토론이 없습니다</div><div class="es">첫 번째 토론을 시작해보세요</div></div>`;
+    return;
+  }
+  el.innerHTML = posts.map(p => `
+    <div class="fc" onclick="openPost('${p.id}')">
+      <div class="ftag">📖 ${esc(p.book_title)}</div>
+      <div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500;color:#26180D;margin-bottom:8px;line-height:1.5">${esc(p.question)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:#8A7565">익명 · ${ago(p.created_at)}</span>
+        <span style="font-size:13px;color:#8A7565">💬 ${p.comments.length}개의 답변</span>
+      </div>
+    </div>`).join('');
+}
+
+async function savePost() {
+  const bookTitle = document.getElementById('pfBook').value.trim();
+  const question  = document.getElementById('pfQuestion').value.trim();
+  if (!bookTitle || !question) { notify('모든 항목을 입력해주세요.', 'err'); return; }
+  setLoad(true);
+  const { error } = await sb.from('agora_posts').insert({ id: ID(), user_id: CU.id, book_title: bookTitle, question });
+  setLoad(false);
+  if (error) { notify('게시 중 오류가 발생했습니다.', 'err'); return; }
+  document.getElementById('pfBook').value = '';
+  document.getElementById('pfQuestion').value = '';
+  notify('토론이 등록되었습니다.');
+  goPage('forum');
+}
+
+async function openPost(id) {
+  activePostId = id;
+  setLoad(true);
+  const { data: p } = await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
+  setLoad(false);
+  if (!p) return;
+  const cmts = (p.agora_comments||[]);
+  const visible = cmts.filter(c=>!c.is_deleted);
+  document.getElementById('postDetailContent').innerHTML = `
+    <div class="card" style="margin-bottom:20px">
+      <div class="ftag">📖 ${esc(p.book_title)}</div>
+      <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div>
+      <div style="font-size:12px;color:#8A7565">익명 · ${ago(p.created_at)}</div>
+    </div>
+    <div style="font-size:14px;color:#6A5A48;margin-bottom:10px;font-weight:500">답변 ${visible.length}개</div>
+    ${visible.length === 0 ? `<div style="text-align:center;padding:28px 0;color:#8A7565;font-size:14px;border-bottom:1px solid #DDD0B5;margin-bottom:20px">아직 답변이 없습니다. 첫 번째 답변을 남겨보세요.</div>` : ''}
+    ${visible.map(c => `
+      <div class="cm">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div style="flex:1">
+            <div style="font-size:15px;color:#26180D;line-height:1.75;margin-bottom:5px">${esc(c.content)}</div>
+            <div style="font-size:12px;color:#8A7565">익명 · ${ago(c.created_at)}</div>
+          </div>
+          ${CU.isAdmin ? `<button class="btnd" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button>` : ''}
+        </div>
+      </div>`).join('')}
+  `;
+  document.getElementById('cmtBanMsg').style.display  = CU.banned ? 'block' : 'none';
+  document.getElementById('cmtForm').style.display    = CU.banned ? 'none' : 'block';
+  document.getElementById('cmtText').value = '';
+  goPage('postDetail');
+}
+
+async function addCmt() {
+  const content = document.getElementById('cmtText').value.trim();
+  if (!content || !activePostId) return;
+  await sb.from('agora_comments').insert({ id: ID(), post_id: activePostId, user_id: CU.id, content, is_deleted: false });
+  await openPost(activePostId);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) {
+    const cmtText = document.getElementById('cmtText');
+    if (document.activeElement === cmtText) addCmt();
+  }
+});
+
+async function delCmt(cmtId, cmtUserId) {
+  await sb.from('agora_comments').update({ is_deleted: true }).eq('id',cmtId);
+  if (cmtUserId && cmtUserId !== 'admin') {
+    const { data: tu } = await sb.from('agora_users').select('*').eq('id',cmtUserId).single();
+    if (tu) {
+      const ns = (tu.strikes||0) + 1;
+      await sb.from('agora_users').update({ strikes: ns, banned: ns>=3 }).eq('id',cmtUserId);
+      if (ns >= 3) notify('해당 사용자가 3회 경고로 자동 이용 제한되었습니다.');
+    }
+  }
+  notify('댓글이 삭제되었습니다.');
+  await openPost(activePostId);
+}
+
+// ── 관리자 패널 ─────────────────────────────
+async function renderAdmin() {
+  setLoad(true);
+  const [{ data: ud }, { data: bd }, { data: pd }, { data: hd }] = await Promise.all([
+    sb.from('agora_users').select('*'),
+    sb.from('agora_books').select('*').eq('is_public',true),
+    sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false}).limit(10),
+    sb.from('agora_hearts').select('*'),
+  ]);
+  setLoad(false);
+  const normal = (ud||[]).filter(u=>!u.is_admin);
+  const banned = normal.filter(u=>u.banned).length;
+  document.getElementById('adminStats').innerHTML = [
+    { l:'전체 회원', v: normal.length+'명' },
+    { l:'이용제한',  v: banned+'명', c:'#B03020' },
+    { l:'토론 게시글', v: (pd||[]).length+'개' },
+    { l:'공개 감상평', v: (bd||[]).length+'개' },
+  ].map(s=>`<div class="stat-box"><div class="stat-n" style="color:${s.c||'#26180D'}">${s.v}</div><div class="stat-l">${s.l}</div></div>`).join('');
+
+  document.getElementById('userList').innerHTML = !normal.length
+    ? `<div class="empty"><div class="et">가입된 회원이 없습니다</div></div>`
+    : normal.map(u=>`
+      <div class="card" style="padding:12px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:500;font-size:16px;margin-bottom:3px">${esc(u.username)}</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:12px;color:#8A7565">경고 ${u.strikes}회</span>
+              ${[...Array(Math.min(u.strikes,3))].map(()=>`<span style="width:7px;height:7px;background:#E74C3C;border-radius:50%;display:inline-block"></span>`).join('')}
+              ${u.banned ? `<span style="background:#FDECEA;color:#8A2010;font-size:11px;padding:1px 7px;border-radius:10px">이용제한</span>` : ''}
+            </div>
+          </div>
+          ${u.banned
+            ? `<button class="btn2" style="font-size:12px;padding:5px 12px" onclick="unbanUser('${u.id}')">제한 해제</button>`
+            : `<button class="btnd" onclick="banUser('${u.id}')">이용 제한</button>`}
+        </div>
+      </div>`).join('');
+
+  document.getElementById('adminPostList').innerHTML = !(pd||[]).length
+    ? `<div class="empty"><div class="et">게시글이 없습니다</div></div>`
+    : pd.map(p=>{
+        const vis = (p.agora_comments||[]).filter(c=>!c.is_deleted).length;
+        return `<div class="card" style="padding:12px 18px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:12px;color:#8A7565;margin-bottom:3px">📖 ${esc(p.book_title)}</div>
+              <div style="font-size:15px;font-family:'Cormorant Garamond',serif">${esc(p.question.length>80?p.question.slice(0,80)+'…':p.question)}</div>
+              <div style="font-size:12px;color:#8A7565;margin-top:3px">답변 ${vis}개 · ${ago(p.created_at)}</div>
+            </div>
+            <button class="btn2" style="font-size:12px;padding:5px 12px;flex-shrink:0" onclick="openPost('${p.id}')">보기</button>
+          </div>
+        </div>`;
+      }).join('');
+}
+
+async function banUser(uid) {
+  await sb.from('agora_users').update({ banned: true }).eq('id',uid);
+  notify('이용이 제한되었습니다.'); renderAdmin();
+}
+async function unbanUser(uid) {
+  await sb.from('agora_users').update({ banned: false, strikes: 0 }).eq('id',uid);
+  notify('이용 제한이 해제되었습니다.'); renderAdmin();
+}
+
+// ── 세션 복원 ───────────────────────────────
+window.onload = () => {
+  const sess = localStorage.getItem('agora_sess');
+  if (sess) {
+    try { loginSuccess(JSON.parse(sess)); } catch { localStorage.removeItem('agora_sess'); }
+  }
+};
+</script>
+</body>
+</html>
