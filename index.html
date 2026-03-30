@@ -553,6 +553,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         </div>
       </div>
     </div>
+ <div class="cat-bar" id="libCatBar" style="margin-bottom:14px">
+   <button class="cat-btn on" onclick="setLibCat('')">전체</button>
+   <button class="cat-btn" onclick="setLibCat('소설')">소설</button>
+   <button class="cat-btn" onclick="setLibCat('에세이')">에세이</button>
+   <button class="cat-btn" onclick="setLibCat('자기계발')">자기계발</button>
+   <button class="cat-btn" onclick="setLibCat('인문')">인문</button>
+   <button class="cat-btn" onclick="setLibCat('경제경영')">경제경영</button>
+   <button class="cat-btn" onclick="setLibCat('역사')">역사</button>
+   <button class="cat-btn" onclick="setLibCat('과학')">과학</button>
+   <button class="cat-btn" onclick="setLibCat('시')">시</button>
+   <button class="cat-btn" onclick="setLibCat('기타')">기타</button>
+ </div>
  <div style="margin-bottom:16px"><input id="libSearch" placeholder="제목, 저자 검색..." oninput="rLib()" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box"/></div>
     <div id="libFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
     <div id="bookList"></div>
@@ -649,8 +661,20 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <button class="cat-btn" onclick="setPubCat('역사')">역사</button>
       <button class="cat-btn" onclick="setPubCat('과학')">과학</button>
     </div>
-<div style="display:flex;justify-content:center;margin-bottom:16px">
-      <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="width:100%;max-width:480px;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;text-align:center"/>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+      <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;"/>
+      <div style="position:relative">
+        <button onclick="togglePubSort()" style="padding:9px 14px;border:1px solid var(--border);border-radius:20px;background:#fff;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:var(--font-body);display:flex;align-items:center;gap:4px">
+          <span id="pubSortLabel">최신순</span> ▾
+        </button>
+        <div id="pubSortMenu" style="display:none;position:absolute;right:0;top:40px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);z-index:300;min-width:120px;overflow:hidden">
+          <div onclick="setPubSort('newest')" id="psopt-newest" class="sort-opt on">최신순</div>
+          <div onclick="setPubSort('oldest')" id="psopt-oldest" class="sort-opt">오래된순</div>
+          <div onclick="setPubSort('hearts')" id="psopt-hearts" class="sort-opt">하트 많은순</div>
+          <div onclick="setPubSort('rating')" id="psopt-rating" class="sort-opt">평점 높은순</div>
+          <div onclick="setPubSort('title')" id="psopt-title" class="sort-opt">제목순</div>
+        </div>
+      </div>
     </div>
     <div id="pubFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
     <div id="rdInfoB" class="info" style="display:none"></div>
@@ -707,14 +731,35 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="h1 serif">토론 시작하기</div>
  <div class="sub">익명으로 게시됩니다</div>
  <div class="card" style="padding:22px 24px">
- <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?"/></div>
- <div class="fg"><label>질문 또는 주제</label><textarea id="pfQ" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점..."></textarea></div>
- <!-- 익명 고정 -->
- <input type="hidden" id="pfAnon" value="true"/></div>
- <div style="display:flex;gap:10px;justify-content:flex-end">
- <button class="btn2" onclick="go('forum')">취소</button>
- <button class="btn" onclick="savePost()">게시하기</button>
+   <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">📖 책 정보</div>
+   <div class="g2">
+     <div class="fg">
+       <label>책 제목 *</label>
+       <div style="display:flex;gap:8px">
+         <input id="pfBook" placeholder="책 제목을 입력해주세요" style="flex:1"/>
+         <button type="button" class="btn2" style="padding:10px 12px;font-size:12px;white-space:nowrap" onclick="searchPostCover()">표지 검색</button>
+       </div>
+     </div>
+     <div class="fg"><label>저자명</label><input id="pfAuthor" placeholder="저자명 (선택)"/></div>
+   </div>
+   <div id="postCoverSearchResult" style="display:none;margin-bottom:14px">
+     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">표지 선택</div>
+     <div id="postCoverList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+   </div>
+   <div id="postSelectedCover" style="display:none;margin-bottom:14px;align-items:center;gap:10px">
+     <img id="postSelectedCoverImg" src="" style="width:50px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"/>
+     <div><div style="font-size:13px;font-weight:500">표지 선택됨</div><span onclick="clearPostCover()" style="font-size:12px;color:var(--muted);cursor:pointer">제거</span></div>
+   </div>
+   <input type="hidden" id="pfCoverUrl" value=""/>
+   <div style="height:1px;background:var(--border);margin:4px 0 18px"></div>
+   <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">💬 토론 내용</div>
+   <div class="fg"><label>글 제목 *</label><input id="pfTitle" placeholder="어떤 주제로 이야기 나누고 싶으신가요?"/></div>
+   <div class="fg"><label>내용</label><textarea id="pfQ" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점, 공유하고 싶은 구절 등 자유롭게 써주세요..."></textarea></div>
+   <input type="hidden" id="pfAnon" value="true"/>
  </div>
+ <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+   <button class="btn2" onclick="go('forum')">취소</button>
+   <button class="btn" onclick="savePost()">게시하기</button>
  </div>
  </div></div>
 
@@ -877,23 +922,10 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
 
-    <!-- 구독 안내 -->
+    <!-- 구독 -->
     <div>
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
-      <div style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:16px">
-        <div style="font-size:16px;font-weight:600;font-family:var(--font-serif);margin-bottom:4px">AGORA 구독</div>
-        <div style="font-size:22px;font-weight:700;color:var(--g);margin:10px 0 4px">월 6,900원</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">카카오 로그인 후 90일간 무료로 모든 기능을 이용할 수 있어요</div>
-        <div style="font-size:13px;color:var(--txt);line-height:2">
-          ✓ &nbsp;내 서재 — 독후감 작성 · 공개<br>
-          ✓ &nbsp;공개 서재 — 다른 사람의 독후감 열람<br>
-          ✓ &nbsp;광장 — 책 토론 · 익명 참여<br>
-          ✓ &nbsp;독서 기록 엑셀 내보내기<br>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.8">
-        구독 결제 기능은 준비 중이에요<br>오픈 일정을 기다려주세요 🌿
-      </div>
+      <div id="membershipSection"></div>
     </div>
 
   </div></div>
@@ -932,7 +964,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <!-- 채팅 섹션 (멤버만) -->
   <div id="clubChatSection" style="display:none;margin-top:24px">
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">실시간 채팅</div>
-    <div id="clubChatMessages" style="height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--gl)"></div>
+    <div id="clubChatMessages" style="height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;background:#fff"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="clubChatInput" placeholder="메시지 입력..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none" onkeydown="if(event.key==='Enter')sendClubChat()"/>
       <button class="btn" style="padding:10px 16px;white-space:nowrap" onclick="sendClubChat()">전송</button>
@@ -1061,6 +1093,39 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </div>
   </div>
 </div>
+<!-- 무료체험 팝업 -->
+<div id="trialPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">📚</div>
+    <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--g);margin-bottom:8px">30일 무료체험</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px">
+      지금 시작하면 30일 동안<br>아고라의 주요 기능을 무료로 이용할 수 있어요.
+    </div>
+    <div style="background:var(--gl);border-radius:12px;padding:14px 18px;margin-bottom:20px;text-align:left">
+      <div style="font-size:13px;color:var(--txt);line-height:2.2">
+        ✅ &nbsp;공개 서재 — 다른 분들의 독서록 열람<br>
+        ✅ &nbsp;광장 — 책 토론 익명 참여<br>
+        ✅ &nbsp;엑셀로 내 독서 기록 저장<br>
+        ❌ &nbsp;독서모임 (프리미엄 전용)
+      </div>
+    </div>
+    <button class="btn" style="width:100%;padding:13px;font-size:15px;margin-bottom:10px" onclick="startTrial()">30일 무료체험 시작하기 🌿</button>
+    <button class="btn2" style="width:100%;padding:11px;font-size:13px" onclick="skipTrial()">괜찮아요, 나중에 할게요</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:12px">체험 후 자동 결제되지 않아요 · 언제든 시작 가능</div>
+  </div>
+</div>
+
+<!-- 프리미엄 유도 모달 -->
+<div id="premiumGate" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">🔒</div>
+    <div style="font-family:var(--font-serif);font-size:20px;font-weight:600;margin-bottom:8px" id="premGateTitle">프리미엄 전용 기능이에요</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px" id="premGateDesc">월 6,900원으로 아고라의 모든 기능을 이용하세요.</div>
+    <button class="btn" style="width:100%;padding:13px;font-size:14px;margin-bottom:10px" onclick="closePremGate();go('points')">구독하러 가기</button>
+    <button class="btn2" style="width:100%;padding:11px;font-size:13px" onclick="closePremGate()">닫기</button>
+  </div>
+</div>
+
 <div class="lov" id="lov" style="display:none"><div class="sp"></div></div>
 
 <!-- 열람 게이트 -->
@@ -1112,6 +1177,41 @@ const KK_REST_KEY='1f06943777edd84ae71d06070a64a0ca'; // 카카오 REST API 키 
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const ID=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
 const today=()=>new Date().toISOString().slice(0,10);
+
+// ══ 멤버십 ══
+const TRIAL_DAYS=30;
+const PREMIUM_PRICE=6900;
+
+// 상태: 'premium' | 'trial' | 'free'
+function getMembershipStatus(){
+  if(!CU)return'free';
+  if(CU.premium_until&&new Date(CU.premium_until)>new Date())return'premium';
+  if(CU.trial_started_at){
+    const end=new Date(CU.trial_started_at);
+    end.setDate(end.getDate()+TRIAL_DAYS);
+    if(new Date()<end)return'trial';
+  }
+  return'free';
+}
+// 접근 가능 여부
+function canAccess(feature){
+  const s=getMembershipStatus();
+  if(s==='premium')return true;
+  if(feature==='library'||feature==='mypage')return true;
+  if(s==='trial'&&feature==='club')return false; // 체험은 독서모임 불가
+  if(s==='trial')return true; // 체험은 나머지 다 가능 (excel 포함)
+  return false;
+}
+function daysLeftTrial(){
+  if(!CU||!CU.trial_started_at)return 0;
+  const end=new Date(CU.trial_started_at);
+  end.setDate(end.getDate()+TRIAL_DAYS);
+  return Math.max(0,Math.ceil((end-new Date())/86400000));
+}
+function daysLeftPremium(){
+  if(!CU||!CU.premium_until)return 0;
+  return Math.max(0,Math.ceil((new Date(CU.premium_until)-new Date())/86400000));
+}
 const ago=d=>{const m=Math.floor((Date.now()-new Date(d))/60000);if(m<1)return'방금 전';if(m<60)return m+'분 전';if(m<1440)return Math.floor(m/60)+'시간 전';return Math.floor(m/1440)+'일 전';};
 const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -1122,7 +1222,73 @@ const load=v=>document.getElementById('lov').style.display=v?'flex':'none';
 function nt(msg,t='ok'){document.querySelectorAll('.notif').forEach(e=>e.remove());const el=document.createElement('div');el.className='notif '+t;el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);}
 function upPts(p){const _npEl=document.getElementById('navPts');if(_npEl)_npEl.textContent=' '+(p||0).toLocaleString()+'P';}
 
-// ══ 소셜 로그인 ══
+// ══ 무료체험 팝업 ══
+function showTrialPopup(){
+  const p=document.getElementById('trialPopup');
+  if(p)p.style.display='flex';
+}
+async function startTrial(){
+  const p=document.getElementById('trialPopup');
+  if(p)p.style.display='none';
+  if(!CU)return;
+  const now=new Date().toISOString();
+  await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
+  CU.trial_started_at=now;
+  localStorage.setItem('agora_sess',JSON.stringify(CU));
+  nt('🌿 30일 무료체험이 시작됐습니다!');
+  updateNavTabs();
+}
+function skipTrial(){
+  const p=document.getElementById('trialPopup');
+  if(p)p.style.display='none';
+}
+function openPremGate(title,desc){
+  const p=document.getElementById('premiumGate');
+  const t=document.getElementById('premGateTitle');
+  const d=document.getElementById('premGateDesc');
+  if(t)t.textContent=title||'프리미엄 전용 기능이에요';
+  if(d)d.textContent=desc||'월 6,900원으로 아고라의 모든 기능을 이용하세요.';
+  if(p)p.style.display='flex';
+}
+function closePremGate(){
+  const p=document.getElementById('premiumGate');
+  if(p)p.style.display='none';
+}
+
+// 탭 표시 업데이트
+function updateNavTabs(){
+  const s=getMembershipStatus();
+  const isPrem=s==='premium';
+  const isTrial=s==='trial';
+  const hasClub=isPrem;
+  const hasFull=isPrem||isTrial;
+  const lock='🔒 ';
+  // 사이드바
+  ['sb-public','sb-forum'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.style.opacity=hasFull?'1':'0.45';
+    el.title=hasFull?'':'무료체험 또는 구독 후 이용 가능';
+  });
+  const sbClub=document.getElementById('sb-club');
+  if(sbClub){sbClub.style.opacity=hasClub?'1':'0.45';sbClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
+  // 상단 nav
+  ['n-public','n-forum'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.opacity=hasFull?'1':'0.45';el.title=hasFull?'':'무료체험 또는 구독 후 이용 가능';}
+  });
+  const nClub=document.getElementById('n-club');
+  if(nClub){nClub.style.opacity=hasClub?'1':'0.45';nClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
+  // 하단탭 (마이페이지/내서재는 항상 100%)
+  const tPoints=document.getElementById('t-points');if(tPoints)tPoints.style.opacity='1';
+  const tLib=document.getElementById('t-library');if(tLib)tLib.style.opacity='1';
+  ['t-public','t-forum'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.opacity=hasFull?'1':'0.45';
+  });
+  const tClub=document.getElementById('t-club');
+  if(tClub)tClub.style.opacity=hasClub?'1':'0.45';
+}
 async function loginGoogle(){load(true);await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});}
 function loginNaver(){
  if(NV_ID==='YOUR_NAVER_CLIENT_ID'){nt('setup-guide.md 를 참고해 네이버 Client ID를 설정해주세요','err');return;}
@@ -1227,17 +1393,29 @@ async function doAuth(){
  await ok({...data,isAdmin:data.is_admin});
 }
 async function ok(u){
+ // DB에서 최신 유저 정보 가져오기 (trial_started_at, premium_until 반영)
+ try{
+   const{data:fresh}=await sb.from('agora_users').select('*').eq('id',u.id).single();
+   if(fresh) u={...u,...fresh,isAdmin:u.isAdmin??fresh.is_admin};
+ }catch{}
  CU=u;localStorage.setItem('agora_sess',JSON.stringify(u));
  // 성별 확인 (최초 1회)
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- // 뒤로가기로 로그인 화면 못 가게 — 히스토리 여러 개 쌓기
  history.replaceState({tab:'library',page:'library'},'',location.href);
  for(let _i=0;_i<20;_i++) history.pushState({tab:'library',page:'library'},'',location.href);
- const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
+ const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0);
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
- load(false);go('library');
+ load(false);
+ updateNavTabs();
+ // 무료체험 팝업: 한 세션당 1번만, trial_started_at 없고 premium도 아닌 경우
+ const s=getMembershipStatus();
+ if(s==='free'&&!u.trial_started_at&&!sessionStorage.getItem('trialPopupShown')){
+   sessionStorage.setItem('trialPopupShown','1');
+   setTimeout(()=>showTrialPopup(),800);
+ }
+ go('library');
  loadNotifSettings();
  checkUnreadNotifs();
  initNotifRealtime();
@@ -1251,6 +1429,20 @@ let _currentTab='library';
 const _tabPages=['library','public','forum','club','points','admin'];
 
 function go(name){
+ // 접근 제어
+ const gated={'public':true,'forum':true,'club':true};
+ if(gated[name]){
+   if(!canAccess(name)){
+     if(getMembershipStatus()==='free'&&!CU.trial_started_at){
+       showTrialPopup();
+     } else if(name==='club'){
+       openPremGate('독서모임은 프리미엄 전용이에요','월 6,900원 구독 후 오프라인 모임에 참여하고 실시간 채팅을 즐겨보세요.');
+     } else {
+       openPremGate('이 기능을 이용하려면 구독이 필요해요','마이페이지에서 구독하거나 무료체험을 시작해보세요.');
+     }
+     return;
+   }
+ }
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
@@ -1279,7 +1471,7 @@ function go(name){
  if(name==='forum')rForum();
  if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
- if(name==='points')rPoints();
+ if(name==='points'){rPoints();renderMembershipSection();}
  if(name==='addBook'){
  document.getElementById('abTitle').textContent='독서 기록 추가';
  document.getElementById('abSub').textContent='새로운 독서 기록을 남겨보세요';
@@ -1371,7 +1563,7 @@ async function gate(type,refId,cb){
  if((count||0)<2){await sb.from('agora_daily_reads').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,read_date:today()});cb();}
  else{
  const _gpEl=document.getElementById('gPts');if(_gpEl)_gpEl.textContent=`현재 보유: ${(CU.points||0).toLocaleString()}P`;
- document.getElementById('gUseBtn').disabled=(CU.points||0)<1000;
+ const _gb=document.getElementById('gUseBtn');if(_gb)_gb.disabled=(CU.points||0)<1000;
  gCb=async()=>{await sb.from('agora_daily_reads').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,read_date:today()});closeG();cb();};
  document.getElementById('gov').classList.add('open');
  }
@@ -1485,6 +1677,7 @@ async function openBook(id){
   `;
   document.getElementById('bookModalOv').classList.add('open');
   document.body.style.overflow='hidden';
+  history.pushState({modal:'book',tab:_currentTab},'',location.href);
 }
 
 async function openBookModal(id){
@@ -1548,6 +1741,7 @@ async function openBookModal(id){
   `;
   document.getElementById('bookModalOv').classList.add('open');
   document.body.style.overflow='hidden';
+  history.pushState({modal:'book',tab:_currentTab},'',location.href);
 }
 function closeBookModal(e){
   if(e&&e.target!==document.getElementById('bookModalOv'))return;
@@ -1674,6 +1868,12 @@ async function saveNickname(){
 }
 
 async function exportToExcel(){
+  if(!canAccess('excel')){
+    const s=getMembershipStatus();
+    if(s==='free'&&!CU.trial_started_at){showTrialPopup();}
+    else{openPremGate('엑셀 저장은 구독 후 이용 가능해요','무료체험 또는 프리미엄 구독으로 내 독서 기록을 엑셀로 저장하세요.');}
+    return;
+  }
   if(typeof XLSX==='undefined'){
     nt('잠시 후 다시 시도해주세요.','err');
     // SheetJS 다시 로드
@@ -1773,21 +1973,24 @@ async function rLib(){
   return new Date(b.created_at)-new Date(a.created_at); // date_desc 기본
 });
  const libQ=(document.getElementById('libSearch')||{value:''}).value.trim().toLowerCase();
-  const filteredBooks=libQ?books.filter(b=>(b.title||'').toLowerCase().includes(libQ)||(b.author||'').toLowerCase().includes(libQ)):books;
+  let filteredBooks=books;
+  if(libCat) filteredBooks=filteredBooks.filter(b=>b.category===libCat);
+  if(libQ) filteredBooks=filteredBooks.filter(b=>(b.title||'').toLowerCase().includes(libQ)||(b.author||'').toLowerCase().includes(libQ));
   await renderLibFolders(books);
   // 폴더 필터
-  if(libFolder!=='all'){const fi=window._libFolderItems&&window._libFolderItems[libFolder];books=books.filter(b=>fi&&fi.has(b.id));}
-  document.getElementById('libSub').textContent=`나의 독서 기록${filteredBooks.length>0?` · ${filteredBooks.length}권`:''}`;
+  let displayBooks=filteredBooks;
+  if(libFolder!=='all'){const fi=window._libFolderItems&&window._libFolderItems[libFolder];displayBooks=displayBooks.filter(b=>fi&&fi.has(b.id));}
+  document.getElementById('libSub').textContent=`나의 독서 기록${displayBooks.length>0?` · ${displayBooks.length}권`:''}`;
  const el=document.getElementById('bookList');
- if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="go('addBook')">첫 번째 책 기록하기</button></div>`;return;}
- el.innerHTML=`<div class="bg">${books.map(b=>{
+ if(!displayBooks.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">${libCat?libCat+' 카테고리 기록이 없어요':'아직 독서 기록이 없습니다'}</div><div class="es">${libCat?'다른 카테고리를 선택해보세요':'읽은 책을 기록해보세요'}</div>${!libCat?'<button class="btn" onclick="go(\'addBook\')">첫 번째 책 기록하기</button>':''}</div>`;return;}
+ el.innerHTML=`<div class="bg">${displayBooks.map(b=>{
     const th=b.cover_url?`<img class="bc" src="${b.cover_url}" loading="lazy"/>`:
       (b.images&&b.images[0])?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:
       `<div class="bph"></div>`;
     return`<div class="bi" id="bi-${b.id}">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span></div></div></div>`;
   }).join('')}</div>`;
   // 이벤트 바인딩
-  filteredBooks.forEach(b=>{
+  displayBooks.forEach(b=>{
     const card=document.getElementById('bi-'+b.id);
     if(!card)return;
     let pt=null;
@@ -1856,14 +2059,39 @@ async function delBook(id){if(!confirm('이 독서 기록을 삭제할까요?'))
 let pubTabMode='all';
 function switchPubTab(tab){
   pubTabMode=tab;
-  document.getElementById('pubTab-all').classList.toggle('on',tab==='all');
-  document.getElementById('pubTab-fav').classList.toggle('on',tab==='fav');
+  const _pa=document.getElementById('pubTab-all');if(_pa)_pa.classList.toggle('on',tab==='all');
+  const _pf=document.getElementById('pubTab-fav');if(_pf)_pf.classList.toggle('on',tab==='fav');
   rPub();
 }
 
 // ══ 폴더 시스템 ══
 
-let pubCat='', forumCat='', libFolder='all';
+let pubCat='', forumCat='', libFolder='all', libCat='', pubSortMode='newest';
+
+function setLibCat(cat){
+  libCat=cat;
+  document.querySelectorAll('#libCatBar .cat-btn').forEach(b=>b.classList.toggle('on',b.textContent===(cat||'전체')));
+  rLib();
+}
+
+function togglePubSort(){
+  const m=document.getElementById('pubSortMenu');
+  if(m)m.style.display=m.style.display==='none'?'block':'none';
+}
+function setPubSort(mode){
+  pubSortMode=mode;
+  const labels={newest:'최신순',oldest:'오래된순',hearts:'하트 많은순',rating:'평점 높은순',title:'제목순'};
+  const lbl=document.getElementById('pubSortLabel');if(lbl)lbl.textContent=labels[mode]||'최신순';
+  document.querySelectorAll('#pubSortMenu .sort-opt').forEach(b=>b.classList.remove('on'));
+  const sel=document.getElementById('psopt-'+mode);if(sel)sel.classList.add('on');
+  const m=document.getElementById('pubSortMenu');if(m)m.style.display='none';
+  rPub();
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#pubSortMenu')&&!e.target.closest('[onclick="togglePubSort()"]')){
+    const m=document.getElementById('pubSortMenu');if(m)m.style.display='none';
+  }
+});
 
 function setStar(v){
   const ri=document.getElementById('bRating');if(ri)ri.value=v;
@@ -2073,6 +2301,12 @@ async function rPub(){
   else if(pubFolder!=='all'){const fi=window._pubFolderItems&&window._pubFolderItems[pubFolder];books=books.filter(b=>fi&&fi.has(b.id));}
   if(pubQ) books=books.filter(b=>(b.title||'').toLowerCase().includes(pubQ)||(b.author||'').toLowerCase().includes(pubQ));
   if(pubCat) books=books.filter(b=>b.category&&b.category===pubCat);
+  // 정렬
+  if(pubSortMode==='oldest') books=[...books].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  else if(pubSortMode==='hearts') books=[...books].sort((a,b)=>b.hearts.length-a.hearts.length);
+  else if(pubSortMode==='rating') books=[...books].sort((a,b)=>(b.rating||0)-(a.rating||0));
+  else if(pubSortMode==='title') books=[...books].sort((a,b)=>(a.title||'').localeCompare(b.title||'','ko'));
+  else books=[...books].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)); // newest
   const el=document.getElementById('pubList');
   if(!books.length){
     el.innerHTML='<div class="empty"><div class="et">'+(pubFolder==='fav'?'즐겨찾기한 독후감이 없습니다':pubQ?'검색 결과가 없습니다':'아직 공개된 감상평이 없습니다')+'</div></div>';
@@ -2125,10 +2359,11 @@ async function rForum(){
     el.innerHTML=fQ?'<div class="empty"><div class="et">검색 결과가 없습니다</div></div>':'<div class="empty"><div class="et">아직 토론이 없습니다</div></div>';
     return;
   }
-  // 책별 커버 이미지 모으기
-  const bookTitles=[...new Set(posts.map(p=>p.book_title).filter(Boolean))];
+  // 책별 커버: DB에 저장된 cover_url 우선, 없으면 카카오 검색
+  const needFetch=posts.filter(p=>!p.cover_url).map(p=>p.book_title).filter(Boolean);
+  const uniqueTitles=[...new Set(needFetch)];
   const coverMap={};
-  await Promise.all(bookTitles.slice(0,10).map(async t=>{
+  await Promise.all(uniqueTitles.slice(0,8).map(async t=>{
     try{
       const r=await fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(t)}&size=1`,{headers:{Authorization:`KakaoAK ${KK_REST_KEY}`}});
       const d=await r.json();
@@ -2137,14 +2372,14 @@ async function rForum(){
   }));
 
   el.innerHTML=posts.map(p=>{
-    const cover=coverMap[p.book_title];
+    const cover=p.cover_url||coverMap[p.book_title];
     return`<div class="forum-row" onclick="openPost('${p.id}')" style="display:flex;gap:12px;align-items:flex-start">
       ${cover
         ?`<img src="${cover}" style="width:40px;height:55px;object-fit:cover;border-radius:5px;flex-shrink:0;margin-top:2px" loading="lazy"/>`
         :`<div style="width:40px;height:55px;background:var(--gl);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);text-align:center;padding:3px">${esc((p.book_title||'').slice(0,6))}</div>`
       }
       <div style="flex:1;min-width:0">
-        <div class="forum-row-meta">${p.category?`<span class="cat-badge" style="margin-right:4px">${esc(p.category)}</span>`:''}${esc(p.book_title||'')}${p.author?' · '+esc(p.author):''} · ${ago(p.created_at)}</div>
+        <div class="forum-row-meta">${esc(p.book_title||'')}${p.author?' · '+esc(p.author):''} · ${ago(p.created_at)}</div>
         <div class="forum-row-title">${esc(p.question)}</div>
         <div class="forum-row-bottom">
           <span style="font-size:12px;color:var(--muted)">답변 ${p.comments.length}개</span>
@@ -2217,23 +2452,66 @@ async function isSubscribed(){
   return new Date(data.subscription_expires) > new Date();
 }
 
+// ══ 광장 글쓰기 표지 검색 ══
+async function searchPostCover(){
+  const title=document.getElementById('pfBook').value.trim();
+  if(!title){nt('책 제목을 먼저 입력해주세요.','err');return;}
+  const resEl=document.getElementById('postCoverSearchResult');
+  const listEl=document.getElementById('postCoverList');
+  listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중...</div>';
+  resEl.style.display='block';
+  try{
+    const[kakaoRes,olRes]=await Promise.allSettled([
+      fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(title)}&size=6`,{headers:{Authorization:`KakaoAK ${KK_REST_KEY}`}}),
+      fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=6&fields=title,author_name,cover_i`)
+    ]);
+    let books=[];
+    if(kakaoRes.status==='fulfilled'){const kd=await kakaoRes.value.json();(kd.documents||[]).filter(b=>b.thumbnail).forEach(b=>books.push({url:b.thumbnail,title:b.title,author:(b.authors||[]).join(', ')}));}
+    if(olRes.status==='fulfilled'){const od=await olRes.value.json();(od.docs||[]).filter(b=>b.cover_i).slice(0,4).forEach(b=>books.push({url:`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`,title:b.title,author:(b.author_name||[]).join(', ')}));}
+    if(!books.length){listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">표지를 찾지 못했어요.</div>';return;}
+    listEl.innerHTML=books.map(b=>`
+      <div onclick="selectPostCover('${b.url}','${esc(b.author).replace(/'/g,"\\'")}')" style="cursor:pointer;flex-shrink:0" title="${esc(b.title)}">
+        <img src="${b.url}" style="width:54px;height:76px;object-fit:cover;border-radius:6px;border:2px solid transparent;display:block;transition:border .15s"
+          onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'"
+          loading="lazy" onerror="this.parentElement.style.display='none'"/>
+      </div>`).join('');
+  }catch(e){listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">오류가 발생했습니다.</div>';}
+}
+function selectPostCover(url, author){
+  document.getElementById('pfCoverUrl').value=url;
+  document.getElementById('postSelectedCoverImg').src=url;
+  document.getElementById('postSelectedCover').style.display='flex';
+  document.getElementById('postCoverSearchResult').style.display='none';
+  // 저자 자동 입력 (비어있을 때만)
+  const authorEl=document.getElementById('pfAuthor');
+  if(authorEl&&!authorEl.value.trim()&&author)authorEl.value=author;
+  nt('표지가 선택됐습니다.');
+}
+function clearPostCover(){
+  document.getElementById('pfCoverUrl').value='';
+  document.getElementById('postSelectedCover').style.display='none';
+  document.getElementById('postCoverSearchResult').style.display='none';
+}
 async function savePost(){
   const bt=document.getElementById('pfBook').value.trim();
+  const author=(document.getElementById('pfAuthor')||{value:''}).value.trim();
+  const title=(document.getElementById('pfTitle')||{value:''}).value.trim();
   const q=document.getElementById('pfQ').value.trim();
+  const coverUrl=(document.getElementById('pfCoverUrl')||{value:''}).value||null;
   if(!bt){nt('책 제목을 입력해주세요.','err');return;}
-  if(!q){nt('질문을 입력해주세요.','err');return;}
+  if(!title){nt('글 제목을 입력해주세요.','err');return;}
   load(true);
   const pid=ID();
-  const cat=(document.getElementById('pfCategory')||{value:''}).value||null;
   const{error}=await sb.from('agora_posts').insert({
-    id:pid,user_id:CU.id,book_title:bt,question:q,
-    category:cat
+    id:pid,user_id:CU.id,book_title:bt,author:author||null,question:title,content:q||null,cover_url:coverUrl
   });
   if(error){load(false);nt('게시 오류: '+error.message,'err');return;}
   load(false);
   document.getElementById('pfBook').value='';
+  const pfAuthorEl=document.getElementById('pfAuthor');if(pfAuthorEl)pfAuthorEl.value='';
+  const pfTitleEl=document.getElementById('pfTitle');if(pfTitleEl)pfTitleEl.value='';
   document.getElementById('pfQ').value='';
-  const pfCatEl=document.getElementById('pfCategory');if(pfCatEl)pfCatEl.value='';
+  clearPostCover();
   nt('토론이 등록됐습니다.');
   go('forum');
 }
@@ -2252,8 +2530,9 @@ async function openPost(id){
  const authorMark=(uid)=>uid===p.user_id?' <span style="color:var(--g);font-weight:700" title="글쓴이">✦</span>':''
  document.getElementById('pdContent').innerHTML=`
  <div class="card" style="margin-bottom:16px">
-   <div class="ftag">${esc(p.book_title)}</div>
-   <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div>
+   <div style="font-size:11px;color:var(--muted);margin-bottom:6px">📖 ${esc(p.book_title)}${p.author?' · '+esc(p.author):''}</div>
+   <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.65;margin-bottom:${p.content?'12px':'10px'}">${esc(p.question)}</div>
+   ${p.content?`<div style="font-size:14px;line-height:1.9;color:var(--txt);white-space:pre-wrap;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px">${esc(p.content)}</div>`:''}
    <div style="display:flex;justify-content:space-between;align-items:center">
      <div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div>
      ${isMyPost?`<div style="display:flex;gap:8px">
@@ -2410,8 +2689,8 @@ async function rPoints(){
  const{data:reqs}=await sb.from('agora_point_requests').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}).limit(20);
  load(false);
  if(u){CU.points=u.points||0;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(CU.points);}
- document.getElementById('myPtsNum').textContent=(CU.points||0).toLocaleString()+' P';
- const el=document.getElementById('myReqs');
+ const _mpn=document.getElementById('myPtsNum');if(_mpn)_mpn.textContent=(CU.points||0).toLocaleString()+' P';
+ const el=document.getElementById('myReqs');if(!el)return;
  if(!reqs||!reqs.length){el.innerHTML=`<div class="empty" style="padding:24px 0"><div class="et">신청 내역이 없습니다</div></div>`;return;}
   try{
  const tp=TossPayments(TOSS_KEY);const pm=tp.payment({customerKey:CU.id});
@@ -2419,9 +2698,118 @@ async function rPoints(){
  }catch(e){nt('결제를 취소했습니다.');}
 }
 
+// ══ 멤버십 렌더 & 결제 ══
+function renderMembershipSection(){
+  const el=document.getElementById('membershipSection');
+  if(!el)return;
+  const s=getMembershipStatus();
+  if(s==='premium'){
+    const d=daysLeftPremium();
+    el.innerHTML=`
+      <div style="background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:20px">👑</span>
+          <span style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--g)">프리미엄 구독 중</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong></div>
+        <div style="font-size:13px;color:var(--txt);line-height:2.2">
+          ✅ 공개 서재 · 광장<br>✅ 독서모임 (오프라인 + 채팅)<br>✅ 엑셀 내보내기
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요 🌿</div>`;
+  } else if(s==='trial'){
+    const d=daysLeftTrial();
+    el.innerHTML=`
+      <div style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:20px">🌿</span>
+          <span style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--g)">30일 무료체험 중</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
+        <div style="font-size:13px;color:var(--txt);line-height:2.2;margin-bottom:16px">
+          ✅ 공개 서재 · 광장 · 엑셀 저장<br>❌ 독서모임 (프리미엄 전용)
+        </div>
+        <div style="font-size:12px;color:var(--g);font-weight:600;margin-bottom:10px">독서모임까지 이용하려면 구독하세요</div>
+        <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
+      </div>`;
+  } else {
+    el.innerHTML=`
+      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+        <div style="font-family:var(--font-serif);font-size:18px;font-weight:600;margin-bottom:6px">AGORA 프리미엄</div>
+        <div style="font-size:26px;font-weight:700;color:var(--g);margin-bottom:4px">월 6,900원</div>
+        <div style="font-size:13px;color:var(--txt);line-height:2.2;margin-bottom:16px">
+          ✅ 공개 서재 · 광장<br>✅ 독서모임 (오프라인 + 채팅)<br>✅ 엑셀 내보내기
+        </div>
+        <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
+        ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기 🌿</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
+      </div>`;
+  }
+}
+
+async function startPremiumPayment(){
+  const oid='PREM_'+ID();
+  try{
+    const tp=TossPayments(TOSS_KEY);
+    const pm=tp.payment({customerKey:CU.id});
+    await pm.requestPayment({
+      method:'CARD',
+      amount:{currency:'KRW',value:PREMIUM_PRICE},
+      orderId:oid,
+      orderName:'아고라 프리미엄 구독 (1개월)',
+      customerName:CU.username,
+      successUrl:`${location.origin}${location.pathname}?payment=premium&orderId=${oid}`,
+      failUrl:`${location.origin}${location.pathname}?payment=fail`
+    });
+  }catch(e){nt('결제를 취소했습니다.');}
+}
+
+// ══ 결제 콜백 처리 ══
+async function handlePay(){
+  const params=new URLSearchParams(location.search);
+  const type=params.get('payment');
+  const orderId=params.get('orderId');
+  history.replaceState({},'',location.pathname); // URL 파라미터 제거
+
+  if(type==='fail'){
+    nt('결제가 취소되었습니다.','err');
+    return;
+  }
+
+  if(type==='premium'){
+    // 프리미엄 구독 처리: premium_until = 지금 + 30일
+    load(true);
+    const now=new Date();
+    const until=new Date(now);
+    until.setDate(until.getDate()+30);
+    const premiumUntil=until.toISOString();
+    await sb.from('agora_users').update({premium_until:premiumUntil}).eq('id',CU.id);
+    CU.premium_until=premiumUntil;
+    localStorage.setItem('agora_sess',JSON.stringify(CU));
+    load(false);
+    nt('🎉 프리미엄 구독이 시작됐습니다!');
+    return;
+  }
+
+  if(type==='success'){
+    // 기존 포인트 결제 처리
+    const points=parseInt(params.get('points')||'0');
+    if(points>0&&CU){
+      load(true);
+      const np=(CU.points||0)+points;
+      await sb.from('agora_users').update({points:np}).eq('id',CU.id);
+      CU.points=np;
+      localStorage.setItem('agora_sess',JSON.stringify(CU));
+      upPts(np);
+      load(false);
+      nt(`${points.toLocaleString()}P가 충전됐습니다! 🎉`);
+    }
+    return;
+  }
+}
+
 async function loadAdmBooks(){
   const{data:bd}=await sb.from('agora_books').select('*,agora_users(username)').eq('is_public',true).order('created_at',{ascending:false});
-  const el=document.getElementById('admBooks');
+  const el=document.getElementById('admBooks');if(!el)return;
   if(!bd||!bd.length){el.innerHTML='<div class="empty"><div class="et">공개 독후감이 없습니다</div></div>';return;}
   el.innerHTML=bd.map(b=>`<div class="card" style="padding:14px 18px;margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -2714,11 +3102,21 @@ function appendChatMessage(msg){
 function chatBubble(m){
   const isMe=m.user_id===CU.id;
   const name=chatUserMap[m.user_id]||'알 수 없음';
-  return`<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px">
+  return`<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px" id="chat_${m.id}">
     ${!isMe?`<div style="font-size:11px;color:var(--muted);margin-left:4px">${esc(name)}</div>`:''}
-    <div style="max-width:75%;background:${isMe?'var(--g)':'#fff'};color:${isMe?'#fff':'var(--txt)'};border:1px solid ${isMe?'var(--g)':'var(--border)'};border-radius:${isMe?'16px 16px 4px 16px':'16px 16px 16px 4px'};padding:9px 14px;font-size:14px;line-height:1.6;word-break:break-word">${esc(m.content)}</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:${isMe?'row':'row-reverse'}">
+      ${isMe?`<span onclick="delChatMsg('${m.id}')" style="font-size:10px;color:var(--muted);cursor:pointer;flex-shrink:0;margin-bottom:2px">삭제</span>`:''}
+      <div style="max-width:75%;background:${isMe?'var(--g)':'#fff'};color:${isMe?'#fff':'var(--txt)'};border:1px solid ${isMe?'var(--g)':'var(--border)'};border-radius:${isMe?'16px 16px 4px 16px':'16px 16px 16px 4px'};padding:9px 14px;font-size:14px;line-height:1.6;word-break:break-word">${esc(m.content)}</div>
+    </div>
     <div style="font-size:10px;color:var(--muted);margin:0 4px">${ago(m.created_at)}</div>
   </div>`;
+}
+
+async function delChatMsg(msgId){
+  if(!confirm('메시지를 삭제할까요?'))return;
+  await sb.from('agora_club_chats').delete().eq('id',msgId).eq('user_id',CU.id);
+  const el=document.getElementById('chat_'+msgId);
+  if(el)el.remove();
 }
 
 async function sendClubChat(){
@@ -2839,7 +3237,7 @@ async function openClub(id){
               <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':''} ${esc(userMap[p.user_id]||'알 수 없음')}</div>
               <div style="display:flex;gap:8px;align-items:center">
                 <span style="font-size:11px;color:var(--muted)">${ago(p.created_at)}</span>
-                ${isMyPost||isHost?`<span onclick="delClubPost('${p.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
+                ${isMyPost||isHost?`<span onclick="deleteClubPost('${p.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
                 ${isMyPost?`<span onclick="editClubPost('${p.id}','${c.id}','${p.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--muted);cursor:pointer">수정</span>`:''}
               </div>
             </div>
@@ -2930,6 +3328,19 @@ async function leaveClub(clubId){
   await sb.from('agora_clubs').update({member_count:Math.max(0,(c?.member_count||1)-1)}).eq('id',clubId);
   nt('모임을 탈퇴했습니다.');
   go('club');
+}
+
+async function editClub(clubId){
+  const{data:c}=await sb.from('agora_clubs').select('*').eq('id',clubId).single();
+  if(!c)return;
+  const newName=prompt('모임 이름',c.name);
+  if(!newName||!newName.trim())return;
+  const newDesc=prompt('소개글',c.description||'');
+  const newSchedule=prompt('모임 일정',c.schedule||'');
+  const newPlace=prompt('모임 장소',c.place||'');
+  await sb.from('agora_clubs').update({name:newName.trim(),description:newDesc||null,schedule:newSchedule||null,place:newPlace||null}).eq('id',clubId);
+  nt('모임 정보가 수정됐습니다.');
+  openClub(clubId);
 }
 
 async function deleteClub(clubId){
@@ -3037,15 +3448,27 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 
 window.addEventListener('popstate', function(e){
   if(!CU){
-    // 로그인 안 된 상태인데 히스토리가 남아있으면 — 앱 화면 숨기고 로그인 화면 보여줌
     document.getElementById('app').style.display='none';
     document.getElementById('lw').style.display='flex';
     return;
   }
-  // 로그인 상태: 항상 현재 탭 첫화면으로
+  const state=e.state;
+  // 1. 이미지 뷰어 열려있으면 닫기
+  if(document.getElementById('vov').classList.contains('open')){
+    closeV();
+    history.pushState({tab:_currentTab},'',location.href);
+    return;
+  }
+  // 2. 독서록 모달 열려있으면 닫기
+  if(document.getElementById('bookModalOv').classList.contains('open')){
+    document.getElementById('bookModalOv').classList.remove('open');
+    document.body.style.overflow='';
+    history.pushState({tab:_currentTab},'',location.href);
+    return;
+  }
+  // 3. 그 외 — 현재 탭 첫화면으로
   _goWithoutHistory(_currentTab);
-  // 히스토리 다시 쌓아서 다음 뒤로가기도 막음
-  history.pushState({tab:_currentTab,page:_currentTab},'',location.href);
+  history.pushState({tab:_currentTab},'',location.href);
 });
 
 // 히스토리 쌓지 않고 페이지 이동 (popstate 내부용)
@@ -3072,7 +3495,7 @@ function _goWithoutHistory(name){
  if(name==='forum')rForum();
  if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
- if(name==='points')rPoints();
+ if(name==='points'){rPoints();renderMembershipSection();}
 }
 window.onload=async()=>{
  loadCustomize();
@@ -3095,58 +3518,4 @@ window.onload=async()=>{
 };
 </script>
 </body>
-</html>  <div class="page" id="p-points"><div class="pg-sm">
-    <div class="h1 serif" style="margin-bottom:32px">마이페이지</div>
-
-    <!-- 닉네임 -->
-    <div style="margin-bottom:32px">
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">닉네임</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">현재: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
-      <div style="display:flex;gap:8px">
-        <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12"
-          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')" style="flex:1"/>
-        <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
-      </div>
-      <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
-    </div>
-
-    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
-
-    <!-- 테마 색상 -->
-    <div style="margin-bottom:32px">
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
-        <!-- 파스텔/핑크 계열 -->
-        <div onclick="setColorPreset('#E8A0BF','#C4608A','#FEF0F6','#F9D0E4')" style="background:#E8A0BF;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#F4A4C0','#D4608A','#FEF0F5','#F9D0E4')" style="background:#F4A4C0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#C9A0DC','#9060B0','#F8F0FF','#E8D0F4')" style="background:#C9A0DC;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#A8D8EA','#5090B0','#EEF8FC','#C8E8F4')" style="background:#A8D8EA;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-        <div onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;background:var(--gl);padding:12px 16px;border-radius:10px">
-        <div style="font-size:13px;color:var(--muted)">직접 고르기</div>
-        <input type="color" id="customColorPicker" value="#B8956A"
-          style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0;background:none"
-          oninput="applyCustomColor(this.value)"/>
-        <span style="font-size:13px;font-weight:500;color:var(--g)" id="colorHexDisplay">#B8956A</span>
-      </div>
-    </div>
-
-    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
-
-    <!-- 포인트 -->
-
-  </div></div>
-
-
+</html>
