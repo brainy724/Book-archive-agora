@@ -1028,10 +1028,8 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- // 뒤로가기 방지
- history.replaceState({page:'app'},'',location.href);
- history.pushState({page:'app'},'',location.href);
- history.pushState({page:'app'},'',location.href);
+ // 뒤로가기 완전 방지 - 히스토리 10개 쌓기
+ for(let _i=0;_i<10;_i++) history.pushState({page:'app'},'',location.href);
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
@@ -1297,14 +1295,14 @@ async function openBookModal(id){
       ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
     </div>`:''}
     ${imgs.length>0?`
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">사진 ${imgs.length}장</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        ${imgs.map((i,idx)=>`<img src="${i.url}" loading="lazy"
-          style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer"
-          onclick="openV(${JSON.stringify(imgUrls)},${idx})"/>`).join('')}
+    <div style="border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;padding:16px 24px 12px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
+      <div style="display:flex;flex-direction:column">
+        ${imgs.map((i,midx)=>`<img src="${i.url}" loading="lazy"
+          style="width:100%;max-height:75vh;object-fit:contain;cursor:pointer;background:#1a1a1a;display:block"
+          onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>`).join('')}
       </div>
-    </div>`:''}
+    </div>`:''}}
     ${b.review?`
     <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
@@ -2193,19 +2191,11 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 
 // ══ 초기화 ══
 
-window.addEventListener('popstate', function(e){
-  const app=document.getElementById('app');
-  const lw=document.getElementById('lw');
-  if(CU && app && app.style.display!=='none'){
-    // 로그인 상태 - 뒤로가기 차단하고 내서재 유지
-    e.preventDefault();
-    history.pushState({page:'app'},'',location.href);
+window.addEventListener('popstate', function(){
+  if(CU){
+    // 로그인 상태 - 뒤로가기 차단, 히스토리 다시 쌓기
+    for(let _i=0;_i<10;_i++) history.pushState({page:'app'},'',location.href);
     go('library');
-  } else {
-    // 비로그인 상태 - 로그인 화면 표시
-    history.pushState({page:'login'},'',location.href);
-    if(app)app.style.display='none';
-    if(lw)lw.style.display='flex';
   }
 });
 window.onload=async()=>{
