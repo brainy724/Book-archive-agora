@@ -415,7 +415,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="page" id="p-forum"><div class="pg">
  <div style="display:flex;gap:20px;align-items:flex-start">
  <div style="flex:1;min-width:0">
- <div class="rf"><div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div><button class="btn" id="nPostBtn" onclick="go('addPost')">토론 시작</button></div>
+ <div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div>
  <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
  <div id="rdInfoP" class="info" style="display:none"></div>
  <div id="postList"></div>
@@ -1093,7 +1093,7 @@ async function rForum(){
  iEl.innerHTML='광장은 <strong>정규 구독(월 9,900원)</strong> 또는 <strong>10,000P 이용권</strong>이 필요합니다. <span onclick="go(\'payment\')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
  }
  const posts=(data||[]).map(p=>({...p,comments:(p.agora_comments||[]).filter(c=>!c.is_deleted)}));
- document.getElementById('nPostBtn').style.display=CU.banned?'none':'inline-block';
+ const nPB=document.getElementById('nPostBtn');if(nPB)nPB.style.display=CU.banned?'none':'inline-block';
  document.getElementById('fBanMsg').style.display=CU.banned?'block':'none';
  const el=document.getElementById('postList');
  if(!posts.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 토론이 없습니다</div></div>`;return;}
@@ -1432,4 +1432,59 @@ window.onload=async()=>{
 };
 </script>
 </body>
-</html>
+</html>  <div class="page" id="p-points"><div class="pg-sm">
+    <div class="h1 serif" style="margin-bottom:28px">마이페이지</div>
+
+    <!-- 닉네임 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:12px">닉네임</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px">현재: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
+      <div style="display:flex;gap:8px">
+        <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12" style="flex:1"
+          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')"/>
+        <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
+      </div>
+      <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <!-- 테마 색상 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:16px">테마 색상</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B"></div>
+        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7"></div>
+        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358"></div>
+        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="color" id="customColorPicker" value="#B8956A"
+          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:#fff"
+          oninput="applyCustomColor(this.value)"/>
+        <span style="font-size:13px;color:var(--muted)">직접 선택</span>
+        <span style="font-size:13px;color:var(--muted)" id="colorHexDisplay">#B8956A</span>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <!-- 포인트 -->
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:16px">포인트</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-size:28px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
+        <button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('payment')">충전하기</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">
+        독후감 공개 +1,000P · 광장 질문 +500P · 댓글 +300P
+      </div>
+      <div id="myReqs"></div>
+    </div>
+  </div></div>
+
+
