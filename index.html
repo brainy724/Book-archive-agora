@@ -514,6 +514,21 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="nav-r">
  
  <span class="admbadge" id="navAdm" style="display:none">관리자</span>
+ <!-- 알림 벨 -->
+ <div style="position:relative;display:inline-block">
+   <button id="bellBtn" onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;padding:6px;color:var(--muted);display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background .15s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''">
+     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+   </button>
+   <span id="bellBadge" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff"></span>
+ </div>
+ <!-- 알림 패널 -->
+ <div id="notifPanel" style="display:none;position:fixed;top:56px;right:12px;width:320px;max-height:460px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:500;overflow:hidden;display:none;flex-direction:column">
+   <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+     <div style="font-size:14px;font-weight:600">알림</div>
+     <span onclick="markAllRead()" style="font-size:12px;color:var(--g);cursor:pointer">모두 읽음</span>
+   </div>
+   <div id="notifList" style="overflow-y:auto;max-height:380px"></div>
+ </div>
  <span id="navUser" onclick="go('points')" style="font-size:13px;font-weight:500;color:var(--txt);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span><button class="btn-sm" onclick="logout()" style="margin-left:8px">로그아웃</button>
  </div>
  </nav>
@@ -726,6 +741,88 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
       </div>
       <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <!-- 알림 설정 -->
+    <div style="margin-bottom:32px" id="notifSettingsSection">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">알림 설정</div>
+      <div style="background:var(--gl);border-radius:12px;padding:16px 18px">
+        <!-- 알림 전체 ON/OFF -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:var(--txt)">알림 받기</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">모든 알림을 켜거나 끕니다</div>
+          </div>
+          <div class="tgl" onclick="toggleNotifSetting('all')">
+            <div class="trk on" id="notifTrk_all"><div class="thm"></div></div>
+          </div>
+        </div>
+        <div id="notifSubSettings">
+          <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+          <!-- 개별 알림 -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">💬 내 글에 댓글</div>
+            <div class="tgl" onclick="toggleNotifSetting('comment')">
+              <div class="trk on" id="notifTrk_comment"><div class="thm"></div></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">↩ 내 댓글에 대댓글</div>
+            <div class="tgl" onclick="toggleNotifSetting('reply')">
+              <div class="trk on" id="notifTrk_reply"><div class="thm"></div></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">♥ 독서록 하트</div>
+            <div class="tgl" onclick="toggleNotifSetting('heart')">
+              <div class="trk on" id="notifTrk_heart"><div class="thm"></div></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:13px;color:var(--txt)">💬 모임 채팅</div>
+            <div class="tgl" onclick="toggleNotifSetting('chat')">
+              <div class="trk on" id="notifTrk_chat"><div class="thm"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <!-- 알림 설정 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">알림 설정</div>
+      <div style="background:var(--gl);border-radius:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:var(--txt)">알림 받기</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">모든 알림을 켜거나 끕니다</div>
+          </div>
+          <div class="tgl" onclick="toggleNotifSetting('all')"><div class="trk on" id="notifTrk_all"><div class="thm"></div></div></div>
+        </div>
+        <div id="notifSubSettings">
+          <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">💬 내 글에 댓글</div>
+            <div class="tgl" onclick="toggleNotifSetting('comment')"><div class="trk on" id="notifTrk_comment"><div class="thm"></div></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">↩ 내 댓글에 대댓글</div>
+            <div class="tgl" onclick="toggleNotifSetting('reply')"><div class="trk on" id="notifTrk_reply"><div class="thm"></div></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--txt)">♥ 독서록 하트</div>
+            <div class="tgl" onclick="toggleNotifSetting('heart')"><div class="trk on" id="notifTrk_heart"><div class="thm"></div></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:13px;color:var(--txt)">💬 모임 채팅</div>
+            <div class="tgl" onclick="toggleNotifSetting('chat')"><div class="trk on" id="notifTrk_chat"><div class="thm"></div></div></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
@@ -1140,11 +1237,18 @@ async function ok(u){
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
+ loadNotifSettings();
+ checkUnreadNotifs();
+ initNotifRealtime();
 }
 function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('lw').style.display='flex';document.getElementById('aId').value='';document.getElementById('aPw').value='';}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('lw').style.display!=='none')doAuth();});
 
 // ══ 페이지 이동 ══
+// 현재 탭 추적 (뒤로가기용)
+let _currentTab='library';
+const _tabPages=['library','public','forum','club','points','admin'];
+
 function go(name){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
@@ -1153,6 +1257,14 @@ function go(name){
  const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name==='addClub'||name==='clubDetail'?'club':name;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
+ // 탭 기억 & 히스토리 관리
+ if(_tabPages.includes(name)){
+   _currentTab=name;
+   history.replaceState({tab:name,page:name},'',location.href);
+ } else {
+   // 서브페이지: 탭으로 돌아올 수 있게 pushState
+   history.pushState({tab:_currentTab,page:name},'',location.href);
+ }
   // FAB 처리
   const _fab=document.getElementById('fabAdd');
   if(_fab){
@@ -1364,7 +1476,7 @@ async function openBook(id){
       <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
-      <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});openBook('${b.id}');})()"
+      <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else{await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif('${b.user_id}','heart','독서록에 하트를 받았어요 ♥','${b.id}');}openBook('${b.id}');})()"
         style="background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'}">
         ${liked?'♥':'♡'} ${(hd||[]).length}
       </button>
@@ -2126,13 +2238,17 @@ async function savePost(){
 }
 async function openPost(id){
  aPid=id;load(true);
- const{data:p}=await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
+ const[{data:p},{data:ud}]=await Promise.all([
+   sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single(),
+   sb.from('agora_users').select('id,username')
+ ]);
  load(false);if(!p)return;
+ const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
  const allCmts=(p.agora_comments||[]).filter(c=>!c.is_deleted);
- // 최상위 댓글과 대댓글 분리
  const roots=allCmts.filter(c=>!c.parent_id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
  const replies=allCmts.filter(c=>c.parent_id);
  const isMyPost=p.user_id===CU.id;
+ const authorMark=(uid)=>uid===p.user_id?' <span style="color:var(--g);font-weight:700" title="글쓴이">✦</span>':''
  document.getElementById('pdContent').innerHTML=`
  <div class="card" style="margin-bottom:16px">
    <div class="ftag">${esc(p.book_title)}</div>
@@ -2154,7 +2270,7 @@ async function openPost(id){
      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
        <div style="flex:1">
          <div style="font-size:15px;line-height:1.75;margin-bottom:4px" id="cmtText_${c.id}">${esc(c.content)}</div>
-         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">익명 · ${ago(c.created_at)}</div>
+         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">익명${authorMark(c.user_id)} · ${ago(c.created_at)}</div>
        </div>
        <div style="display:flex;gap:8px;flex-shrink:0">
          ${isMyCmt?`<span onclick="editCmt('${c.id}','${c.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>`:''}
@@ -2169,7 +2285,7 @@ async function openPost(id){
          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
            <div style="flex:1">
              <div style="font-size:14px;line-height:1.7" id="cmtText_${r.id}">${esc(r.content)}</div>
-             <div style="font-size:11px;color:var(--muted);margin-top:3px">익명 · ${ago(r.created_at)}</div>
+             <div style="font-size:11px;color:var(--muted);margin-top:3px">익명${authorMark(r.user_id)} · ${ago(r.created_at)}</div>
            </div>
            <div style="display:flex;gap:8px;flex-shrink:0">
              ${isMyReply?`<span onclick="editCmt('${r.id}','${r.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--muted);cursor:pointer">수정</span>`:''}
@@ -2205,6 +2321,9 @@ async function addReply(parentId){
  const ct=el?el.value.trim():'';
  if(!ct)return;
  await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false,parent_id:parentId});
+ // 댓글 작성자에게 알림
+ const{data:parentCmt}=await sb.from('agora_comments').select('user_id').eq('id',parentId).single();
+ if(parentCmt&&notifSettings.all&&notifSettings.reply) await createNotif(parentCmt.user_id,'reply','내 답변에 대댓글이 달렸어요',aPid);
  await openPost(aPid);
 }
 
@@ -2232,6 +2351,9 @@ async function delPost(pid){
 async function addCmt(){
  const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;
  await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false,parent_id:null});
+ // 글쓴이에게 알림
+ const{data:post}=await sb.from('agora_posts').select('user_id,book_title').eq('id',aPid).single();
+ if(post&&notifSettings.all&&notifSettings.comment) await createNotif(post.user_id,'comment',`"${(post.book_title||'').slice(0,15)}" 글에 새 답변이 달렸어요`,aPid);
  await openPost(aPid);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&document.activeElement===document.getElementById('cmtTxt'))addCmt();});
@@ -2379,7 +2501,130 @@ async function rejPt(rid){await sb.from('agora_point_requests').update({status:'
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
 
-// ══ 광장 내 활동 탭 ══
+// ══ 알림 시스템 ══
+let notifSettings={all:true,comment:true,reply:true,heart:true,chat:true};
+let notifChannel=null;
+
+function loadNotifSettings(){
+  const saved=localStorage.getItem('agora_notif');
+  if(saved){try{notifSettings={...notifSettings,...JSON.parse(saved)};}catch{}}
+  // UI 반영
+  Object.keys(notifSettings).forEach(k=>{
+    const el=document.getElementById('notifTrk_'+k);
+    if(el)el.classList.toggle('on',notifSettings[k]);
+  });
+  const sub=document.getElementById('notifSubSettings');
+  if(sub)sub.style.opacity=notifSettings.all?'1':'0.4';
+}
+
+function toggleNotifSetting(key){
+  if(key==='all'){
+    notifSettings.all=!notifSettings.all;
+  } else {
+    if(!notifSettings.all)return;
+    notifSettings[key]=!notifSettings[key];
+  }
+  localStorage.setItem('agora_notif',JSON.stringify(notifSettings));
+  const el=document.getElementById('notifTrk_'+key);
+  if(el)el.classList.toggle('on',notifSettings[key]);
+  const sub=document.getElementById('notifSubSettings');
+  if(sub)sub.style.opacity=notifSettings.all?'1':'0.4';
+}
+
+function toggleNotifPanel(){
+  const panel=document.getElementById('notifPanel');
+  if(!panel)return;
+  const isOpen=panel.style.display==='flex';
+  panel.style.display=isOpen?'none':'flex';
+  if(!isOpen){loadNotifList();markAllRead();}
+  // 패널 외부 클릭 시 닫기
+  if(!isOpen){
+    setTimeout(()=>{
+      document.addEventListener('click',function handler(e){
+        if(!panel.contains(e.target)&&e.target.id!=='bellBtn'){
+          panel.style.display='none';
+        }
+        document.removeEventListener('click',handler);
+      });
+    },100);
+  }
+}
+
+async function loadNotifList(){
+  const el=document.getElementById('notifList');
+  if(!el)return;
+  const{data}=await sb.from('agora_notifications').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}).limit(30);
+  if(!data||!data.length){
+    el.innerHTML='<div style="padding:32px 18px;text-align:center;color:var(--muted);font-size:14px">새 알림이 없어요</div>';
+    return;
+  }
+  el.innerHTML=data.map(n=>`
+    <div onclick="handleNotifClick('${n.type}','${n.ref_id||''}')" style="padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read?'#fff':'var(--gl)'};transition:background .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='${n.is_read?'#fff':'var(--gl)'}'">
+      <div style="font-size:13px;color:var(--txt);line-height:1.6">${notifIcon(n.type)} ${esc(n.message)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">${ago(n.created_at)}</div>
+    </div>`).join('');
+  updateBellBadge(data);
+}
+
+function notifIcon(type){
+  if(type==='comment'||type==='reply') return '💬';
+  if(type==='heart') return '♥';
+  if(type==='chat') return '📣';
+  return '🔔';
+}
+
+function handleNotifClick(type,refId){
+  document.getElementById('notifPanel').style.display='none';
+  if(type==='comment'||type==='reply') openPost(refId);
+  else if(type==='heart') go('library');
+  else if(type==='chat') go('club');
+}
+
+async function markAllRead(){
+  await sb.from('agora_notifications').update({is_read:true}).eq('user_id',CU.id).eq('is_read',false);
+  const badge=document.getElementById('bellBadge');
+  if(badge)badge.style.display='none';
+}
+
+function updateBellBadge(notifs){
+  const badge=document.getElementById('bellBadge');
+  if(!badge)return;
+  const unread=(notifs||[]).some(n=>!n.is_read);
+  badge.style.display=unread?'block':'none';
+}
+
+async function checkUnreadNotifs(){
+  if(!CU)return;
+  const{data}=await sb.from('agora_notifications').select('id').eq('user_id',CU.id).eq('is_read',false).limit(1);
+  const badge=document.getElementById('bellBadge');
+  if(badge)badge.style.display=(data&&data.length)?'block':'none';
+}
+
+async function createNotif(userId,type,message,refId){
+  if(userId===CU.id)return; // 본인 알림 제외
+  await sb.from('agora_notifications').insert({id:ID(),user_id:userId,type,message,ref_id:refId||null,is_read:false});
+}
+
+function initNotifRealtime(){
+  if(!CU)return;
+  if(notifChannel){sb.removeChannel(notifChannel);notifChannel=null;}
+  notifChannel=sb.channel('notif_'+CU.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'agora_notifications',filter:`user_id=eq.${CU.id}`},
+      payload=>{
+        const n=payload.new;
+        if(!notifSettings.all)return;
+        if(!notifSettings[n.type])return;
+        // 벨 뱃지 표시
+        const badge=document.getElementById('bellBadge');
+        if(badge)badge.style.display='block';
+        // 토스트 알림
+        nt(`${notifIcon(n.type)} ${n.message}`);
+      }
+    )
+    .subscribe();
+}
+
+
 let forumTabMode='all';
 function switchForumTab(tab){
   forumTabMode=tab;
@@ -2481,6 +2726,12 @@ async function sendClubChat(){
   if(!txt||!chatClubId)return;
   input.value='';
   await sb.from('agora_club_chats').insert({id:ID(),club_id:chatClubId,user_id:CU.id,content:txt});
+  // 같은 모임 멤버들에게 알림 (본인 제외)
+  if(notifSettings.all&&notifSettings.chat){
+    const{data:members}=await sb.from('agora_club_members').select('user_id').eq('club_id',chatClubId);
+    const others=(members||[]).filter(m=>m.user_id!==CU.id);
+    await Promise.all(others.map(m=>createNotif(m.user_id,'chat','모임 채팅에 새 메시지가 있어요',chatClubId)));
+  }
 }
 
 
@@ -2784,12 +3035,46 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 // ══ 초기화 ══
 
 window.addEventListener('popstate', function(e){
-  if(CU){
-    e.preventDefault();
-    history.pushState({page:'app'},'',location.href);
-    // 뒤로가기 시 현재 페이지 유지 (로그인 화면으로 안 감)
+  if(!CU) return; // 비로그인 상태면 무시
+  const state=e.state;
+  if(state&&state.tab){
+    // 히스토리에 탭 정보가 있으면 그 탭으로
+    const target=_tabPages.includes(state.page)?state.page:state.tab;
+    _goWithoutHistory(target);
+  } else {
+    // 없으면 현재 탭 첫화면으로
+    _goWithoutHistory(_currentTab);
   }
+  // 로그인 화면으로 못 가게 방지
+  history.pushState({tab:_currentTab,page:_currentTab},'',location.href);
 });
+
+// 히스토리 쌓지 않고 페이지 이동 (popstate 내부용)
+function _goWithoutHistory(name){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
+ document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
+ const el=document.getElementById('p-'+name);
+ if(!el)return;
+ el.classList.add('active');
+ const nk=_tabPages.includes(name)?name:_currentTab;
+ const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
+ const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
+ _currentTab=nk;
+ const _fab=document.getElementById('fabAdd');
+ if(_fab){
+   if(window.innerWidth<=600&&name==='library'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
+   else if(window.innerWidth<=600&&name==='forum'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
+   else if(window.innerWidth<=600&&name==='club'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addClub');};}
+   else{_fab.style.cssText='display:none!important';}
+ }
+ if(name==='library')rLib();
+ if(name==='public')rPub();
+ if(name==='forum')rForum();
+ if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
+ if(name==='admin')rAdmin();
+ if(name==='points')rPoints();
+}
 window.onload=async()=>{
  loadCustomize();
  const ts=document.createElement('script');ts.src='https://js.tosspayments.com/v2/standard';document.head.appendChild(ts);
