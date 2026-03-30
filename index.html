@@ -556,7 +556,7 @@ function loginKakao(){
     client_id:KK_REST_KEY,
     redirect_uri:location.origin+location.pathname,
     response_type:'code',
-    scope:'profile_nickname,profile_image'
+    scope:'account_email'
   });
   location.href='https://kauth.kakao.com/oauth/authorize?'+params.toString();
 }
