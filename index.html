@@ -583,6 +583,17 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="fg"><label>완독한 날</label><input type="date" id="bEnd"/></div>
  </div>
  <div class="fg">
+   <label>평점</label>
+   <div id="starRating" style="display:flex;gap:8px;font-size:30px;cursor:pointer;padding:4px 0">
+     <span class="star" data-v="1" onclick="setStar(1)" style="color:#ccc;transition:color .1s">★</span>
+     <span class="star" data-v="2" onclick="setStar(2)" style="color:#ccc;transition:color .1s">★</span>
+     <span class="star" data-v="3" onclick="setStar(3)" style="color:#ccc;transition:color .1s">★</span>
+     <span class="star" data-v="4" onclick="setStar(4)" style="color:#ccc;transition:color .1s">★</span>
+     <span class="star" data-v="5" onclick="setStar(5)" style="color:#ccc;transition:color .1s">★</span>
+   </div>
+   <input type="hidden" id="bRating" value="0"/>
+ </div>
+ <div class="fg">
    <label>카테고리</label>
    <select id="bCategory" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;color:var(--txt);background:#fff">
      <option value="">선택 안함</option>
@@ -1008,6 +1019,8 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
+ // 뒤로가기 방지 - 히스토리 스택 설정
+ history.pushState({page:'app'},'','');
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
@@ -1060,7 +1073,7 @@ function onImgSel(e){Array.from(e.target.files).forEach(f=>{if(!pFiles.find(p=>p
 function rImgPrev(){const w=document.getElementById('ipl');w.innerHTML=eUrls.map((u,i)=>`<div class="ipw"><img src="${u}"/><button class="idl" onclick="rmEImg(${i})">✕</button></div>`).join('')+pFiles.map((f,i)=>`<div class="ipw"><img src="${URL.createObjectURL(f)}"/><button class="idl" onclick="rmPImg(${i})">✕</button></div>`).join('');}
 function rmEImg(i){eUrls.splice(i,1);rImgPrev();}
 function rmPImg(i){pFiles.splice(i,1);rImgPrev();}
-async function upImgs(bid){const urls=[];for(const f of pFiles){try{const ext=f.name.split('.').pop();const path=`${bid}/${ID()}.${ext}`;const{error}=await sb.storage.from('book-images').upload(path,f,{upsert:true});if(!error){const{data:pd}=sb.storage.from('book-images').getPublicUrl(path);urls.push(pd.publicUrl);}}catch(e){console.warn('이미지 업로드 스킵:',e);}}return urls;}
+async function upImgs(bid){const urls=[];for(const f of pFiles){try{const ext=(f.name.split('.').pop()||'jpg').toLowerCase();const path=`${bid}/${ID()}.${ext}`;const{data:ud,error:ue}=await sb.storage.from('book-images').upload(path,f,{upsert:true,contentType:f.type});if(ue){console.error('업로드 오류:',ue.message);}else{const{data:pd}=sb.storage.from('book-images').getPublicUrl(path);if(pd)urls.push(pd.publicUrl);}}catch(e){console.warn('이미지 업로드 스킵:',e.message);}}return urls;}
 
 // ══ 토글 ══
 function togPub(){isPub=!isPub;document.getElementById('bPubV').value=String(isPub);document.getElementById('pubTrk').classList.toggle('on',isPub);document.getElementById('pubLbl').textContent=isPub?'공개':'비공개';document.getElementById('pubLbl').style.color=isPub?'var(--g)':'var(--muted)';}
@@ -1973,6 +1986,14 @@ function vTouch(){const wrap=document.getElementById('viw');const img=document.g
 document.addEventListener('keydown',e=>{if(!document.getElementById('vov').classList.contains('open'))return;if(e.key==='ArrowRight')vMove(1);if(e.key==='ArrowLeft')vMove(-1);if(e.key==='Escape')closeV();});
 
 // ══ 초기화 ══
+
+window.addEventListener('popstate', function(e){
+  if(CU && document.getElementById('app').style.display!=='none'){
+    // 로그인 상태에서 뒤로가기 → library로
+    history.pushState({page:'app'},'','');
+    go('library');
+  }
+});
 window.onload=async()=>{
  loadCustomize();
  const ts=document.createElement('script');ts.src='https://js.tosspayments.com/v2/standard';document.head.appendChild(ts);
