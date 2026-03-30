@@ -734,8 +734,8 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- document.getElementById('navUser').textContent=u.username;upPts(u.points||0);
- if(u.isAdmin){document.getElementById('navAdm').style.display='inline';document.getElementById('n-admin').style.display='inline';document.getElementById('t-admin').style.display='flex';}
+ const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username;upPts(u.points||0); // navPts optional
+ if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
 }
 function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('lw').style.display='flex';document.getElementById('aId').value='';document.getElementById('aPw').value='';}
