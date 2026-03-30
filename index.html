@@ -1232,8 +1232,9 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- // 뒤로가기 시 로그인 화면 안 나오게
- history.replaceState({page:'app'},'',location.href);
+ // 뒤로가기로 로그인 화면 못 가게 — 히스토리 여러 개 쌓기
+ history.replaceState({tab:'library',page:'library'},'',location.href);
+ for(let _i=0;_i<20;_i++) history.pushState({tab:'library',page:'library'},'',location.href);
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
@@ -3035,17 +3036,15 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 // ══ 초기화 ══
 
 window.addEventListener('popstate', function(e){
-  if(!CU) return; // 비로그인 상태면 무시
-  const state=e.state;
-  if(state&&state.tab){
-    // 히스토리에 탭 정보가 있으면 그 탭으로
-    const target=_tabPages.includes(state.page)?state.page:state.tab;
-    _goWithoutHistory(target);
-  } else {
-    // 없으면 현재 탭 첫화면으로
-    _goWithoutHistory(_currentTab);
+  if(!CU){
+    // 로그인 안 된 상태인데 히스토리가 남아있으면 — 앱 화면 숨기고 로그인 화면 보여줌
+    document.getElementById('app').style.display='none';
+    document.getElementById('lw').style.display='flex';
+    return;
   }
-  // 로그인 화면으로 못 가게 방지
+  // 로그인 상태: 항상 현재 탭 첫화면으로
+  _goWithoutHistory(_currentTab);
+  // 히스토리 다시 쌓아서 다음 뒤로가기도 막음
   history.pushState({tab:_currentTab,page:_currentTab},'',location.href);
 });
 
