@@ -164,12 +164,12 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .ctx-item.del{color:var(--red);}
 .ctx-item.del:hover{background:#FDECEA;}
 /* 책 상세 모달 */
-.book-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:none;align-items:flex-end;justify-content:center;}
+.book-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:flex-end;justify-content:center;}
 .book-modal-ov.open{display:flex;}
-.book-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:28px 24px 40px;}
+.book-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:0 0 40px;}
 @media(min-width:601px){
   .book-modal-ov{align-items:center;}
-  .book-modal{border-radius:16px;max-height:80vh;}
+  .book-modal{border-radius:16px;max-height:85vh;}
   .fab{display:none!important;}
 }
 @media(max-width:600px){
@@ -575,7 +575,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    </div>
  </div>
  <div class="g2">
- <div class="fg"><label>글쓴이</label><input id="bAuthor" placeholder="저자명"/></div>
+ <div class="fg"><label>글쓴이 *</label><input id="bAuthor" required placeholder="저자명"/></div>
  <div class="fg"><label>출판사</label><input id="bPub" placeholder="출판사명"/></div>
  </div>
  <div class="g2">
@@ -1125,6 +1125,73 @@ function ctxEdit(){closeCtx();openEdit(ctxBookId);}
 function ctxDelete(){closeCtx();delBook(ctxBookId);}
 
 // ── 책 상세 모달 ──
+
+async function openBook(id){
+  const[{data:b},{data:imgd},{data:hd},{data:ud}]=await Promise.all([
+    sb.from('agora_books').select('*').eq('id',id).single(),
+    sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true}),
+    sb.from('agora_hearts').select('*').eq('book_id',id),
+    sb.from('agora_users').select('id,username').eq('id',(await sb.from('agora_books').select('user_id').eq('id',id).single()).data?.user_id||'')
+  ]);
+  if(!b)return;
+  const imgs=imgd||[];
+  const imgUrls=imgs.map(i=>i.url);
+  const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
+  const liked=(hd||[]).some(h=>h.user_id===CU.id);
+  const authorName=b.is_anonymous?'익명의 독서가':(ud&&ud[0]?ud[0].username:'');
+
+  document.getElementById('bookModalBody').innerHTML=`
+    <!-- 헤더 -->
+    <div style="position:relative;background:linear-gradient(180deg,var(--gl) 0%,#fff 100%);padding:32px 24px 24px;border-radius:20px 20px 0 0;text-align:center">
+      <button onclick="closeBookModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">✕</button>
+      ${b.cover_url
+        ?`<img src="${b.cover_url}" style="width:90px;height:125px;object-fit:cover;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);margin-bottom:16px"/>`
+        :`<div style="width:90px;height:125px;background:var(--gl);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:11px;color:var(--muted);margin-bottom:16px;text-align:center;padding:8px">${esc(b.title.slice(0,15))}</div>`
+      }
+      <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:4px">${esc(b.title)}</div>
+      ${b.author?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">${esc(b.author)}${b.publisher?' · '+esc(b.publisher):''}</div>`:''}
+      ${!b.is_anonymous&&authorName?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">by ${esc(authorName)}</div>`:''}
+      ${stars?`<div style="font-size:20px;color:#E8A020;letter-spacing:3px;margin-bottom:4px">${stars}</div>`:''}
+      ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
+    </div>
+
+    <!-- 읽은 날짜 (입력된 경우만) -->
+    ${(b.start_date||b.end_date)?`
+    <div style="display:flex;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border)">
+      ${b.start_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">시작일</div><div style="font-size:13px;font-weight:500">${b.start_date}</div></div>`:''}
+      ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
+    </div>`:''
+    }
+
+    <!-- 첨부 사진 (있을 때만) -->
+    ${imgs.length>0?`
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">사진 ${imgs.length}장</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${imgs.map((i,idx)=>`<img src="${i.url}" loading="lazy"
+          style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer"
+          onclick="openV(${JSON.stringify(imgUrls)},${idx})"/>`).join('')}
+      </div>
+    </div>`:''}
+
+    <!-- 독후감 (있을 때만) -->
+    ${b.review?`
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
+      <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap">${esc(b.review)}</div>
+    </div>`:''}
+
+    <!-- 하트 버튼 -->
+    <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
+      <button onclick="(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});openBook('${b.id}');})()"
+        style="background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'}">
+        ${liked?'♥':'♡'} ${(hd||[]).length}
+      </button>
+    </div>
+  `;
+  document.getElementById('bookModalOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
 async function openBookModal(id){
   const[{data:b},{data:imgd},{data:hd}]=await Promise.all([
     sb.from('agora_books').select('*').eq('id',id).single(),
@@ -1154,7 +1221,7 @@ async function openBookModal(id){
   document.body.style.overflow='hidden';
 }
 function closeBookModal(e){
-  if(e&&e.target!==document.getElementById('bookModalOv'))return;
+  if(e&&e.target!==document.getElementById('bookModalOv')&&!e.target.closest&&e.target.tagName!=='BUTTON')return;
   document.getElementById('bookModalOv').classList.remove('open');
   document.body.style.overflow='';
 }
@@ -1329,6 +1396,7 @@ async function openEdit(id){
 }
 async function saveBook(){
  const title=document.getElementById('bTitle').value.trim();if(!title){nt('책 제목을 입력해주세요.','err');return;}
+  const author=document.getElementById('bAuthor').value.trim();if(!author){nt('저자명을 입력해주세요.','err');return;}
  const eid=document.getElementById('editId').value,bid=eid||ID(),isNew=!eid;
 
  
