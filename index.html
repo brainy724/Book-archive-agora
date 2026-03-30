@@ -479,10 +479,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         </div>
       </div>
     </div>
- <div id="bookList"></div>
- </div></div>
+ <div style="margin-bottom:16px"><input id="libSearch" placeholder="제목, 저자 검색..." oninput="rLib()" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box"/></div>
+    <div id="bookList"></div>
+  </div></div>
 
- <div class="page" id="p-addBook"><div class="pg-sm">
+  <div class="page" id="p-addBook"><div class="pg-sm">
  <div class="h1 serif" id="abTitle">독서 기록 추가</div>
  <div class="sub" id="abSub" style="margin-bottom:18px">새로운 독서 기록을 남겨보세요</div>
  <div class="card" style="padding:22px 24px">
@@ -522,9 +523,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="page" id="p-public"><div class="pg">
  <div class="h1 serif">공개 서재</div>
  <div class="sub">아고라 회원들의 독서 감상평 · 하트로 공감을 전해보세요</div>
- <div id="rdInfoB" class="info" style="display:none"></div>
- <div id="pubList"></div>
- </div></div>
+<div style="display:flex;justify-content:center;margin-bottom:16px">
+      <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="width:100%;max-width:480px;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;text-align:center"/>
+    </div>
+    <div id="pubFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+    <div id="rdInfoB" class="info" style="display:none"></div>
+    <div id="pubList"></div>
+  </div></div>
 
  <div class="page" id="p-bookDetail"><div class="pg-sm" style="max-width:680px">
  <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('public')">← 공개 서재로</button>
@@ -535,7 +540,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div style="display:flex;gap:20px;align-items:flex-start">
  <div style="flex:1;min-width:0">
  <div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div>
- <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
+ <div style="display:flex;justify-content:center;margin-bottom:16px">
+      <input id="forumSearch" placeholder="책 제목 · 저자 · 질문 검색" oninput="rForum()" style="width:100%;max-width:480px;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;text-align:center"/>
+    </div>
+    <div id="forumFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+    <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
  <div id="rdInfoP" class="info" style="display:none"></div>
  <div id="postList"></div>
  </div>
@@ -573,18 +582,56 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div></div>
 
  <div class="page" id="p-points"><div class="pg-sm">
- <div class="h1 serif">포인트</div>
- <div class="sub">독서 기록을 남기고 포인트를 모아보세요</div>
- <div class="pts-box"><div><div style="font-size:13px;color:var(--g);font-weight:600;margin-bottom:4px">보유 포인트</div><div class="pts-num" id="myPtsNum">0 P</div></div><button class="btn" onclick="go('payment')">포인트 충전</button></div>
- <div style="background:var(--brl);border:1px solid var(--brb);border-radius:12px;padding:16px 18px;margin-bottom:20px">
- <div style="font-size:14px;font-weight:600;color:var(--br);margin-bottom:10px">포인트 안내</div>
- <div style="font-size:13px;color:var(--muted);line-height:2"> 독서 기록 추가 시 <strong style="color:var(--g)">+1,000P</strong> 신청 (하루 2회)<br> 광장 토론 시작 시 <strong style="color:var(--g)">+1,000P</strong> 신청 (하루 2회)<br> 공개 서재·광장 하루 각 2회 무료 열람<br> 추가 열람 시 <strong style="color:var(--br)">1,000P</strong> 차감</div>
- </div>
- <div style="font-size:15px;font-weight:600;margin-bottom:12px">포인트 신청 내역</div>
- <div id="myReqs"></div>
- </div></div>
+    <div class="h1 serif" style="margin-bottom:32px">마이페이지</div>
 
- <div class="page" id="p-payment"><div class="pg-sm">
+    <div style="margin-bottom:32px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">닉네임</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">현재: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
+      <div style="display:flex;gap:8px">
+        <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12"
+          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')" style="flex:1"/>
+        <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
+      </div>
+      <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <div style="margin-bottom:32px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B"></div>
+        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7"></div>
+        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358"></div>
+        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A"></div>
+        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="color" id="customColorPicker" value="#B8956A"
+          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px"
+          oninput="applyCustomColor(this.value)"/>
+        <span style="font-size:13px;color:var(--muted)">직접 선택</span>
+        <span style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</span>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">포인트</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-size:30px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
+        <button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('payment')">충전하기</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">독후감 공개 +1,000P &nbsp;·&nbsp; 광장 질문 +500P &nbsp;·&nbsp; 댓글 +300P</div>
+      <div id="myReqs"></div>
+    </div>
+  </div></div>
+
+  <div class="page" id="p-payment"><div class="pg-sm">
  <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('points')">← 포인트로</button>
  <div class="h1 serif">구독 · 충전</div>
  <div class="sub">토스페이먼츠로 안전하게 결제하세요</div>
@@ -889,7 +936,14 @@ function go(name){
  const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
- if(name==='library')rLib();
+  // FAB 처리
+  const _fab=document.getElementById('fabAdd');
+  if(_fab){
+    if(window.innerWidth<=600&&name==='library'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
+    else if(window.innerWidth<=600&&name==='forum'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
+    else{_fab.style.cssText='display:none!important';}
+  }
+  if(name==='library')rLib();
  if(name==='public')rPub();
  if(name==='forum')rForum();
  if(name==='admin')rAdmin();
