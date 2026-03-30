@@ -1182,28 +1182,61 @@ async function searchBookCover(){
   listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중...</div>';
   resEl.style.display='block';
   try{
-    const res=await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=10&fields=title,author_name,cover_i,isbn`);
-    const data=await res.json();
-    const books=(data.docs||[]).filter(b=>b.cover_i);
+    // 카카오 + Open Library 동시 검색
+    const [kakaoRes, olRes] = await Promise.allSettled([
+      fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(title)}&size=6`,
+        {headers:{Authorization:`KakaoAK ${KK_REST_KEY}`}}),
+      fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=6&fields=title,author_name,cover_i`)
+    ]);
+
+    let books=[];
+
+    // 카카오 결과
+    if(kakaoRes.status==='fulfilled'){
+      const kd=await kakaoRes.value.json();
+      (kd.documents||[]).filter(b=>b.thumbnail).forEach(b=>{
+        books.push({url:b.thumbnail,title:b.title,author:(b.authors||[]).join(', '),source:'카카오'});
+      });
+    }
+
+    // Open Library 결과
+    if(olRes.status==='fulfilled'){
+      const od=await olRes.value.json();
+      (od.docs||[]).filter(b=>b.cover_i).slice(0,6).forEach(b=>{
+        books.push({
+          url:`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`,
+          title:b.title,
+          author:(b.author_name||[]).join(', '),
+          source:'OL'
+        });
+      });
+    }
+
     if(!books.length){
-      listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">표지 이미지를 찾을 수 없습니다.<br>직접 사진을 업로드해주세요.</div>';
+      listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">표지를 찾지 못했어요.<br>직접 사진을 업로드해주세요.</div>';
       return;
     }
-    listEl.innerHTML=books.slice(0,6).map(b=>{
-      const coverUrl=`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`;
-      return`<div onclick="selectCover('${coverUrl}')" style="cursor:pointer;border:2px solid transparent;border-radius:8px;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'">
-        <img src="${coverUrl}" style="width:60px;height:80px;object-fit:cover;display:block" loading="lazy"/>
-      </div>`;
-    }).join('');
+
+    listEl.innerHTML=books.map(b=>`
+      <div onclick="selectCover('${b.url}')" style="cursor:pointer;flex-shrink:0" title="${esc(b.title)}">
+        <img src="${b.url}" style="width:60px;height:85px;object-fit:cover;border-radius:6px;border:2px solid transparent;display:block;transition:border .15s"
+          onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'"
+          loading="lazy" onerror="this.parentElement.style.display='none'"/>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px;width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.author)}</div>
+        <div style="font-size:8px;color:var(--g);margin-top:1px">${b.source}</div>
+      </div>`).join('');
   }catch(e){
-    listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중 오류가 발생했습니다.</div>';
+    console.error('책검색오류:',e);
+    listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">오류가 발생했습니다.</div>';
   }
 }
-function selectCover(url){
+
+function selectCover(url, title){
   document.getElementById('bCoverUrl').value=url;
   document.getElementById('selectedCoverImg').src=url;
   document.getElementById('selectedCover').style.display='flex';
   document.getElementById('coverSearchResult').style.display='none';
+  // 제목/저자 자동 입력 (비어있을 때만)
   nt('표지가 선택됐습니다.');
 }
 function clearCover(){
