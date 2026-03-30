@@ -183,11 +183,20 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .c-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
 .c-swatch.on{border-color:var(--txt);transform:scale(1.15);}
 .c-swatch:hover{transform:scale(1.1);}
+.ad-banner{background:linear-gradient(135deg,var(--gl),var(--card));border:1px solid var(--gb);border-radius:12px;padding:16px 18px;margin-bottom:16px;position:relative;overflow:hidden;}
+.ad-banner::before{content:'AD';position:absolute;top:8px;right:10px;font-size:10px;color:var(--muted);letter-spacing:1px;}
+.ad-book{display:flex;gap:12px;align-items:center;cursor:pointer;text-decoration:none;color:inherit;}
+.ad-book img{width:52px;height:68px;object-fit:cover;border-radius:4px;flex-shrink:0;}
+.ad-book-info{flex:1;}
+.ad-book-title{font-size:14px;font-weight:600;margin-bottom:3px;line-height:1.4;}
+.ad-book-sub{font-size:12px;color:var(--muted);}
+.ad-book-btn{display:inline-block;margin-top:6px;background:var(--g);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
 .page{display:none;}
 .page.active{display:block;}
 #lw{display:none;}
 #lw.active{display:flex;}
 @media(max-width:600px){
+  #adSidebar{display:none!important;}
   .nav .nav-links,.uname{display:none;}
   .btab{display:flex;}
   .pg,.pg-sm{padding:18px 14px 76px;}
@@ -349,10 +358,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   </div></div>
 
   <div class="page" id="p-forum"><div class="pg">
-    <div class="rf"><div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div><button class="btn" id="nPostBtn" onclick="go('addPost')">토론 시작</button></div>
-    <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
-    <div id="rdInfoP" class="info" style="display:none"></div>
-    <div id="postList"></div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div class="rf"><div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div><button class="btn" id="nPostBtn" onclick="go('addPost')">토론 시작</button></div>
+        <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
+        <div id="rdInfoP" class="info" style="display:none"></div>
+        <div id="postList"></div>
+      </div>
+      <!-- 광고 사이드바 (데스크탑) -->
+      <div id="adSidebar" style="width:220px;flex-shrink:0;position:sticky;top:72px">
+        <div id="adContent"></div>
+      </div>
+    </div>
   </div></div>
 
   <div class="page" id="p-addPost"><div class="pg-sm">
@@ -400,12 +417,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <!-- 정규 구독 -->
     <div style="font-size:15px;font-weight:600;margin-bottom:10px">📚 정규 구독</div>
-    <div class="ppkg" style="border-color:var(--g);flex-direction:column;align-items:flex-start;gap:12px" onclick="showSubModal()">
+    <div class="ppkg" style="flex-direction:column;align-items:flex-start;gap:10px;opacity:.7;cursor:not-allowed">
       <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-        <div><div style="font-size:18px;font-weight:700;color:var(--g)">월 9,900원</div><div style="font-size:12px;color:var(--g);font-weight:600;margin-top:2px">광장 무제한 + 독후감 무제한</div></div>
-        <span style="background:var(--g);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">추천</span>
+        <div><div style="font-size:18px;font-weight:700;color:var(--g)">월 9,900원</div><div style="font-size:12px;color:var(--g);font-weight:600;margin-top:2px">광장 무제한 + 독후감 무제한 + 광고 없음</div></div>
+        <span style="background:var(--muted);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">준비 중</span>
       </div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.7">✓ 광장 무제한 참여<br>✓ 독후감 무제한 공유<br>✓ 포인트로 최대 9,000P 차감 가능</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">✓ 광장 무제한 참여<br>✓ 독후감 무제한 공유<br>✓ 광고 없음<br>✓ 포인트로 최대 9,000P 차감 가능</div>
+      <div style="background:var(--gl);border-radius:8px;padding:8px 12px;width:100%;font-size:12px;color:var(--g);font-weight:600">🗓 2025년 9월 오픈 예정</div>
     </div>
 
     <!-- 포인트로 광장 이용권 -->
@@ -794,8 +812,51 @@ function mvSlide(id,dir,tot){const tr=document.getElementById('ist-'+id);if(!tr)
 async function togHeart(bid,oid){if(oid===CU.id)return;const{data:hd}=await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bid);if(hd&&hd.length>0)await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bid);else await sb.from('agora_hearts').insert({user_id:CU.id,book_id:bid});rPub();}
 
 // ══ 광장 ══
+
+// ── 광고 배너 ──
+// 나중에 여기에 실제 도서 광고 정보를 넣으세요
+// 쿠팡파트너스 또는 알라딘 제휴 링크로 교체하면 됩니다
+const AD_BOOKS = [
+  {
+    title: '준비 중',
+    author: '곧 추천 도서를 소개할게요',
+    cover: '',
+    link: '#',
+    desc: '🌸 추천 도서 광고 준비 중'
+  }
+];
+
+async function renderAd(){
+  const adEl=document.getElementById('adContent');
+  if(!adEl)return;
+  // 구독 회원은 광고 미표시
+  const sub=await isSubscribed();
+  if(sub){adEl.innerHTML='';return;}
+  const book=AD_BOOKS[Math.floor(Math.random()*AD_BOOKS.length)];
+  adEl.innerHTML=`
+    <div class="ad-banner">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600">📚 추천 도서</div>
+      <a class="ad-book" href="${book.link}" target="_blank" rel="noopener">
+        ${book.cover
+          ? `<img src="${book.cover}" alt="${book.title}"/>`
+          : `<div style="width:52px;height:68px;background:var(--gb);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📖</div>`}
+        <div class="ad-book-info">
+          <div class="ad-book-title">${book.title}</div>
+          <div class="ad-book-sub">${book.author}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">${book.desc}</div>
+          <span class="ad-book-btn">자세히 보기 →</span>
+        </div>
+      </a>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">구독 시 광고가 사라집니다</div>`;
+}
+// 무료 오픈 종료일 (2025년 9월 30일)
+const FREE_OPEN_UNTIL = new Date('2025-09-30T23:59:59');
+
 async function canAccessForum(){
   if(!CU) return false;
+  // 무료 오픈 기간 체크
+  if(new Date() <= FREE_OPEN_UNTIL) return true;
   // 정규 구독 확인
   const{data:u}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
   if(u?.subscription_expires && new Date(u.subscription_expires)>new Date()) return true;
@@ -813,16 +874,18 @@ async function rForum(){
   const iEl=document.getElementById('rdInfoP');
   if(hasAccess){
     iEl.style.display='block';iEl.style.background='var(--gl)';iEl.style.border='1px solid var(--gb)';iEl.style.color='var(--g)';
-    iEl.textContent='광장 이용 중 ✓';
+    const isFree=new Date()<=FREE_OPEN_UNTIL;
+    iEl.textContent=isFree?'🌸 오픈 기념 무료 이용 기간 (~ 2025년 9월 30일)':'광장 이용 중 ✓';
   } else {
     iEl.style.display='block';iEl.style.background='var(--brl)';iEl.style.border='1px solid var(--brb)';iEl.style.color='var(--br)';
-    iEl.innerHTML='광장은 <strong>정규 구독(월 9,900원)</strong> 또는 <strong>10,000P 이용권</strong>이 필요합니다. <span onclick="go('payment')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
+    iEl.innerHTML='광장은 <strong>정규 구독(월 9,900원)</strong> 또는 <strong>10,000P 이용권</strong>이 필요합니다. <span onclick="go(\'payment\')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
   }
   const posts=(data||[]).map(p=>({...p,comments:(p.agora_comments||[]).filter(c=>!c.is_deleted)}));
   document.getElementById('nPostBtn').style.display=CU.banned?'none':'inline-block';
   document.getElementById('fBanMsg').style.display=CU.banned?'block':'none';
   const el=document.getElementById('postList');
   if(!posts.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px">💬</div><div class="et">아직 토론이 없습니다</div></div>`;return;}
+  renderAd();
   el.innerHTML=posts.map(p=>`<div class="fc" onclick="openPost('${p.id}')"><div class="ftag">📖 ${esc(p.book_title)}</div><div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:8px;line-height:1.5">${esc(p.question)}</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</span><span style="font-size:13px;color:var(--muted)">💬 ${p.comments.length}개의 답변</span></div></div>`).join('');
 }
 
@@ -905,7 +968,7 @@ async function savePost(){
   if(!sub){await autoAddPts(500);}
   load(false);
   document.getElementById('pfBook').value='';document.getElementById('pfQ').value='';
-  nt('토론이 등록되었습니다.'+(sub?'':' +500P 적립!'));go('forum');
+  nt('토론이 등록되었습니다.'+(sub?'':' +500P 적립!'));go('forum');renderAd();
 }
 async function openPost(id){
   const ok2=await canAccessForum();
