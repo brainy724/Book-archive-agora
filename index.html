@@ -87,6 +87,24 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .folder-card-name{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:2px;word-break:break-all;}
 .folder-card-count{font-size:11px;color:var(--muted);}
 .folder-card-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-bottom:6px;}
+
+/* 웹 사이드바 */
+.sidebar{display:none;position:fixed;left:0;top:var(--nav-h);bottom:0;width:180px;background:#fff;border-right:1px solid var(--border);padding:24px 0;z-index:90;flex-direction:column;}
+.sb-item{padding:13px 24px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .2s;font-family:var(--font-body);}
+.sb-item:hover{color:var(--g);background:var(--gl);}
+.sb-item.on{color:var(--g);background:var(--gl);border-left-color:var(--g);font-weight:600;}
+.sb-theme-btn{margin:auto 16px 24px;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;color:var(--muted);font-family:var(--font-body);text-align:center;width:calc(100%-32px);}
+.sb-theme-btn:hover{border-color:var(--g);color:var(--g);}
+.app-with-sidebar{margin-left:180px;}
+@media(min-width:601px){
+  .sidebar{display:flex;}
+  .app-with-sidebar{margin-left:180px;}
+  .tab-bar-bottom{display:none;}
+}
+@media(max-width:600px){
+  .sidebar{display:none!important;}
+  .app-with-sidebar{margin-left:0!important;}
+}
 .folder-add{border:1px dashed var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;background:#fff;color:var(--muted);font-size:20px;display:flex;align-items:center;justify-content:center;}
 .folder-add:hover{border-color:var(--g);color:var(--g);}
 /* 폴더 모달 */
@@ -303,6 +321,83 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </head>
 <body>
 
+<!-- 관리자 로그인 -->
+<div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FFFFFF;">
+  <div style="width:100%;max-width:380px;padding:48px 40px;text-align:center">
+    <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);letter-spacing:4px;margin-bottom:6px">AGORA</div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
+    <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="admin"/></div>
+    <div class="fg" style="text-align:left"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAuth()"/></div>
+    <div id="aErr" class="err-msg" style="display:none;margin-bottom:12px;text-align:left"></div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="doAuth()">로그인</button>
+    <div style="margin-top:24px"><span onclick="goAdminLogin()" style="font-size:12px;color:var(--muted);cursor:pointer">← 돌아가기</span></div>
+  </div>
+</div>
+
+<!-- 로그인 -->
+<div class="lw active" id="lw">
+  <div class="lcard">
+    <div style="text-align:center;margin-bottom:0">
+      <svg viewBox="0 0 380 100" width="320" style="display:block;margin:0 auto">
+        <defs>
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7A5000"/>
+            <stop offset="40%" style="stop-color:#A0720A"/>
+            <stop offset="70%" style="stop-color:#7A5500"/>
+            <stop offset="100%" style="stop-color:#4A3000"/>
+          </linearGradient>
+        </defs>
+        <g fill="url(#goldGrad)">
+          <path d="M10 78 C25 55 45 35 75 18" stroke="url(#goldGrad)" stroke-width="1.8" fill="none"/>
+          <path d="M15 70 C8 60 12 48 22 52 C18 62 14 68 15 70Z" transform="rotate(-5 15 70)"/>
+          <path d="M24 58 C14 50 16 37 27 42 C24 52 22 56 24 58Z" transform="rotate(5 24 58)"/>
+          <path d="M34 47 C23 41 23 27 35 33 C33 43 31 45 34 47Z" transform="rotate(10 34 47)"/>
+          <path d="M46 36 C35 32 33 18 46 25 C45 35 44 34 46 36Z" transform="rotate(15 46 36)"/>
+          <path d="M58 27 C48 25 45 11 58 19 C57 27 56 26 58 27Z" transform="rotate(20 58 27)"/>
+          <path d="M70 20 C61 20 57 7 70 14 C70 20 69 20 70 20Z" transform="rotate(25 70 20)"/>
+          <path d="M20 74 C28 65 30 55 22 52 C18 62 18 70 20 74Z" transform="rotate(-10 20 74)"/>
+          <path d="M30 62 C38 53 40 43 32 40 C28 50 28 58 30 62Z" transform="rotate(-5 30 62)"/>
+          <path d="M42 50 C50 42 51 32 43 30 C39 40 39 46 42 50Z"/>
+          <path d="M55 38 C63 31 63 21 55 20 C52 30 52 35 55 38Z"/>
+          <path d="M67 28 C75 22 74 13 66 13 C63 22 64 26 67 28Z"/>
+        </g>
+        <g fill="url(#goldGrad)" transform="scale(-1,1) translate(-380,0)">
+          <path d="M10 78 C25 55 45 35 75 18" stroke="url(#goldGrad)" stroke-width="1.8" fill="none"/>
+          <path d="M15 70 C8 60 12 48 22 52 C18 62 14 68 15 70Z" transform="rotate(-5 15 70)"/>
+          <path d="M24 58 C14 50 16 37 27 42 C24 52 22 56 24 58Z" transform="rotate(5 24 58)"/>
+          <path d="M34 47 C23 41 23 27 35 33 C33 43 31 45 34 47Z" transform="rotate(10 34 47)"/>
+          <path d="M46 36 C35 32 33 18 46 25 C45 35 44 34 46 36Z" transform="rotate(15 46 36)"/>
+          <path d="M58 27 C48 25 45 11 58 19 C57 27 56 26 58 27Z" transform="rotate(20 58 27)"/>
+          <path d="M70 20 C61 20 57 7 70 14 C70 20 69 20 70 20Z" transform="rotate(25 70 20)"/>
+          <path d="M20 74 C28 65 30 55 22 52 C18 62 18 70 20 74Z" transform="rotate(-10 20 74)"/>
+          <path d="M30 62 C38 53 40 43 32 40 C28 50 28 58 30 62Z" transform="rotate(-5 30 62)"/>
+          <path d="M42 50 C50 42 51 32 43 30 C39 40 39 46 42 50Z"/>
+          <path d="M55 38 C63 31 63 21 55 20 C52 30 52 35 55 38Z"/>
+          <path d="M67 28 C75 22 74 13 66 13 C63 22 64 26 67 28Z"/>
+        </g>
+        <path d="M170 85 C175 80 185 82 190 85 C185 90 175 90 170 85Z" fill="url(#goldGrad)" opacity="0.8"/>
+        <path d="M190 85 C195 80 205 82 210 85 C205 90 195 90 190 85Z" fill="url(#goldGrad)" opacity="0.8"/>
+        <circle cx="190" cy="85" r="3" fill="url(#goldGrad)"/>
+        <text x="190" y="68" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="44" font-weight="600" fill="url(#goldGrad)" letter-spacing="10">AGORA</text>
+      </svg>
+    </div>
+    <div style="height:44px"></div>
+    <div style="font-size:14px;color:var(--muted);text-align:center;line-height:2.1;letter-spacing:.3px">
+      AGORA는 고대 그리스의 토론 광장입니다.<br>
+      책을 읽고, 생각을 나누고, 연결되는 곳—<br>
+      현대의 아고라에 오신 것을 환영합니다.
+    </div>
+    <div style="height:32px"></div>
+    <button class="bk-btn" onclick="loginKakao()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
+      카카오로 계속하기
+    </button>
+    <div style="height:10px"></div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;letter-spacing:.2px">카카오 계정으로 간편하게 시작하세요</div>
+    <div style="text-align:center;margin-top:36px"><span onclick="goAdminLogin()" style="font-size:11px;color:#FFFFFF;cursor:pointer;letter-spacing:1px">·</span></div>
+  </div>
+</div>
+
 <!-- 성별 확인 -->
 <div id="genderWrap" style="display:none;position:fixed;inset:0;background:#fff;z-index:300;align-items:center;justify-content:center;flex-direction:column;padding:32px 24px;text-align:center">
  <div style="font-family:var(--font-serif);font-size:34px;color:var(--br);letter-spacing:4px;margin-bottom:6px">AGORA</div>
@@ -321,129 +416,97 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </div>
 
 <!-- 커스터마이즈 모달 -->
-<div id="customWrap" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;padding:20px">
- <div style="background:var(--card);border-radius:16px;padding:26px 22px;max-width:340px;width:100%;max-height:85vh;overflow-y:auto">
- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
- <div style="font-size:17px;font-weight:600"> 내 공간 꾸미기</div>
- <button onclick="closeCustom()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
- </div>
- <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">포인트 컬러</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
- <div class="c-swatch" onclick="setColor('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B" title="딥로즈 (기본)"></div>
- <div class="c-swatch" onclick="setColor('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A" title="골드"></div>
- <div class="c-swatch" onclick="setColor('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7" title="라벤더"></div>
- <div class="c-swatch" onclick="setColor('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A" title="스모키블루"></div>
- <div class="c-swatch" onclick="setColor('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358" title="로즈브라운"></div>
- <div class="c-swatch" onclick="setColor('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A" title="세이지"></div>
- </div>
- <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">폰트</div>
- <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
- <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Noto Serif KR',serif" onclick="setFont('notoserif')">Noto Serif KR (기본)</button>
- <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Nanum Myeongjo',serif" onclick="setFont('myeongjo')">나눔명조</button>
- <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Pretendard',sans-serif" onclick="setFont('pretendard')">Pretendard (고딕)</button>
- </div>
- <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">테마</div>
- <div style="display:flex;gap:8px">
- <button class="btn2" style="flex:1;padding:10px" onclick="setTheme('light')">☀️ 라이트</button>
- <button class="btn2" style="flex:1;padding:10px" onclick="setTheme('dark')">🌙 다크</button>
- </div>
- </div>
-</div>
-
-<!-- 관리자 로그인 -->
-<div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FFFFFF;">
-  <div style="width:100%;max-width:360px;padding:48px 40px;text-align:center">
-    <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);letter-spacing:4px;margin-bottom:4px">AGORA</div>
-    <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
-    <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="admin"/></div>
-    <div class="fg" style="text-align:left"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAuth()"/></div>
-    <div id="aErr" class="err-msg" style="display:none;margin-bottom:12px;text-align:left"></div>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="doAuth()">로그인</button>
-    <div style="margin-top:24px"><span onclick="goAdminLogin()" style="font-size:12px;color:var(--muted);cursor:pointer">← 돌아가기</span></div>
-  </div>
-</div>
-
-<!-- 로그인 -->
-<div id="lw" class="lw active">
- <div class="lcard">
-    <div style="text-align:center;margin-bottom:0">
-  <svg viewBox="0 0 380 100" width="320" style="display:block;margin:0 auto">
-    <defs>
-      <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#D4A843"/>
-        <stop offset="40%" style="stop-color:#F0C060"/>
-        <stop offset="70%" style="stop-color:#B8956A"/>
-        <stop offset="100%" style="stop-color:#8C6A3E"/>
-      </linearGradient>
-    </defs>
-
-    <!-- 왼쪽 월계관 -->
-    <g fill="url(#goldGrad)">
-      <!-- 줄기 곡선 -->
-      <path d="M10 78 C25 55 45 35 75 18" stroke="url(#goldGrad)" stroke-width="1.8" fill="none"/>
-      <!-- 잎사귀들 - 크고 우아하게 -->
-      <path d="M15 70 C8 60 12 48 22 52 C18 62 14 68 15 70Z" transform="rotate(-5 15 70)"/>
-      <path d="M24 58 C14 50 16 37 27 42 C24 52 22 56 24 58Z" transform="rotate(5 24 58)"/>
-      <path d="M34 47 C23 41 23 27 35 33 C33 43 31 45 34 47Z" transform="rotate(10 34 47)"/>
-      <path d="M46 36 C35 32 33 18 46 25 C45 35 44 34 46 36Z" transform="rotate(15 46 36)"/>
-      <path d="M58 27 C48 25 45 11 58 19 C57 27 56 26 58 27Z" transform="rotate(20 58 27)"/>
-      <path d="M70 20 C61 20 57 7 70 14 C70 20 69 20 70 20Z" transform="rotate(25 70 20)"/>
-      <!-- 반대편 잎 -->
-      <path d="M20 74 C28 65 30 55 22 52 C18 62 18 70 20 74Z" transform="rotate(-10 20 74)"/>
-      <path d="M30 62 C38 53 40 43 32 40 C28 50 28 58 30 62Z" transform="rotate(-5 30 62)"/>
-      <path d="M42 50 C50 42 51 32 43 30 C39 40 39 46 42 50Z"/>
-      <path d="M55 38 C63 31 63 21 55 20 C52 30 52 35 55 38Z"/>
-      <path d="M67 28 C75 22 74 13 66 13 C63 22 64 26 67 28Z"/>
-    </g>
-
-    <!-- 오른쪽 월계관 (대칭) -->
-    <g fill="url(#goldGrad)" transform="scale(-1,1) translate(-380,0)">
-      <path d="M10 78 C25 55 45 35 75 18" stroke="url(#goldGrad)" stroke-width="1.8" fill="none"/>
-      <path d="M15 70 C8 60 12 48 22 52 C18 62 14 68 15 70Z" transform="rotate(-5 15 70)"/>
-      <path d="M24 58 C14 50 16 37 27 42 C24 52 22 56 24 58Z" transform="rotate(5 24 58)"/>
-      <path d="M34 47 C23 41 23 27 35 33 C33 43 31 45 34 47Z" transform="rotate(10 34 47)"/>
-      <path d="M46 36 C35 32 33 18 46 25 C45 35 44 34 46 36Z" transform="rotate(15 46 36)"/>
-      <path d="M58 27 C48 25 45 11 58 19 C57 27 56 26 58 27Z" transform="rotate(20 58 27)"/>
-      <path d="M70 20 C61 20 57 7 70 14 C70 20 69 20 70 20Z" transform="rotate(25 70 20)"/>
-      <path d="M20 74 C28 65 30 55 22 52 C18 62 18 70 20 74Z" transform="rotate(-10 20 74)"/>
-      <path d="M30 62 C38 53 40 43 32 40 C28 50 28 58 30 62Z" transform="rotate(-5 30 62)"/>
-      <path d="M42 50 C50 42 51 32 43 30 C39 40 39 46 42 50Z"/>
-      <path d="M55 38 C63 31 63 21 55 20 C52 30 52 35 55 38Z"/>
-      <path d="M67 28 C75 22 74 13 66 13 C63 22 64 26 67 28Z"/>
-    </g>
-
-    <!-- 하단 리본 매듭 -->
-    <path d="M170 85 C175 80 185 82 190 85 C185 90 175 90 170 85Z" fill="url(#goldGrad)" opacity="0.8"/>
-    <path d="M190 85 C195 80 205 82 210 85 C205 90 195 90 190 85Z" fill="url(#goldGrad)" opacity="0.8"/>
-    <circle cx="190" cy="85" r="3" fill="url(#goldGrad)"/>
-
-    <!-- AGORA 텍스트 -->
-    <text x="190" y="68" text-anchor="middle"
-      font-family="Cormorant Garamond, Georgia, serif"
-      font-size="44" font-weight="600"
-      fill="url(#goldGrad)"
-      letter-spacing="10">AGORA</text>
-  </svg>
-</div>
-    <div style="height:44px"></div>
-    <div style="font-size:14px;color:var(--muted);text-align:center;line-height:2.1;letter-spacing:.3px">
-      AGORA는 고대 그리스의 토론 광장입니다.<br>
-      책을 읽고, 생각을 나누고, 연결되는 곳—<br>
-      현대의 아고라에 오신 것을 환영합니다.
+<div id="customWrap" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:360px;width:100%;max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:600;font-family:var(--font-serif)">테마 색상</div>
+      <button onclick="closeCustom()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
     </div>
-    <div style="height:32px"></div>
-    <button class="bk-btn" onclick="loginKakao()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
-      카카오로 계속하기
-    </button>
-    <div style="height:10px"></div>
-    <div style="font-size:12px;color:var(--muted);text-align:center;letter-spacing:.2px">카카오 계정으로 간편하게 시작하세요</div>
-    <div style="text-align:center;margin-top:36px"><span onclick="goAdminLogin()" style="font-size:11px;color:#FAF8F5;cursor:pointer;letter-spacing:1px">·</span></div>
+
+    <!-- 파스텔/핑크 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">파스텔</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+      <div onclick="setColor('#F4A4C0','#D4608A','#FEF0F5','#F9D0E4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#F4A4C0;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">로즈핑크</div>
+      </div>
+      <div onclick="setColor('#E8A0BF','#C4608A','#FEF0F6','#F9D0E4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#E8A0BF;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">베이비핑크</div>
+      </div>
+      <div onclick="setColor('#FFB3C6','#E0607A','#FFF0F3','#FFD6DF');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFB3C6;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">코랄핑크</div>
+      </div>
+      <div onclick="setColor('#C9A0DC','#9060B0','#F8F0FF','#E8D0F4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#C9A0DC;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">파스텔보라</div>
+      </div>
+      <div onclick="setColor('#A8D8EA','#5090B0','#EEF8FC','#C8E8F4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#A8D8EA;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">스카이블루</div>
+      </div>
+      <div onclick="setColor('#B5EAD7','#5BAD8A','#F0FBF6','#D0F0E4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#B5EAD7;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">민트</div>
+      </div>
+      <div onclick="setColor('#FFDAC1','#E09060','#FFF5EE','#FFE0C8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFDAC1;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">피치</div>
+      </div>
+      <div onclick="setColor('#FFD700','#B8960A','#FFFAE8','#FFE878');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFD700;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">레몬</div>
+      </div>
+    </div>
+
+    <!-- 클래식 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">클래식</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
+      <div onclick="setColor('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#B8956A;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">골드</div>
+      </div>
+      <div onclick="setColor('#8B4A6B','#6E3555','#F9F0F4','#EECFDC');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#8B4A6B;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">딥로즈</div>
+      </div>
+      <div onclick="setColor('#4A7A6A','#35604F','#EEF6F2','#BCDDD2');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#4A7A6A;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">세이지</div>
+      </div>
+      <div onclick="setColor('#2C3E50','#1A2535','#EEF0F2','#B8C0C8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#2C3E50;margin-bottom:5px"></div>
+        <div style="font-size:10px;color:var(--muted)">네이비</div>
+      </div>
+    </div>
+
+    <!-- 직접 선택 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">직접 선택</div>
+    <div style="display:flex;align-items:center;gap:12px;background:#F9F9F9;padding:12px 16px;border-radius:12px">
+      <input type="color" id="customColorPicker" value="#B8956A"
+        style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0"
+        oninput="applyCustomColor(this.value)"/>
+      <div>
+        <div style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</div>
+        <div style="font-size:11px;color:var(--muted)">색상 코드</div>
+      </div>
+      <button class="btn" style="margin-left:auto;padding:8px 14px;font-size:13px" onclick="applyCustomColor(document.getElementById('customColorPicker').value);closeCustom()">적용</button>
+    </div>
   </div>
 </div>
-
 <!-- 앱 -->
-<div id="app" style="display:none">
+
+  <!-- 웹 사이드바 -->
+  <div class="sidebar" id="mainSidebar">
+    <div class="sb-item on" id="sb-library" onclick="go('library')">내 서재</div>
+    <div class="sb-item" id="sb-public" onclick="go('public')">공개 서재</div>
+    <div class="sb-item" id="sb-forum" onclick="go('forum')">광장</div>
+    <div class="sb-item" id="sb-admin" onclick="go('admin')" style="display:none">관리자</div>
+    <button class="sb-theme-btn" onclick="openCustom()">테마 변경</button>
+  </div>
+
+<div id="app" class="app-with-sidebar" style="display:none">
  <nav class="nav">
  <div class="logo" onclick="go('library')">AGORA</div>
  <div class="nav-links">
@@ -456,7 +519,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  
  <span class="uname" id="navUser" style="font-size:13px;color:var(--muted)"></span>
  <span class="admbadge" id="navAdm" style="display:none">관리자</span>
- <button class="btn-sm" onclick="openCustom()" style="font-size:16px;padding:4px 8px"></button><button class="btn-sm" onclick="logout()">로그아웃</button>
+ <button class="btn-sm" onclick="go('points')" style="margin-right:4px">마이페이지</button><button class="btn-sm" onclick="logout()" style="margin-left:8px">로그아웃</button>
  </div>
  </nav>
  <div class="btab">
@@ -599,22 +662,39 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B"></div>
-        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7"></div>
-        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358"></div>
-        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+        <!-- 파스텔/핑크 계열 -->
+        <div onclick="setColorPreset('#E8A0BF','#C4608A','#FEF0F6','#F9D0E4')" style="background:#E8A0BF;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">베이비핑크</div>
+        </div>
+        <div onclick="setColorPreset('#F4A4C0','#D4608A','#FEF0F5','#F9D0E4')" style="background:#F4A4C0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">로즈핑크</div>
+        </div>
+        <div onclick="setColorPreset('#C9A0DC','#9060B0','#F8F0FF','#E8D0F4')" style="background:#C9A0DC;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">파스텔보라</div>
+        </div>
+        <div onclick="setColorPreset('#A8D8EA','#5090B0','#EEF8FC','#C8E8F4')" style="background:#A8D8EA;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">스카이블루</div>
+        </div>
+        <div onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">골드</div>
+        </div>
+        <div onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">딥로즈</div>
+        </div>
+        <div onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">세이지</div>
+        </div>
+        <div onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">다크네이비</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;background:var(--gl);padding:12px 16px;border-radius:10px">
+        <div style="font-size:13px;color:var(--muted)">직접 고르기</div>
         <input type="color" id="customColorPicker" value="#B8956A"
-          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px"
+          style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0;background:none"
           oninput="applyCustomColor(this.value)"/>
-        <span style="font-size:13px;color:var(--muted)">직접 선택</span>
-        <span style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</span>
+        <span style="font-size:13px;font-weight:500;color:var(--g)" id="colorHexDisplay">#B8956A</span>
       </div>
     </div>
 
@@ -921,7 +1001,7 @@ async function ok(u){
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
- if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
+ if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
 }
 function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('lw').style.display='flex';document.getElementById('aId').value='';document.getElementById('aPw').value='';}
@@ -1840,22 +1920,39 @@ window.onload=async()=>{
     <!-- 테마 색상 -->
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B"></div>
-        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7"></div>
-        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358"></div>
-        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+        <!-- 파스텔/핑크 계열 -->
+        <div onclick="setColorPreset('#E8A0BF','#C4608A','#FEF0F6','#F9D0E4')" style="background:#E8A0BF;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">베이비핑크</div>
+        </div>
+        <div onclick="setColorPreset('#F4A4C0','#D4608A','#FEF0F5','#F9D0E4')" style="background:#F4A4C0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">로즈핑크</div>
+        </div>
+        <div onclick="setColorPreset('#C9A0DC','#9060B0','#F8F0FF','#E8D0F4')" style="background:#C9A0DC;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">파스텔보라</div>
+        </div>
+        <div onclick="setColorPreset('#A8D8EA','#5090B0','#EEF8FC','#C8E8F4')" style="background:#A8D8EA;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#333;margin-top:4px">스카이블루</div>
+        </div>
+        <div onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">골드</div>
+        </div>
+        <div onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">딥로즈</div>
+        </div>
+        <div onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">세이지</div>
+        </div>
+        <div onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50;border-radius:10px;padding:10px;cursor:pointer;text-align:center;border:2px solid transparent" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'">
+          <div style="font-size:11px;color:#fff;margin-top:4px">다크네이비</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;background:var(--gl);padding:12px 16px;border-radius:10px">
+        <div style="font-size:13px;color:var(--muted)">직접 고르기</div>
         <input type="color" id="customColorPicker" value="#B8956A"
-          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px"
+          style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0;background:none"
           oninput="applyCustomColor(this.value)"/>
-        <span style="font-size:13px;color:var(--muted)">직접 선택</span>
-        <span style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</span>
+        <span style="font-size:13px;font-weight:500;color:var(--g)" id="colorHexDisplay">#B8956A</span>
       </div>
     </div>
 
