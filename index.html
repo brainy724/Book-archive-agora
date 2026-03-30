@@ -820,7 +820,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
 <!-- 책 상세 모달 -->
 <div class="book-modal-ov" id="bookModalOv" onclick="closeBookModal(event)">
-  <div class="book-modal" id="bookModalContent">
+  <div class="book-modal" id="bookModalContent" onclick="event.stopPropagation()">
     <div id="bookModalBody"></div>
   </div>
 </div>
@@ -1232,12 +1232,22 @@ async function openBook(id){
       ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
     </div>`:''}
     ${imgs.length>0?`
-    <div style="border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--muted);padding:16px 24px 12px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
-      <div style="display:flex;flex-direction:column">
-        ${imgs.map((i,midx)=>`<img src="${i.url}" loading="lazy"
-          style="width:100%;max-height:75vh;object-fit:contain;cursor:pointer;background:#1a1a1a;display:block"
-          onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>`).join('')}
+    <div style="border-bottom:1px solid var(--border);padding-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);padding:16px 24px 8px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
+      <div style="position:relative;overflow:hidden" id="slider_pub_${b.id}">
+        <div style="display:flex;transition:transform .3s ease" id="sliderTrack_pub_${b.id}">
+          ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
+            <img src="${i.url}" loading="lazy"
+              style="width:100%;max-height:60vh;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
+              onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>
+          </div>`).join('')}
+        </div>
+        ${imgs.length>1?`
+        <button onclick="event.stopPropagation();slidePub('${b.id}',-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5">‹</button>
+        <button onclick="event.stopPropagation();slidePub('${b.id}',1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5">›</button>
+        <div style="display:flex;gap:5px;justify-content:center;padding:8px 0 0" id="sliderDots_pub_${b.id}">
+          ${imgs.map((_,di)=>`<div style="width:6px;height:6px;border-radius:50%;background:${di===0?'var(--g)':'rgba(0,0,0,.2)'};transition:background .2s;cursor:pointer" onclick="event.stopPropagation();goSlidePub('${b.id}',${di})"></div>`).join('')}
+        </div>`:''}
       </div>
     </div>`:''}
     ${b.review?`
@@ -1246,7 +1256,7 @@ async function openBook(id){
       <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
-      <button onclick="(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});openBook('${b.id}');})()"
+      <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});openBook('${b.id}');})()"
         style="background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'}">
         ${liked?'♥':'♡'} ${(hd||[]).length}
       </button>
@@ -1286,12 +1296,22 @@ async function openBookModal(id){
       ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
     </div>`:''}
     ${imgs.length>0?`
-    <div style="border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;padding:16px 24px 12px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
-      <div style="display:flex;flex-direction:column">
-        ${imgs.map((i,midx)=>`<img src="${i.url}" loading="lazy"
-          style="width:100%;max-height:75vh;object-fit:contain;cursor:pointer;background:#1a1a1a;display:block"
-          onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>`).join('')}
+    <div style="border-bottom:1px solid var(--border);padding-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;padding:16px 24px 8px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
+      <div style="position:relative;overflow:hidden" id="slider_my_${b.id}">
+        <div style="display:flex;transition:transform .3s ease" id="sliderTrack_my_${b.id}">
+          ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
+            <img src="${i.url}" loading="lazy"
+              style="width:100%;max-height:60vh;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
+              onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>
+          </div>`).join('')}
+        </div>
+        ${imgs.length>1?`
+        <button onclick="event.stopPropagation();slideMy('${b.id}',-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5">‹</button>
+        <button onclick="event.stopPropagation();slideMy('${b.id}',1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5">›</button>
+        <div style="display:flex;gap:5px;justify-content:center;padding:8px 0 0" id="sliderDots_my_${b.id}">
+          ${imgs.map((_,di)=>`<div style="width:6px;height:6px;border-radius:50%;background:${di===0?'var(--g)':'rgba(0,0,0,.2)'};transition:background .2s;cursor:pointer" onclick="event.stopPropagation();goSlideMy('${b.id}',${di})"></div>`).join('')}
+        </div>`:''}
       </div>
     </div>`:''}}
     ${b.review?`
@@ -1310,7 +1330,11 @@ async function openBookModal(id){
   document.body.style.overflow='hidden';
 }
 function closeBookModal(e){
-  if(e&&e.target!==document.getElementById('bookModalOv')&&!e.target.closest&&e.target.tagName!=='BUTTON')return;
+  if(e&&e.target!==document.getElementById('bookModalOv'))return;
+  document.getElementById('bookModalOv').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeBookModalBtn(){
   document.getElementById('bookModalOv').classList.remove('open');
   document.body.style.overflow='';
 }
@@ -1592,7 +1616,7 @@ async function saveBook(){
  
  load(true);
  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
- const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null,category:(document.getElementById('bCategory')||{value:''}).value||null,rating:parseInt((document.getElementById('bRating')||{value:'0'}).value)||0};
+ const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',is_anonymous:document.getElementById('bAnonV').value==='true',cover_url:coverUrl||null,category:(document.getElementById('bCategory')||{value:''}).value||null,rating:parseInt((document.getElementById('bRating')||{value:'0'}).value)||0};
  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
  try{await sb.from('agora_book_images').delete().eq('book_id',bid);if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));}catch(e){console.warn('이미지 저장 스킵:',e);}
@@ -1978,8 +2002,7 @@ async function savePost(){
   const cat=(document.getElementById('pfCategory')||{value:''}).value||null;
   const{error}=await sb.from('agora_posts').insert({
     id:pid,user_id:CU.id,book_title:bt,question:q,
-    category:cat,
-    is_anonymous:true
+    category:cat
   });
   if(error){load(false);nt('게시 오류: '+error.message,'err');return;}
   load(false);
@@ -2106,7 +2129,7 @@ async function loadAdmForum(){
   el.innerHTML=pd.map(p=>{
     const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
     return`<div class="card" style="padding:14px 18px;margin-bottom:10px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.book_title)} · ${p.is_anonymous?'익명':esc(p.agora_users?.username||'')} · ${ago(p.created_at)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.book_title)} · 익명 · ${ago(p.created_at)}</div>
       <div style="font-size:15px;font-family:var(--font-serif);margin-bottom:8px;line-height:1.6">${esc(p.question)}</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:8px">답변 ${vis.length}개</div>
       ${vis.map(c=>`<div style="background:var(--gl);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:var(--muted);line-height:1.6">${esc(c.content)}<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px">${ago(c.created_at)}</span><button class="btnd" style="font-size:11px;padding:2px 8px" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button></div></div>`).join('')}
@@ -2161,6 +2184,44 @@ async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select(
 async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
+
+// ══ 슬라이더 (독서록 모달 사진) ══
+const _sliderIdx={};
+function _updateSlider(prefix,id,idx,total){
+  _sliderIdx[prefix+'_'+id]=idx;
+  const track=document.getElementById('sliderTrack_'+prefix+'_'+id);
+  if(track) track.style.transform=`translateX(-${idx*100}%)`;
+  const dotsEl=document.getElementById('sliderDots_'+prefix+'_'+id);
+  if(dotsEl){
+    dotsEl.querySelectorAll('div').forEach((d,i)=>{
+      d.style.background=i===idx?'var(--g)':'rgba(0,0,0,.2)';
+    });
+  }
+}
+function slidePub(id,dir){
+  const track=document.getElementById('sliderTrack_pub_'+id);
+  if(!track)return;
+  const total=track.children.length;
+  const cur=_sliderIdx['pub_'+id]||0;
+  _updateSlider('pub',id,(cur+dir+total)%total,total);
+}
+function goSlidePub(id,idx){
+  const track=document.getElementById('sliderTrack_pub_'+id);
+  if(!track)return;
+  _updateSlider('pub',id,idx,track.children.length);
+}
+function slideMy(id,dir){
+  const track=document.getElementById('sliderTrack_my_'+id);
+  if(!track)return;
+  const total=track.children.length;
+  const cur=_sliderIdx['my_'+id]||0;
+  _updateSlider('my',id,(cur+dir+total)%total,total);
+}
+function goSlideMy(id,idx){
+  const track=document.getElementById('sliderTrack_my_'+id);
+  if(!track)return;
+  _updateSlider('my',id,idx,track.children.length);
+}
 
 // ══ 뷰어 ══
 let vIs=[],vI=0,vSc=1,vLD=0;
