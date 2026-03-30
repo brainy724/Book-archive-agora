@@ -31,13 +31,13 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .serif{font-family:var(--font-serif);}
 /* NAV */
 .nav{background:#FFFFFF;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
-.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold);letter-spacing:4px;cursor:pointer;user-select:none;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--g);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
 .nav-r{display:flex;align-items:center;gap:10px;}
-.nav-pts{font-size:13px;font-weight:600;color:var(--gold);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--gb);}
+.nav-pts{font-size:13px;font-weight:600;color:var(--g);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--gb);}
 .btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;}
 .btn-sm:hover{background:var(--gl);color:var(--g);}
 .admbadge{background:var(--red);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
@@ -278,7 +278,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 /* 로그인 */
 .lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FFFFFF;}
 .lcard{background:transparent;border:none;border-radius:0;padding:48px 40px;width:100%;max-width:480px;box-shadow:none;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.ltitle{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--gold);text-align:center;letter-spacing:6px;margin-bottom:16px;}
+.ltitle{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--g);text-align:center;letter-spacing:6px;margin-bottom:16px;}
 .lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:1.5px;}
 .atog{text-align:center;margin-top:14px;color:var(--muted);font-size:14px;}
 .atog span{color:var(--g);cursor:pointer;font-weight:600;}
@@ -330,7 +330,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 <!-- 관리자 로그인 -->
 <div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FFFFFF;">
   <div style="width:100%;max-width:380px;padding:48px 40px;text-align:center">
-    <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);letter-spacing:4px;margin-bottom:6px">AGORA</div>
+    <div style="font-family:var(--font-serif);font-size:28px;color:var(--g);letter-spacing:4px;margin-bottom:6px">AGORA</div>
     <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
     <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="admin"/></div>
     <div class="fg" style="text-align:left"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAuth()"/></div>
@@ -651,6 +651,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div style="display:flex;gap:20px;align-items:flex-start">
  <div style="flex:1;min-width:0">
  <div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div>
+ <!-- 내 활동 탭 -->
+ <div class="tab-bar" style="margin-bottom:14px">
+   <button class="tab-btn on" id="forumTab-all" onclick="switchForumTab('all')">전체 글</button>
+   <button class="tab-btn" id="forumTab-mine" onclick="switchForumTab('mine')">내 활동</button>
+ </div>
+ <!-- 전체 글 영역 -->
+ <div id="forumAllSection">
  <div class="cat-bar" id="forumCatBar">
       <button class="cat-btn on" onclick="setForumCat('')">전체</button>
       <button class="cat-btn" onclick="setForumCat('소설')">소설</button>
@@ -668,6 +675,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div id="fBanMsg" class="warn" style="display:none">⚠️ 커뮤니티 이용 규정 위반으로 이 기능의 이용이 제한되었습니다.</div>
  <div id="rdInfoP" style="display:none"></div>
  <div id="postList"></div>
+ </div>
+ <!-- 내 활동 영역 -->
+ <div id="forumMineSection" style="display:none">
+   <div id="myForumActivity"></div>
+ </div>
  </div>
  <!-- 광고 사이드바 (데스크탑) -->
  <div id="adSidebar" style="width:220px;flex-shrink:0;position:sticky;top:72px">
@@ -820,6 +832,15 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="page" id="p-clubDetail"><div class="pg-sm" style="max-width:680px">
   <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('club')">← 독서모임으로</button>
   <div id="clubDetailContent"></div>
+  <!-- 채팅 섹션 (멤버만) -->
+  <div id="clubChatSection" style="display:none;margin-top:24px">
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">실시간 채팅</div>
+    <div id="clubChatMessages" style="height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--gl)"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="clubChatInput" placeholder="메시지 입력..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none" onkeydown="if(event.key==='Enter')sendClubChat()"/>
+      <button class="btn" style="padding:10px 16px;white-space:nowrap" onclick="sendClubChat()">전송</button>
+    </div>
+  </div>
  </div></div>
 
  <!-- 모임 만들기 -->
@@ -1143,7 +1164,7 @@ function go(name){
   if(name==='library')rLib();
  if(name==='public')rPub();
  if(name==='forum')rForum();
- if(name==='club')rClub();
+ if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
  if(name==='points')rPoints();
  if(name==='addBook'){
@@ -1506,9 +1527,13 @@ function clearCover(){
 function setColorPreset(g,g2,gl,gb){
   const r=document.documentElement.style;
   r.setProperty('--g',g);r.setProperty('--g2',g2);r.setProperty('--gl',gl);r.setProperty('--gb',gb);
+  r.setProperty('--gold',g);r.setProperty('--gold2',g2);
   localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
   const cp=document.getElementById('customColorPicker');if(cp)cp.value=g;
   const hx=document.getElementById('colorHexDisplay');if(hx)hx.textContent=g;
+  // SVG 로그인 로고 색상도 업데이트
+  const stops=document.querySelectorAll('#goldGrad stop');
+  if(stops.length>=2){stops[0].style.stopColor=g2;stops[1].style.stopColor=g;stops[2&&stops[2]?2:1].style&&(stops[Math.min(2,stops.length-1)].style.stopColor=g2);}
 }
 function applyCustomColor(hex){
   const r=parseInt(hex.slice(1,3),16),g2=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
@@ -1621,6 +1646,7 @@ function applyMainColor(){
   const g2='#'+[r,g,b].map(x=>Math.max(0,x-30).toString(16).padStart(2,'0')).join('');
   const rs=document.documentElement.style;
   rs.setProperty('--g',hex);rs.setProperty('--g2',g2);rs.setProperty('--gl',gl);rs.setProperty('--gb',gb2);
+  rs.setProperty('--gold',hex);rs.setProperty('--gold2',g2);
   localStorage.setItem('agora_color',JSON.stringify({g:hex,g2,gl,gb:gb2}));
   nt('테마 색상이 적용됐습니다.');
 }
@@ -2102,30 +2128,117 @@ async function openPost(id){
  aPid=id;load(true);
  const{data:p}=await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
  load(false);if(!p)return;
- const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
+ const allCmts=(p.agora_comments||[]).filter(c=>!c.is_deleted);
+ // 최상위 댓글과 대댓글 분리
+ const roots=allCmts.filter(c=>!c.parent_id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+ const replies=allCmts.filter(c=>c.parent_id);
+ const isMyPost=p.user_id===CU.id;
  document.getElementById('pdContent').innerHTML=`
- <div class="card" style="margin-bottom:16px"><div class="ftag"> ${esc(p.book_title)}</div><div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div><div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div></div>
- <div style="font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500">답변 ${vis.length}개</div>
- ${vis.length===0?`<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--border);margin-bottom:18px">아직 답변이 없습니다.</div>`:''}
- ${vis.map(c=>`<div class="cm"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:15px;line-height:1.75;margin-bottom:4px">${esc(c.content)}</div><div style="font-size:12px;color:var(--muted)">익명 · ${ago(c.created_at)}</div></div>${CU.isAdmin?`<button class="btnd" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button>`:''}</div></div>`).join('')}`;
+ <div class="card" style="margin-bottom:16px">
+   <div class="ftag">${esc(p.book_title)}</div>
+   <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div>
+   <div style="display:flex;justify-content:space-between;align-items:center">
+     <div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div>
+     ${isMyPost?`<div style="display:flex;gap:8px">
+       <span onclick="editPost('${p.id}','${esc(p.question).replace(/'/g,"\\'")}','${esc(p.book_title).replace(/'/g,"\\'")}') " style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>
+       <span onclick="delPost('${p.id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span>
+     </div>`:''}
+   </div>
+ </div>
+ <div style="font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500">답변 ${roots.length}개</div>
+ ${roots.length===0?`<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--border);margin-bottom:18px">아직 답변이 없습니다.</div>`:''}
+ ${roots.map(c=>{
+   const myReplies=replies.filter(r=>r.parent_id===c.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+   const isMyCmt=c.user_id===CU.id;
+   return`<div class="cm" id="cmt_${c.id}">
+     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+       <div style="flex:1">
+         <div style="font-size:15px;line-height:1.75;margin-bottom:4px" id="cmtText_${c.id}">${esc(c.content)}</div>
+         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">익명 · ${ago(c.created_at)}</div>
+       </div>
+       <div style="display:flex;gap:8px;flex-shrink:0">
+         ${isMyCmt?`<span onclick="editCmt('${c.id}','${c.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>`:''}
+         ${isMyCmt||CU.isAdmin?`<span onclick="delCmt('${c.id}','${isMyCmt?'':c.user_id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span>`:''}
+       </div>
+     </div>
+     <span onclick="toggleReplyForm('${c.id}')" style="font-size:12px;color:var(--g);cursor:pointer;margin-bottom:8px;display:inline-block">↩ 답글 달기</span>
+     <!-- 대댓글 목록 -->
+     ${myReplies.map(r=>{
+       const isMyReply=r.user_id===CU.id;
+       return`<div style="margin-left:20px;padding:10px 14px;background:var(--gl);border-radius:8px;margin-bottom:6px" id="cmt_${r.id}">
+         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+           <div style="flex:1">
+             <div style="font-size:14px;line-height:1.7" id="cmtText_${r.id}">${esc(r.content)}</div>
+             <div style="font-size:11px;color:var(--muted);margin-top:3px">익명 · ${ago(r.created_at)}</div>
+           </div>
+           <div style="display:flex;gap:8px;flex-shrink:0">
+             ${isMyReply?`<span onclick="editCmt('${r.id}','${r.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--muted);cursor:pointer">수정</span>`:''}
+             ${isMyReply||CU.isAdmin?`<span onclick="delCmt('${r.id}','')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
+           </div>
+         </div>
+       </div>`;
+     }).join('')}
+     <!-- 답글 입력폼 (숨김) -->
+     <div id="replyForm_${c.id}" style="display:none;margin-left:20px;margin-top:6px">
+       <textarea id="replyTxt_${c.id}" placeholder="답글을 작성하세요..." style="min-height:60px;margin-bottom:6px;font-size:14px"></textarea>
+       <div style="display:flex;gap:6px;justify-content:flex-end">
+         <button class="btn2" style="font-size:12px;padding:6px 12px" onclick="toggleReplyForm('${c.id}')">취소</button>
+         <button class="btn" style="font-size:12px;padding:6px 12px" onclick="addReply('${c.id}')">등록</button>
+       </div>
+     </div>
+   </div>`;
+ }).join('')}`;
  document.getElementById('cmtBan').style.display=CU.banned?'block':'none';
  document.getElementById('cmtForm').style.display=CU.banned?'none':'block';
  document.getElementById('cmtTxt').value='';go('postDetail');
 }
+
+function toggleReplyForm(cmtId){
+ const f=document.getElementById('replyForm_'+cmtId);
+ if(!f)return;
+ f.style.display=f.style.display==='none'?'block':'none';
+ if(f.style.display==='block') document.getElementById('replyTxt_'+cmtId).focus();
+}
+
+async function addReply(parentId){
+ const el=document.getElementById('replyTxt_'+parentId);
+ const ct=el?el.value.trim():'';
+ if(!ct)return;
+ await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false,parent_id:parentId});
+ await openPost(aPid);
+}
+
+async function editCmt(cid,oldText){
+ const newText=prompt('댓글 수정',oldText.replace(/\\n/g,'\n'));
+ if(newText===null||newText.trim()==='')return;
+ await sb.from('agora_comments').update({content:newText.trim()}).eq('id',cid).eq('user_id',CU.id);
+ await openPost(aPid);
+}
+
+async function editPost(pid,oldQ,oldBook){
+ const newQ=prompt('질문 수정',oldQ);
+ if(newQ===null||newQ.trim()==='')return;
+ await sb.from('agora_posts').update({question:newQ.trim()}).eq('id',pid).eq('user_id',CU.id);
+ await openPost(pid);
+}
+
+async function delPost(pid){
+ if(!confirm('게시글을 삭제할까요?'))return;
+ await sb.from('agora_comments').delete().eq('post_id',pid);
+ await sb.from('agora_posts').delete().eq('id',pid);
+ nt('삭제됐습니다.');go('forum');
+}
+
 async function addCmt(){
  const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;
- const sub=await isSubscribed();
- // 일반회원 주간 댓글 한도 체크 (주 10개)
- await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false});
- // 포인트 자동 지급 (일반회원만 300P)
- 
+ await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false,parent_id:null});
  await openPost(aPid);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&document.activeElement===document.getElementById('cmtTxt'))addCmt();});
 async function delCmt(cid,cuid){
  await sb.from('agora_comments').update({is_deleted:true}).eq('id',cid);
- if(cuid&&cuid!=='admin'){const{data:tu}=await sb.from('agora_users').select('*').eq('id',cuid).single();if(tu){const ns=(tu.strikes||0)+1;await sb.from('agora_users').update({strikes:ns,banned:ns>=3}).eq('id',cuid);if(ns>=3)nt('해당 사용자가 3회 경고로 자동 이용 제한되었습니다.');}}
- nt('댓글이 삭제되었습니다.');await openPost(aPid);
+ if(cuid&&cuid!=='admin'&&CU.isAdmin){const{data:tu}=await sb.from('agora_users').select('*').eq('id',cuid).single();if(tu){const ns=(tu.strikes||0)+1;await sb.from('agora_users').update({strikes:ns,banned:ns>=3}).eq('id',cuid);if(ns>=3)nt('해당 사용자가 3회 경고로 자동 이용 제한되었습니다.');}}
+ nt('삭제됐습니다.');await openPost(aPid);
 }
 
 // ══ 포인트 ══
@@ -2266,7 +2379,111 @@ async function rejPt(rid){await sb.from('agora_point_requests').update({status:'
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
 
-// ══ 독서모임 ══
+// ══ 광장 내 활동 탭 ══
+let forumTabMode='all';
+function switchForumTab(tab){
+  forumTabMode=tab;
+  document.getElementById('forumTab-all').classList.toggle('on',tab==='all');
+  document.getElementById('forumTab-mine').classList.toggle('on',tab==='mine');
+  document.getElementById('forumAllSection').style.display=tab==='all'?'block':'none';
+  document.getElementById('forumMineSection').style.display=tab==='mine'?'block':'none';
+  if(tab==='mine') rMyForumActivity();
+}
+
+async function rMyForumActivity(){
+  load(true);
+  const[{data:myPosts},{data:myCmts},{data:allPosts}]=await Promise.all([
+    sb.from('agora_posts').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),
+    sb.from('agora_comments').select('*').eq('user_id',CU.id).eq('is_deleted',false).order('created_at',{ascending:false}),
+    sb.from('agora_posts').select('id,book_title,question')
+  ]);
+  load(false);
+  const postMap={};(allPosts||[]).forEach(p=>postMap[p.id]=p);
+  const el=document.getElementById('myForumActivity');
+  let html='';
+  // 내가 쓴 글
+  if((myPosts||[]).length){
+    html+=`<div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:10px">내가 올린 질문 ${myPosts.length}개</div>`;
+    html+=(myPosts||[]).map(p=>`
+      <div class="card" style="padding:14px 18px;margin-bottom:8px;cursor:pointer" onclick="openPost('${p.id}')">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.book_title||'')} · ${ago(p.created_at)}</div>
+        <div style="font-size:14px;font-weight:500;line-height:1.6">${esc(p.question)}</div>
+      </div>`).join('');
+  } else {
+    html+=`<div style="color:var(--muted);font-size:14px;margin-bottom:20px">아직 올린 질문이 없어요.</div>`;
+  }
+  // 내가 쓴 댓글
+  html+=`<div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin:20px 0 10px">내가 쓴 답변 ${(myCmts||[]).length}개</div>`;
+  if((myCmts||[]).length){
+    html+=(myCmts||[]).map(c=>{
+      const post=postMap[c.post_id];
+      return`<div class="card" style="padding:14px 18px;margin-bottom:8px;cursor:pointer" onclick="openPost('${c.post_id}')">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${post?esc(post.book_title||''):'알 수 없는 글'} · ${ago(c.created_at)}</div>
+        ${post?`<div style="font-size:12px;color:var(--g);margin-bottom:4px">↳ ${esc(post.question.slice(0,40))}${post.question.length>40?'...':''}</div>`:''}
+        <div style="font-size:14px;line-height:1.6">${esc(c.content)}</div>
+      </div>`;
+    }).join('');
+  } else {
+    html+=`<div style="color:var(--muted);font-size:14px">아직 쓴 답변이 없어요.</div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ══ 모임 실시간 채팅 (Supabase Realtime) ══
+let chatClubId=null, chatChannel=null, chatUserMap={};
+
+async function initClubChat(clubId, userMap, isMember){
+  chatClubId=clubId;
+  chatUserMap=userMap;
+  const chatSection=document.getElementById('clubChatSection');
+  if(!isMember){chatSection.style.display='none';return;}
+  chatSection.style.display='block';
+  // 기존 채팅 내역 로드
+  const{data:msgs}=await sb.from('agora_club_chats').select('*').eq('club_id',clubId).order('created_at',{ascending:true}).limit(100);
+  renderChatMessages(msgs||[]);
+  // 기존 채널 정리
+  if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}
+  // Realtime 구독
+  chatChannel=sb.channel('club_chat_'+clubId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'agora_club_chats',filter:`club_id=eq.${clubId}`},
+      payload=>{appendChatMessage(payload.new);}
+    )
+    .subscribe();
+}
+
+function renderChatMessages(msgs){
+  const el=document.getElementById('clubChatMessages');
+  if(!el)return;
+  el.innerHTML=msgs.map(m=>chatBubble(m)).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function appendChatMessage(msg){
+  const el=document.getElementById('clubChatMessages');
+  if(!el)return;
+  el.insertAdjacentHTML('beforeend',chatBubble(msg));
+  el.scrollTop=el.scrollHeight;
+}
+
+function chatBubble(m){
+  const isMe=m.user_id===CU.id;
+  const name=chatUserMap[m.user_id]||'알 수 없음';
+  return`<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px">
+    ${!isMe?`<div style="font-size:11px;color:var(--muted);margin-left:4px">${esc(name)}</div>`:''}
+    <div style="max-width:75%;background:${isMe?'var(--g)':'#fff'};color:${isMe?'#fff':'var(--txt)'};border:1px solid ${isMe?'var(--g)':'var(--border)'};border-radius:${isMe?'16px 16px 4px 16px':'16px 16px 16px 4px'};padding:9px 14px;font-size:14px;line-height:1.6;word-break:break-word">${esc(m.content)}</div>
+    <div style="font-size:10px;color:var(--muted);margin:0 4px">${ago(m.created_at)}</div>
+  </div>`;
+}
+
+async function sendClubChat(){
+  const input=document.getElementById('clubChatInput');
+  const txt=input?input.value.trim():'';
+  if(!txt||!chatClubId)return;
+  input.value='';
+  await sb.from('agora_club_chats').insert({id:ID(),club_id:chatClubId,user_id:CU.id,content:txt});
+}
+
+
 let clubRegionFilter='';
 function setClubRegion(r){
   clubRegionFilter=r;
@@ -2311,11 +2528,12 @@ async function rClub(){
 
 async function openClub(id){
   load(true);
-  const[{data:c},{data:members},{data:users},{data:posts}]=await Promise.all([
+  const[{data:c},{data:members},{data:users},{data:posts},{data:clubCmts}]=await Promise.all([
     sb.from('agora_clubs').select('*').eq('id',id).single(),
     sb.from('agora_club_members').select('*').eq('club_id',id),
     sb.from('agora_users').select('id,username'),
-    sb.from('agora_club_posts').select('*').eq('club_id',id).order('created_at',{ascending:true})
+    sb.from('agora_club_posts').select('*').eq('club_id',id).order('created_at',{ascending:true}),
+    sb.from('agora_club_comments').select('*').eq('club_id',id).order('created_at',{ascending:true})
   ]);
   load(false);
   if(!c)return;
@@ -2357,30 +2575,55 @@ async function openClub(id){
 
     <!-- 게시판 -->
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">모임 게시판</div>
-    ${!isMember?`<div class="info" style="background:var(--gl);border:1px solid var(--gb);color:var(--muted);font-size:13px;margin-bottom:12px">모임에 참여하면 게시판을 이용할 수 있어요.</div>`:''}
+    ${!isMember?`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--muted);margin-bottom:12px">모임에 참여하면 게시판을 이용할 수 있어요.</div>`:''}
     <div id="clubPosts">
       ${(posts||[]).length===0
         ?'<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px">아직 게시글이 없어요</div>'
-        :(posts||[]).map(p=>`
-        <div class="card" style="padding:16px 18px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':''} ${esc(userMap[p.user_id]||'알 수 없음')}</div>
-            <div style="font-size:11px;color:var(--muted)">${ago(p.created_at)}</div>
-          </div>
-          <div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--txt)">${esc(p.content)}</div>
-          ${p.user_id===CU.id||isHost?`<div style="text-align:right;margin-top:8px"><span onclick="deleteClubPost('${p.id}','${c.id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span></div>`:''}
-        </div>`).join('')
+        :(posts||[]).map(p=>{
+          const pCmts=(clubCmts||[]).filter(cm=>cm.post_id===p.id);
+          const isMyPost=p.user_id===CU.id;
+          return`<div class="card" style="padding:16px 18px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+              <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':''} ${esc(userMap[p.user_id]||'알 수 없음')}</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span style="font-size:11px;color:var(--muted)">${ago(p.created_at)}</span>
+                ${isMyPost||isHost?`<span onclick="delClubPost('${p.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
+                ${isMyPost?`<span onclick="editClubPost('${p.id}','${c.id}','${p.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--muted);cursor:pointer">수정</span>`:''}
+              </div>
+            </div>
+            <div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--txt);margin-bottom:10px">${esc(p.content)}</div>
+            <!-- 댓글 -->
+            ${pCmts.map(cm=>`
+            <div style="background:var(--gl);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <span style="font-size:12px;font-weight:600;color:var(--g)">${cm.user_id===c.host_id?'👑 ':''} ${esc(userMap[cm.user_id]||'알 수 없음')}</span>
+                <div style="display:flex;gap:6px">
+                  <span style="font-size:11px;color:var(--muted)">${ago(cm.created_at)}</span>
+                  ${cm.user_id===CU.id||isHost?`<span onclick="delClubComment('${cm.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
+                </div>
+              </div>
+              <div style="font-size:13px;line-height:1.7;margin-top:4px">${esc(cm.content)}</div>
+            </div>`).join('')}
+            ${isMember?`
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <input id="clubCmtTxt_${p.id}" placeholder="댓글 달기..." style="flex:1;padding:7px 12px;font-size:13px;border:1px solid var(--border);border-radius:8px;outline:none"/>
+              <button class="btn" style="padding:7px 14px;font-size:12px;white-space:nowrap" onclick="addClubComment('${p.id}','${c.id}')">등록</button>
+            </div>`:''}
+          </div>`;
+        }).join('')
       }
     </div>
     ${isMember?`
     <div style="margin-top:14px">
       <textarea id="clubPostTxt" placeholder="모임원들과 이야기를 나눠보세요..." style="min-height:80px;margin-bottom:8px"></textarea>
       <div style="display:flex;justify-content:flex-end">
-        <button class="btn" onclick="saveClubPost('${c.id}')">등록</button>
+        <button class="btn" onclick="saveClubPost('${c.id}')">글 올리기</button>
       </div>
     </div>`:''}
   `;
   go('clubDetail');
+  // 채팅 초기화
+  initClubChat(id, userMap, isMember);
 }
 
 async function saveClubPost(clubId){
@@ -2389,6 +2632,27 @@ async function saveClubPost(clubId){
   const{error}=await sb.from('agora_club_posts').insert({id:ID(),club_id:clubId,user_id:CU.id,content:txt});
   if(error){nt('오류: '+error.message,'err');return;}
   nt('등록됐습니다.');
+  openClub(clubId);
+}
+
+async function editClubPost(postId,clubId,oldContent){
+  const newText=prompt('글 수정',oldContent);
+  if(newText===null||newText.trim()==='')return;
+  await sb.from('agora_club_posts').update({content:newText.trim()}).eq('id',postId).eq('user_id',CU.id);
+  openClub(clubId);
+}
+
+async function addClubComment(postId,clubId){
+  const el=document.getElementById('clubCmtTxt_'+postId);
+  const txt=el?el.value.trim():'';
+  if(!txt){nt('내용을 입력해주세요.','err');return;}
+  await sb.from('agora_club_comments').insert({id:ID(),post_id:postId,club_id:clubId,user_id:CU.id,content:txt});
+  openClub(clubId);
+}
+
+async function delClubComment(cmtId,clubId){
+  if(!confirm('삭제할까요?'))return;
+  await sb.from('agora_club_comments').delete().eq('id',cmtId);
   openClub(clubId);
 }
 
