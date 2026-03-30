@@ -6,17 +6,23 @@
 <title>AGORA — 독서 아카이브</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Nanum+Myeongjo:wght@400;700&family=Noto+Serif+KR:wght@300;400;500&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --g:#1E5C38;--g2:#174D2F;--gl:#EBF5EF;--gb:#C8DFD1;
   --br:#3B1F0E;--brl:#F5EFE9;--brb:#D9C4B5;
   --card:#fff;--border:#EAEAEA;--txt:#3B1F0E;--muted:#7A6A5E;--red:#C0392B;
-  --nav-h:56px;--tab-h:60px;
+  --bg-page:#fff;--nav-h:56px;--tab-h:60px;
+  --font-body:'Pretendard','Apple SD Gothic Neo',sans-serif;
+  --font-serif:'Cormorant Garamond',Georgia,serif;
 }
-body{background:#fff;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;color:var(--txt);min-height:100vh;}
-.serif{font-family:'Cormorant Garamond',Georgia,serif;}
+body.dark{
+  --card:#1E1E2E;--border:#2E2E3E;--txt:#F0E6FF;--muted:#9A8AAA;--bg-page:#16161E;
+  --gl:#1A2E22;--gb:#2A4A35;--brl:#2E1E14;--brb:#4A3020;
+}
+body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;}
+.serif{font-family:var(--font-serif);}
 /* NAV */
 .nav{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--br);letter-spacing:4px;cursor:pointer;user-select:none;}
@@ -174,6 +180,9 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .preq.ok{border-left:3px solid var(--g);}
 .preq.rej{border-left:3px solid var(--red);opacity:.6;}
 /* 페이지 */
+.c-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;}
+.c-swatch.on{border-color:var(--txt);transform:scale(1.15);}
+.c-swatch:hover{transform:scale(1.1);}
 .page{display:none;}
 .page.active{display:block;}
 #lw{display:none;}
@@ -192,6 +201,53 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </style>
 </head>
 <body>
+
+<!-- 성별 확인 -->
+<div id="genderWrap" style="display:none;position:fixed;inset:0;background:#fff;z-index:300;align-items:center;justify-content:center;flex-direction:column;padding:32px 24px;text-align:center">
+  <div style="font-family:var(--font-serif);font-size:34px;color:var(--br);letter-spacing:4px;margin-bottom:6px">AGORA</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:36px">여성 전용 독서 아카이브</div>
+  <div style="font-size:44px;margin-bottom:14px">🌸</div>
+  <div style="font-size:19px;font-weight:600;color:var(--txt);margin-bottom:8px">아고라는 여성 전용 공간입니다</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.8;max-width:300px">안전하고 편안한 독서 커뮤니티를 위해<br>여성 회원만 가입할 수 있습니다.<br>허위 신고 시 이용이 제한됩니다.</div>
+  <div style="background:var(--brl);border:1px solid var(--brb);border-radius:12px;padding:18px 20px;margin-bottom:20px;max-width:320px;width:100%">
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;text-align:left">
+      <input type="checkbox" id="genderCheck" style="width:18px;height:18px;margin-top:2px;accent-color:var(--g);flex-shrink:0"/>
+      <span style="font-size:13px;color:var(--txt);line-height:1.7">저는 여성입니다. 허위 신고 시 서비스 이용이 제한될 수 있음에 동의합니다.</span>
+    </label>
+  </div>
+  <button class="btn" style="width:100%;max-width:320px;padding:13px" onclick="confirmGender()">아고라 시작하기 🌸</button>
+  <button class="btn2" style="width:100%;max-width:320px;margin-top:10px;padding:11px" onclick="rejectGender()">저는 해당하지 않습니다</button>
+</div>
+
+<!-- 커스터마이즈 모달 -->
+<div id="customWrap" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:16px;padding:26px 22px;max-width:340px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-size:17px;font-weight:600">🎨 내 공간 꾸미기</div>
+      <button onclick="closeCustom()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">포인트 컬러</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <div class="c-swatch" onclick="setColor('#1E5C38','#174D2F','#EBF5EF','#C8DFD1')" style="background:#1E5C38" title="숲초록"></div>
+      <div class="c-swatch" onclick="setColor('#7B4FA6','#5E3080','#F3EEFF','#D4B8F0')" style="background:#7B4FA6" title="라벤더"></div>
+      <div class="c-swatch" onclick="setColor('#C0395A','#9A2A45','#FFEEF2','#F4B8C5')" style="background:#C0395A" title="로즈"></div>
+      <div class="c-swatch" onclick="setColor('#2980B9','#1A6090','#EAF4FF','#B8D9F5')" style="background:#2980B9" title="블루"></div>
+      <div class="c-swatch" onclick="setColor('#C8732A','#A05A1E','#FFF3E8','#F5CFA0')" style="background:#C8732A" title="테라코타"></div>
+      <div class="c-swatch" onclick="setColor('#E5789A','#C0506A','#FFF0F5','#F5C0CF')" style="background:#E5789A" title="핑크"></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">폰트</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Pretendard',sans-serif" onclick="setFont('pretendard')">Pretendard (기본)</button>
+      <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Nanum Myeongjo',serif" onclick="setFont('myeongjo')">나눔명조</button>
+      <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Noto Serif KR',serif" onclick="setFont('notoserif')">Noto Serif KR</button>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">테마</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn2" style="flex:1;padding:10px" onclick="setTheme('light')">☀️ 라이트</button>
+      <button class="btn2" style="flex:1;padding:10px" onclick="setTheme('dark')">🌙 다크</button>
+    </div>
+  </div>
+</div>
 
 <!-- 로그인 -->
 <div id="lw" class="lw active">
@@ -227,7 +283,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <span class="nav-pts" id="navPts" onclick="go('points')">🍃 0P</span>
       <span class="uname" id="navUser" style="font-size:13px;color:var(--muted)"></span>
       <span class="admbadge" id="navAdm" style="display:none">관리자</span>
-      <button class="btn-sm" onclick="logout()">로그아웃</button>
+      <button class="btn-sm" onclick="openCustom()" style="font-size:16px;padding:4px 8px">🎨</button><button class="btn-sm" onclick="logout()">로그아웃</button>
     </div>
   </nav>
   <div class="btab">
@@ -272,7 +328,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <div><label>공개 설정</label><div class="tgl" onclick="togPub()"><div class="trk" id="pubTrk"><div class="thm"></div></div><span id="pubLbl" style="font-size:13px;color:var(--muted)">비공개</span></div><input type="hidden" id="bPubV" value="false"/></div>
         <div><label>익명 공개</label><div class="tgl" onclick="togAnon()"><div class="trk" id="anonTrk"><div class="thm"></div></div><span id="anonLbl" style="font-size:13px;color:var(--muted)">이름 표시</span></div><input type="hidden" id="bAnonV" value="false"/></div>
       </div>
-      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 독서 기록 추가 시 <strong>1,000P</strong> 신청 가능 (하루 2회 한도)</div>
+      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 독후감을 <strong>공개</strong>로 설정하면 <strong>1,000P</strong> 적립 신청 가능 (관리자 승인 후 지급)</div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button class="btn2" onclick="go('library')">취소</button>
         <button class="btn" id="saveBBtn" onclick="saveBook()">기록 저장</button>
@@ -306,7 +362,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?"/></div>
       <div class="fg"><label>질문 또는 주제</label><textarea id="pfQ" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점..."></textarea></div>
       <div style="margin-bottom:16px"><label>익명 설정</label><div class="tgl" onclick="togPostAnon()"><div class="trk on" id="pAnonTrk"><div class="thm"></div></div><span id="pAnonLbl" style="font-size:13px;color:var(--g)">익명으로 게시</span></div><input type="hidden" id="pfAnon" value="true"/></div>
-      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 토론 시작 시 <strong>1,000P</strong> 신청 가능 (하루 2회 한도)</div>
+      <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)">🍃 일반회원: 질문글 작성 시 <strong>+500P</strong> 자동 적립 · 주 3개 한도<br>👑 구독회원: 무제한 작성 (포인트 미지급)</div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button class="btn2" onclick="go('forum')">취소</button>
         <button class="btn" onclick="savePost()">게시하기</button>
@@ -339,18 +395,58 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
   <div class="page" id="p-payment"><div class="pg-sm">
     <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('points')">← 포인트로</button>
-    <div class="h1 serif">포인트 충전</div>
+    <div class="h1 serif">구독 · 충전</div>
     <div class="sub">토스페이먼츠로 안전하게 결제하세요</div>
-    <div class="ppkg" onclick="pay(5000,5000)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">5,000 P</div><div style="font-size:12px;color:var(--muted);margin-top:2px">공개 서재 5회 추가 열람</div></div><div style="font-size:15px;color:var(--muted)">5,000원</div></div>
-    <div class="ppkg" onclick="pay(10000,10000)" style="border-color:var(--g)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">10,000 P</div><div style="font-size:12px;color:var(--g);font-weight:600;margin-top:2px">가장 인기</div></div><div style="font-size:15px;color:var(--muted)">10,000원</div></div>
-    <div class="ppkg" onclick="pay(30000,30000)"><div><div style="font-size:18px;font-weight:700;color:var(--g)">30,000 P</div><div style="font-size:12px;color:var(--muted);margin-top:2px">넉넉하게 충전</div></div><div style="font-size:15px;color:var(--muted)">30,000원</div></div>
+
+    <!-- 정규 구독 -->
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">📚 정규 구독</div>
+    <div class="ppkg" style="border-color:var(--g);flex-direction:column;align-items:flex-start;gap:12px" onclick="showSubModal()">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+        <div><div style="font-size:18px;font-weight:700;color:var(--g)">월 9,900원</div><div style="font-size:12px;color:var(--g);font-weight:600;margin-top:2px">광장 무제한 + 독후감 무제한</div></div>
+        <span style="background:var(--g);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">추천</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">✓ 광장 무제한 참여<br>✓ 독후감 무제한 공유<br>✓ 포인트로 최대 9,000P 차감 가능</div>
+    </div>
+
+    <!-- 포인트로 광장 이용권 -->
+    <div style="font-size:15px;font-weight:600;margin:20px 0 10px">💬 광장 이용권 (포인트 차감)</div>
+    <div class="ppkg" onclick="buyForumPass()">
+      <div><div style="font-size:18px;font-weight:700;color:var(--br)">광장 1개월 이용권</div><div style="font-size:12px;color:var(--muted);margin-top:2px">현재 보유: <span id="payMyPts">0</span>P</div></div>
+      <div style="font-size:15px;font-weight:600;color:var(--br)">10,000P</div>
+    </div>
+
     <div style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6">결제는 토스페이먼츠를 통해 안전하게 처리됩니다.</div>
+
+    <!-- 구독 모달 -->
+    <div id="subModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:340px;width:100%">
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">정규 구독 결제</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">포인트로 차감할 금액을 선택하세요 (1,000P 단위)</div>
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:500;color:var(--muted)">포인트 차감 (보유: <span id="modalMyPts">0</span>P)</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px" id="ptsBtns"></div>
+        </div>
+        <div style="background:var(--gl);border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">구독료</span><span>9,900원</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">포인트 차감</span><span style="color:var(--g)" id="ptsDiscount">-0원</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--gb);padding-top:8px;margin-top:4px"><span>최종 결제</span><span id="finalAmount">9,900원</span></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn2" style="flex:1" onclick="closeSubModal()">취소</button>
+          <button class="btn" style="flex:1" onclick="paySubscription()">결제하기</button>
+        </div>
+      </div>
+    </div>
   </div></div>
 
   <div class="page" id="p-admin"><div class="pg">
     <div class="h1 serif">관리자 패널</div>
     <div class="sub">커뮤니티 관리 · 포인트 승인</div>
     <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:10px">⭐ 우수 콘텐츠 포인트 지급</div>
+    <div style="background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--g)">
+      고품질 독후감·질문·댓글 작성자에게 3,000P를 지급합니다.<br>회원 목록에서 해당 회원의 ⭐ 버튼을 눌러주세요.
+    </div>
     <div style="font-size:15px;font-weight:600;margin-bottom:10px">⏳ 포인트 승인 대기</div>
     <div id="pendPts"></div>
     <hr/>
@@ -397,8 +493,8 @@ const SB_URL='https://xtgfidsgcawfrlrzcmxf.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0Z2ZpZHNnY2F3ZnJscnpjbXhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3OTUyNzcsImV4cCI6MjA5MDM3MTI3N30.xotPU7iBBCph35lG8ohfBmLpZzC2s4kMHKaj8ntMgUo';
 const TOSS_KEY='test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq'; // 실제 키로 교체
 const NV_ID='YOUR_NAVER_CLIENT_ID'; // 네이버 개발자센터에서 발급
-const KK_JS_KEY='YOUR_KAKAO_JS_KEY';   // 카카오 JavaScript 키
-const KK_REST_KEY='YOUR_KAKAO_REST_KEY'; // 카카오 REST API 키 (카카오 로그인용)
+const KK_JS_KEY='71d55f39fcded8ee230c53d4de64a2f4';   // 카카오 JavaScript 키
+const KK_REST_KEY='1f06943777edd84ae71d06070a64a0ca'; // 카카오 REST API 키 (카카오 로그인용)
 
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const ID=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
@@ -507,6 +603,8 @@ async function doAuth(){
 }
 async function ok(u){
   CU=u;localStorage.setItem('agora_sess',JSON.stringify(u));
+  // 성별 확인 (최초 1회)
+  if(!localStorage.getItem('agora_gender')){showGender();}
   document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('navUser').textContent=u.username;upPts(u.points||0);
@@ -609,6 +707,14 @@ async function openEdit(id){
 async function saveBook(){
   const title=document.getElementById('bTitle').value.trim();if(!title){nt('책 제목을 입력해주세요.','err');return;}
   const eid=document.getElementById('editId').value,bid=eid||ID(),isNew=!eid;
+  // 독후감 공개 월 6회 한도 (일반회원, 신규 등록만)
+  if(isNew && document.getElementById('bPubV').value==='true'){
+    const sub=await isSubscribed();
+    if(!sub){
+      const cnt=await checkMonthlyPublicLimit();
+      if(cnt>=6){nt('일반회원은 이번 달 공개 독후감 한도(6회)에 도달했습니다.','err');load(false);return;}
+    }
+  }
   load(true);
   const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
   const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',is_anonymous:document.getElementById('bAnonV').value==='true'};
@@ -688,14 +794,30 @@ function mvSlide(id,dir,tot){const tr=document.getElementById('ist-'+id);if(!tr)
 async function togHeart(bid,oid){if(oid===CU.id)return;const{data:hd}=await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bid);if(hd&&hd.length>0)await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bid);else await sb.from('agora_hearts').insert({user_id:CU.id,book_id:bid});rPub();}
 
 // ══ 광장 ══
+async function canAccessForum(){
+  if(!CU) return false;
+  // 정규 구독 확인
+  const{data:u}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
+  if(u?.subscription_expires && new Date(u.subscription_expires)>new Date()) return true;
+  // 포인트 이용권 확인
+  const{data:pass}=await sb.from('agora_forum_passes').select('*').eq('user_id',CU.id).gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);
+  return !!(pass&&pass.length>0);
+}
 async function rForum(){
   load(true);
-  const{data}=await sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false});
-  const{count:rc}=await sb.from('agora_daily_reads').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type','post').eq('read_date',today());
+  const[{data},hasAccess]=await Promise.all([
+    sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false}),
+    canAccessForum()
+  ]);
   load(false);
-  const fl=Math.max(0,2-(rc||0));const iEl=document.getElementById('rdInfoP');
-  iEl.style.display='block';iEl.style.background=fl>0?'var(--gl)':'var(--brl)';iEl.style.border=`1px solid ${fl>0?'var(--gb)':'var(--brb)'}`;iEl.style.color=fl>0?'var(--g)':'var(--br)';
-  iEl.textContent=fl>0?`오늘 광장 무료 열람 ${fl}회 남았습니다`:'오늘 무료 열람을 모두 사용했습니다. 열람 시 1,000P가 차감됩니다.';
+  const iEl=document.getElementById('rdInfoP');
+  if(hasAccess){
+    iEl.style.display='block';iEl.style.background='var(--gl)';iEl.style.border='1px solid var(--gb)';iEl.style.color='var(--g)';
+    iEl.textContent='광장 이용 중 ✓';
+  } else {
+    iEl.style.display='block';iEl.style.background='var(--brl)';iEl.style.border='1px solid var(--brb)';iEl.style.color='var(--br)';
+    iEl.innerHTML='광장은 <strong>정규 구독(월 9,900원)</strong> 또는 <strong>10,000P 이용권</strong>이 필요합니다. <span onclick="go('payment')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
+  }
   const posts=(data||[]).map(p=>({...p,comments:(p.agora_comments||[]).filter(c=>!c.is_deleted)}));
   document.getElementById('nPostBtn').style.display=CU.banned?'none':'inline-block';
   document.getElementById('fBanMsg').style.display=CU.banned?'block':'none';
@@ -703,18 +825,92 @@ async function rForum(){
   if(!posts.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px">💬</div><div class="et">아직 토론이 없습니다</div></div>`;return;}
   el.innerHTML=posts.map(p=>`<div class="fc" onclick="openPost('${p.id}')"><div class="ftag">📖 ${esc(p.book_title)}</div><div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:8px;line-height:1.5">${esc(p.question)}</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</span><span style="font-size:13px;color:var(--muted)">💬 ${p.comments.length}개의 답변</span></div></div>`).join('');
 }
+
+// ── 성별 확인 ──
+function showGender(){document.getElementById('genderWrap').style.display='flex';}
+function confirmGender(){
+  if(!document.getElementById('genderCheck').checked){alert('체크박스에 동의해주세요.');return;}
+  document.getElementById('genderWrap').style.display='none';
+  localStorage.setItem('agora_gender','female');
+}
+function rejectGender(){
+  document.getElementById('genderWrap').style.display='none';
+  document.getElementById('lw').style.display='none';
+  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">🌸</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">아고라는 여성 전용 공간입니다</div><div style="font-size:14px;color:#888">감사합니다.</div></div></div>';
+}
+
+// ── 커스터마이즈 ──
+function openCustom(){document.getElementById('customWrap').style.display='flex';}
+function closeCustom(){document.getElementById('customWrap').style.display='none';}
+function setColor(g,g2,gl,gb){
+  const r=document.documentElement.style;
+  r.setProperty('--g',g);r.setProperty('--g2',g2);r.setProperty('--gl',gl);r.setProperty('--gb',gb);
+  document.querySelectorAll('.c-swatch').forEach(s=>s.classList.remove('on'));
+  event.target.classList.add('on');
+  localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
+}
+function setFont(f){
+  const fonts={pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif",myeongjo:"'Nanum Myeongjo',serif",notoserif:"'Noto Serif KR',serif"};
+  document.documentElement.style.setProperty('--font-body',fonts[f]);
+  localStorage.setItem('agora_font',f);
+}
+function setTheme(t){
+  document.body.classList.toggle('dark',t==='dark');
+  localStorage.setItem('agora_theme',t);
+}
+function loadCustomize(){
+  const color=localStorage.getItem('agora_color');
+  if(color){const c=JSON.parse(color);const r=document.documentElement.style;r.setProperty('--g',c.g);r.setProperty('--g2',c.g2);r.setProperty('--gl',c.gl);r.setProperty('--gb',c.gb);}
+  const font=localStorage.getItem('agora_font');
+  if(font){const fonts={pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif",myeongjo:"'Nanum Myeongjo',serif",notoserif:"'Noto Serif KR',serif"};document.documentElement.style.setProperty('--font-body',fonts[font]);}
+  const theme=localStorage.getItem('agora_theme');
+  if(theme==='dark')document.body.classList.add('dark');
+}
+
+// ── 우수 콘텐츠 3,000P 지급 ──
+async function giveQualityPts(uid,uname){
+  if(!confirm(`${uname}님께 우수 콘텐츠 3,000P를 지급할까요?`))return;
+  const{data:u}=await sb.from('agora_users').select('points').eq('id',uid).single();
+  const np=(u?.points||0)+3000;
+  await sb.from('agora_users').update({points:np}).eq('id',uid);
+  nt(`${uname}님께 3,000P 지급 완료!`);renderAdmin();
+}
+
+// ── 독후감 공개 월 6회 한도 ──
+async function checkMonthlyPublicLimit(){
+  const monthStart=new Date();monthStart.setDate(1);monthStart.setHours(0,0,0,0);
+  const{count}=await sb.from('agora_books').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('is_public',true).gte('created_at',monthStart.toISOString());
+  return (count||0);
+}
+async function isSubscribed(){
+  const{data:u}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
+  return !!(u?.subscription_expires && new Date(u.subscription_expires)>new Date());
+}
+function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.toISOString();}
+
 async function savePost(){
   const bt=document.getElementById('pfBook').value.trim(),q=document.getElementById('pfQ').value.trim();
   if(!bt||!q){nt('모든 항목을 입력해주세요.','err');return;}
+  const ok2=await canAccessForum();if(!ok2){nt('광장 이용권이 필요합니다.','err');go('payment');return;}
+  const sub=await isSubscribed();
+  // 일반회원 주간 질문글 한도 체크 (주 3개)
+  if(!sub){
+    const{count}=await sb.from('agora_posts').select('id',{count:'exact',head:true}).eq('user_id',CU.id).gte('created_at',weekStart());
+    if((count||0)>=3){nt('일반회원은 주 3개까지 질문글을 올릴 수 있습니다.','err');return;}
+  }
   load(true);const pid=ID();
   const{error}=await sb.from('agora_posts').insert({id:pid,user_id:CU.id,book_title:bt,question:q,is_anonymous:document.getElementById('pfAnon').value==='true'});
   if(error){load(false);nt('게시 중 오류가 발생했습니다.','err');return;}
-  await reqPts('post',pid);load(false);
+  // 포인트 자동 지급 (일반회원만 500P)
+  if(!sub){await autoAddPts(500);}
+  load(false);
   document.getElementById('pfBook').value='';document.getElementById('pfQ').value='';
-  nt('토론이 등록되었습니다.');go('forum');
+  nt('토론이 등록되었습니다.'+(sub?'':' +500P 적립!'));go('forum');
 }
 async function openPost(id){
-  await gate('post',id,async()=>{
+  const ok2=await canAccessForum();
+  if(!ok2){nt('광장 이용권이 필요합니다.','err');go('payment');return;}
+  const doOpen=async()=>{
     aPid=id;load(true);
     const{data:p}=await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
     load(false);if(!p)return;
@@ -727,9 +923,22 @@ async function openPost(id){
     document.getElementById('cmtBan').style.display=CU.banned?'block':'none';
     document.getElementById('cmtForm').style.display=CU.banned?'none':'block';
     document.getElementById('cmtTxt').value='';go('postDetail');
-  });
+  };
+  doOpen();
 }
-async function addCmt(){const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false});await openPost(aPid);}
+async function addCmt(){
+  const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;
+  const sub=await isSubscribed();
+  // 일반회원 주간 댓글 한도 체크 (주 10개)
+  if(!sub){
+    const{count}=await sb.from('agora_comments').select('id',{count:'exact',head:true}).eq('user_id',CU.id).gte('created_at',weekStart());
+    if((count||0)>=10){nt('일반회원은 주 10개까지 댓글을 달 수 있습니다.','err');return;}
+  }
+  await sb.from('agora_comments').insert({id:ID(),post_id:aPid,user_id:CU.id,content:ct,is_deleted:false});
+  // 포인트 자동 지급 (일반회원만 300P)
+  if(!sub){await autoAddPts(300);nt('+300P 적립!');}
+  await openPost(aPid);
+}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&document.activeElement===document.getElementById('cmtTxt'))addCmt();});
 async function delCmt(cid,cuid){
   await sb.from('agora_comments').update({is_deleted:true}).eq('id',cid);
@@ -738,11 +947,70 @@ async function delCmt(cid,cuid){
 }
 
 // ══ 포인트 ══
+
+async function autoAddPts(amount){
+  const np=(CU.points||0)+amount;
+  await sb.from('agora_users').update({points:np}).eq('id',CU.id);
+  CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
+}
 async function reqPts(type,refId){
   const{count}=await sb.from('agora_point_requests').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type',type).gte('created_at',today()+'T00:00:00');
   if((count||0)>=2){nt('오늘 포인트 신청 한도(2회)에 도달했습니다.');return;}
   await sb.from('agora_point_requests').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,points:1000,status:'pending'});
   nt('포인트 1,000P 신청 완료! 관리자 승인 후 지급됩니다 🍃');
+}
+
+async function buyForumPass(){
+  const pts=CU.points||0;
+  if(pts<10000){nt('포인트가 부족합니다. (10,000P 필요)','err');return;}
+  if(!confirm('10,000P를 차감하여 광장 1개월 이용권을 구매할까요?'))return;
+  const exp=new Date();exp.setMonth(exp.getMonth()+1);
+  const np=pts-10000;
+  await Promise.all([
+    sb.from('agora_forum_passes').insert({id:ID(),user_id:CU.id,expires_at:exp.toISOString(),points_used:10000}),
+    sb.from('agora_users').update({points:np}).eq('id',CU.id)
+  ]);
+  CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
+  nt('광장 1개월 이용권이 활성화되었습니다! 🎉');go('forum');
+}
+
+let selectedPts=0;
+function showSubModal(){
+  const pts=CU.points||0;
+  document.getElementById('modalMyPts').textContent=pts.toLocaleString();
+  document.getElementById('payMyPts').textContent=pts.toLocaleString();
+  selectedPts=0;updateSubPrice();
+  // 차감 가능 포인트 버튼 (1,000P 단위, 최대 9,000P)
+  const max=Math.min(Math.floor(pts/1000)*1000,9000);
+  const btns=document.getElementById('ptsBtns');
+  btns.innerHTML='<button onclick="selPts(0)" class="btn2" style="padding:5px 12px;font-size:13px">0P</button>';
+  for(let i=1000;i<=max;i+=1000){
+    btns.innerHTML+=`<button onclick="selPts(${i})" class="btn2" style="padding:5px 12px;font-size:13px">${i.toLocaleString()}P</button>`;
+  }
+  document.getElementById('subModal').style.display='flex';
+}
+function selPts(p){selectedPts=p;updateSubPrice();document.querySelectorAll('#ptsBtns button').forEach(b=>{b.style.background=parseInt(b.textContent)===p?'var(--g)':'';b.style.color=parseInt(b.textContent)===p?'#fff':'';})}
+function updateSubPrice(){document.getElementById('ptsDiscount').textContent=`-${selectedPts.toLocaleString()}원`;document.getElementById('finalAmount').textContent=`${(9900-selectedPts).toLocaleString()}원`;}
+function closeSubModal(){document.getElementById('subModal').style.display='none';}
+async function paySubscription(){
+  const amount=9900-selectedPts;
+  if(amount<=0){
+    // 포인트만으로 결제
+    const np=(CU.points||0)-selectedPts;
+    const exp=new Date();exp.setMonth(exp.getMonth()+1);
+    await Promise.all([sb.from('agora_users').update({points:np,subscription_expires:exp.toISOString()}).eq('id',CU.id)]);
+    CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
+    closeSubModal();nt('구독이 활성화되었습니다! 🎉');go('forum');return;
+  }
+  // 토스 결제
+  closeSubModal();
+  if(!window.TossPayments){nt('결제 모듈 로딩 중입니다.','err');return;}
+  const oid=`sub-${CU.id.slice(0,8)}-${Date.now()}`;
+  await sb.from('agora_orders').insert({id:ID(),user_id:CU.id,order_id:oid,points:selectedPts,amount,status:'pending',order_type:'subscription'});
+  try{
+    const tp=TossPayments(TOSS_KEY);const pm=tp.payment({customerKey:CU.id});
+    await pm.requestPayment({method:'CARD',amount:{currency:'KRW',value:amount},orderId:oid,orderName:'아고라 정규 구독 1개월',customerName:CU.username,successUrl:`${location.origin}${location.pathname}?payment=success&orderId=${oid}&type=sub&pts=${selectedPts}`,failUrl:`${location.origin}${location.pathname}?payment=fail`});
+  }catch(e){nt('결제를 취소했습니다.');}
 }
 async function rPoints(){
   load(true);
@@ -769,8 +1037,22 @@ async function pay(amount,points){
 async function handlePay(){
   const params=new URLSearchParams(location.search);
   if(params.get('payment')==='success'){
-    const oid=params.get('orderId'),pts=parseInt(params.get('points')||'0');
-    if(oid&&pts>0){const{data:ord}=await sb.from('agora_orders').select('*').eq('order_id',oid).eq('status','pending').single();if(ord){const np=(CU.points||0)+pts;await Promise.all([sb.from('agora_users').update({points:np}).eq('id',CU.id),sb.from('agora_orders').update({status:'paid'}).eq('order_id',oid)]);CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);nt(`${pts.toLocaleString()}P 충전 완료! 🎉`);}}
+    const oid=params.get('orderId'),type=params.get('type'),ptsUsed=parseInt(params.get('pts')||'0');
+    const{data:ord}=await sb.from('agora_orders').select('*').eq('order_id',oid).eq('status','pending').single();
+    if(ord){
+      if(type==='sub'){
+        // 구독 처리
+        const np=(CU.points||0)-ptsUsed;
+        const exp=new Date();exp.setMonth(exp.getMonth()+1);
+        await Promise.all([sb.from('agora_users').update({points:np,subscription_expires:exp.toISOString()}).eq('id',CU.id),sb.from('agora_orders').update({status:'paid'}).eq('order_id',oid)]);
+        CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);nt('구독이 활성화되었습니다! 🎉');
+      } else {
+        // 포인트 충전
+        const pts=ord.points;const np=(CU.points||0)+pts;
+        await Promise.all([sb.from('agora_users').update({points:np}).eq('id',CU.id),sb.from('agora_orders').update({status:'paid'}).eq('order_id',oid)]);
+        CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);nt(`${pts.toLocaleString()}P 충전 완료! 🎉`);
+      }
+    }
     history.replaceState({},'',location.pathname);
   }else if(params.get('payment')==='fail'){nt('결제에 실패했습니다.','err');history.replaceState({},'',location.pathname);}
 }
@@ -785,7 +1067,10 @@ async function rAdmin(){
   const pEl=document.getElementById('pendPts');
   if(!(reqs||[]).length){pEl.innerHTML=`<div style="color:var(--muted);font-size:14px;padding:12px 0">대기 중인 신청이 없습니다</div>`;}
   else{pEl.innerHTML=(reqs||[]).map(r=>`<div class="preq" style="margin-bottom:8px"><div><div style="font-size:14px;font-weight:500">${esc(r.agora_users?.username||'알 수 없음')} — ${r.ref_type==='book'?'📚 독서 기록':'💬 광장 토론'}</div><div style="font-size:12px;color:var(--muted)">${ago(r.created_at)}</div></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:600;color:var(--g)">+1,000P</span><button class="btn" style="padding:5px 12px;font-size:12px" onclick="appPt('${r.id}','${r.user_id}')">승인</button><button class="btnd" onclick="rejPt('${r.id}')">반려</button></div></div>`).join('');}
-  document.getElementById('uList').innerHTML=!normal.length?`<div class="empty"><div class="et">가입된 회원이 없습니다</div></div>`:normal.map(u=>`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px;margin-bottom:2px">${esc(u.username)} <span style="font-size:11px;color:var(--muted);font-weight:400">${u.auth_id?'(소셜)':''}</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:var(--muted)">경고 ${u.strikes}회 · ${(u.points||0).toLocaleString()}P</span>${[...Array(Math.min(u.strikes,3))].map(()=>`<span style="width:6px;height:6px;background:#E74C3C;border-radius:50%;display:inline-block"></span>`).join('')}${u.banned?`<span style="background:#FDECEA;color:#8A2010;font-size:11px;padding:1px 7px;border-radius:10px">이용제한</span>`:''}</div></div>${u.banned?`<button class="btn2" style="font-size:12px;padding:5px 12px" onclick="unban('${u.id}')">제한 해제</button>`:`<button class="btnd" onclick="ban('${u.id}')">이용 제한</button>`}</div></div>`).join('');
+  document.getElementById('uList').innerHTML=!normal.length?`<div class="empty"><div class="et">가입된 회원이 없습니다</div></div>`:normal.map(u=>`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:15px;margin-bottom:2px">${esc(u.username)} <span style="font-size:11px;color:var(--muted);font-weight:400">${u.auth_id?'(소셜)':''}</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px;color:var(--muted)">경고 ${u.strikes}회 · ${(u.points||0).toLocaleString()}P</span>${[...Array(Math.min(u.strikes,3))].map(()=>`<span style="width:6px;height:6px;background:#E74C3C;border-radius:50%;display:inline-block"></span>`).join('')}${u.banned?`<span style="background:#FDECEA;color:#8A2010;font-size:11px;padding:1px 7px;border-radius:10px">이용제한</span>`:''}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+              <button class="btn2" style="font-size:12px;padding:5px 10px" onclick="giveQualityPts('${u.id}','${esc(u.username)}')">⭐ 3,000P</button>
+              ${u.banned?`<button class="btn2" style="font-size:12px;padding:5px 12px" onclick="unban('${u.id}')">제한 해제</button>`:`<button class="btnd" onclick="ban('${u.id}')">이용 제한</button>`}
+            </div></div></div>`).join('');
   document.getElementById('admPosts').innerHTML=!(pd||[]).length?`<div class="empty"><div class="et">게시글이 없습니다</div></div>`:pd.map(p=>{const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted).length;return`<div class="card" style="padding:12px 18px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:12px;color:var(--muted);margin-bottom:2px">📖 ${esc(p.book_title)}</div><div style="font-size:14px">${esc(p.question.length>80?p.question.slice(0,80)+'…':p.question)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">답변 ${vis}개 · ${ago(p.created_at)}</div></div><button class="btn2" style="font-size:12px;padding:5px 12px;flex-shrink:0" onclick="openPost('${p.id}')">보기</button></div></div>`;}).join('');
 }
 async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select('points').eq('id',uid).single();const np=(u?.points||0)+1000;await Promise.all([sb.from('agora_point_requests').update({status:'approved'}).eq('id',rid),sb.from('agora_users').update({points:np}).eq('id',uid)]);nt('1,000P 승인 완료');rAdmin();}
@@ -805,6 +1090,7 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 
 // ══ 초기화 ══
 window.onload=async()=>{
+  loadCustomize();
   const ts=document.createElement('script');ts.src='https://js.tosspayments.com/v2/standard';document.head.appendChild(ts);
   // 카카오 콜백
   const kkParams=new URLSearchParams(location.search);
