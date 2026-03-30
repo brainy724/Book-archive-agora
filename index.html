@@ -800,11 +800,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <button class="cat-btn" onclick="setClubRegion('서울')">서울</button>
     <button class="cat-btn" onclick="setClubRegion('경기')">경기</button>
     <button class="cat-btn" onclick="setClubRegion('인천')">인천</button>
-    <button class="cat-btn" onclick="setClubRegion('부산')">부산</button>
-    <button class="cat-btn" onclick="setClubRegion('대구')">대구</button>
+    <button class="cat-btn" onclick="setClubRegion('강원')">강원</button>
+    <button class="cat-btn" onclick="setClubRegion('충북')">충북</button>
+    <button class="cat-btn" onclick="setClubRegion('충남')">충남</button>
     <button class="cat-btn" onclick="setClubRegion('대전')">대전</button>
+    <button class="cat-btn" onclick="setClubRegion('대구')">대구</button>
+    <button class="cat-btn" onclick="setClubRegion('부산')">부산</button>
+    <button class="cat-btn" onclick="setClubRegion('경북')">경북</button>
+    <button class="cat-btn" onclick="setClubRegion('경남')">경남</button>
+    <button class="cat-btn" onclick="setClubRegion('전북')">전북</button>
+    <button class="cat-btn" onclick="setClubRegion('전남')">전남</button>
     <button class="cat-btn" onclick="setClubRegion('광주')">광주</button>
-    <button class="cat-btn" onclick="setClubRegion('기타')">기타</button>
+    <button class="cat-btn" onclick="setClubRegion('제주')">제주</button>
   </div>
   <div id="clubList"></div>
  </div></div>
@@ -830,11 +837,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
           <option value="서울">서울</option>
           <option value="경기">경기</option>
           <option value="인천">인천</option>
-          <option value="부산">부산</option>
-          <option value="대구">대구</option>
+          <option value="강원">강원</option>
+          <option value="충북">충북</option>
+          <option value="충남">충남</option>
           <option value="대전">대전</option>
+          <option value="대구">대구</option>
+          <option value="부산">부산</option>
+          <option value="경북">경북</option>
+          <option value="경남">경남</option>
+          <option value="전북">전북</option>
+          <option value="전남">전남</option>
           <option value="광주">광주</option>
-          <option value="기타">기타</option>
+          <option value="제주">제주</option>
         </select>
       </div>
       <div class="fg"><label>상세 위치</label><input id="clubPlace" placeholder="예: 홍대 근처 카페"/></div>
@@ -1100,8 +1114,8 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- // 뒤로가기 완전 방지 - 히스토리 10개 쌓기
- for(let _i=0;_i<10;_i++) history.pushState({page:'app'},'',location.href);
+ // 뒤로가기 시 로그인 화면 안 나오게
+ history.replaceState({page:'app'},'',location.href);
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);go('library');
@@ -2085,9 +2099,6 @@ async function savePost(){
   go('forum');
 }
 async function openPost(id){
- const ok2=await canAccessForum();
- 
- const doOpen=async()=>{
  aPid=id;load(true);
  const{data:p}=await sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single();
  load(false);if(!p)return;
@@ -2100,8 +2111,6 @@ async function openPost(id){
  document.getElementById('cmtBan').style.display=CU.banned?'block':'none';
  document.getElementById('cmtForm').style.display=CU.banned?'none':'block';
  document.getElementById('cmtTxt').value='';go('postDetail');
- };
- doOpen();
 }
 async function addCmt(){
  const ct=document.getElementById('cmtTxt').value.trim();if(!ct||!aPid)return;
@@ -2278,7 +2287,7 @@ async function rClub(){
   const el=document.getElementById('clubList');
   const makeBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('addClub')">+ 모임 만들기</button></div>`;
   if(!list.length){
-    el.innerHTML=makeBtn+`<div class="empty"><div style="font-size:38px;margin-bottom:10px">📚</div><div class="et">${clubRegionFilter?clubRegionFilter+' 지역 모임이 없어요':'아직 독서모임이 없어요'}</div><div class="es">첫 번째 모임을 만들어보세요</div></div>`;
+    el.innerHTML=makeBtn+`<div class="empty"><div class="et">${clubRegionFilter?clubRegionFilter+' 지역 모임이 없어요':'아직 독서모임이 없어요'}</div><div class="es">첫 번째 모임을 만들어보세요</div></div>`;
     return;
   }
   el.innerHTML=makeBtn+list.map(c=>{
@@ -2510,11 +2519,11 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 
 // ══ 초기화 ══
 
-window.addEventListener('popstate', function(){
+window.addEventListener('popstate', function(e){
   if(CU){
-    // 로그인 상태 - 뒤로가기 차단, 히스토리 다시 쌓기
-    for(let _i=0;_i<10;_i++) history.pushState({page:'app'},'',location.href);
-    go('library');
+    e.preventDefault();
+    history.pushState({page:'app'},'',location.href);
+    // 뒤로가기 시 현재 페이지 유지 (로그인 화면으로 안 감)
   }
 });
 window.onload=async()=>{
