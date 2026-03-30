@@ -1307,7 +1307,6 @@ async function openBook(id){
     </div>`:''}
     ${imgs.length>0?`
     <div style="border-bottom:1px solid var(--border);padding-bottom:12px">
-      <div style="font-size:11px;color:var(--muted);padding:16px 24px 8px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
       <div style="position:relative;overflow:hidden" id="slider_pub_${b.id}">
         <div style="display:flex;transition:transform .3s ease" id="sliderTrack_pub_${b.id}">
           ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
@@ -1362,7 +1361,7 @@ async function openBookModal(id){
       <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
       ${stars?`<div style="font-size:22px;color:#E8A020;letter-spacing:3px;margin-bottom:6px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
-      ${(!b.is_anonymous&&b.username)?`<div style="font-size:11px;color:var(--muted);margin-top:6px">by ${esc(b.username||'')}</div>`:b.is_anonymous?`<div style="font-size:11px;color:var(--muted);margin-top:6px">익명의 독서가</div>`:''}
+
     </div>
     ${(b.start_date||b.end_date)?`
     <div style="display:flex;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border)">
@@ -1371,7 +1370,6 @@ async function openBookModal(id){
     </div>`:''}
     ${imgs.length>0?`
     <div style="border-bottom:1px solid var(--border);padding-bottom:12px">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;padding:16px 24px 8px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
       <div style="position:relative;overflow:hidden" id="slider_my_${b.id}">
         <div style="display:flex;transition:transform .3s ease" id="sliderTrack_my_${b.id}">
           ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
@@ -1387,7 +1385,7 @@ async function openBookModal(id){
           ${imgs.map((_,di)=>`<div style="width:6px;height:6px;border-radius:50%;background:${di===0?'var(--g)':'rgba(0,0,0,.2)'};transition:background .2s;cursor:pointer" onclick="event.stopPropagation();goSlideMy('${b.id}',${di})"></div>`).join('')}
         </div>`:''}
       </div>
-    </div>`:''}}
+    </div>`:''}
     ${b.review?`
     <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
