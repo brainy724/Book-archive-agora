@@ -2,19 +2,23 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <title>AGORA — 독서 아카이브</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Nanum+Myeongjo:wght@400;700&family=Noto+Serif+KR:wght@300;400;500&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
  --g:#B8956A;--g2:#8C6A3E;--gl:#FBF5EE;--gb:#E8D5BC;
  --br:#2C1A2E;--brl:#F7F3F8;--brb:#D9C9DF;
- --card:#FFFDFB;--border:#EDE5E8;--txt:#2C1A2E;--muted:#8A7590;--red:#C0392B;
- --bg-page:#FFFDFB;--nav-h:56px;--tab-h:60px;
- --font-body:'Pretendard','Apple SD Gothic Neo',sans-serif;
+ --card:#FFFFFF;--border:#EDE5E8;--txt:#2C1A2E;--muted:#8A7590;--red:#C0392B;
+ --bg-page:#FAF8F5;--nav-h:56px;--tab-h:60px;
+ --font-body:'Noto Serif KR','Apple SD Gothic Neo',serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
  --gold:#B8956A;--gold2:#8C6A3E;
 }
@@ -25,7 +29,7 @@ body.dark{
 body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;}
 .serif{font-family:var(--font-serif);}
 /* NAV */
-.nav{background:#FFFDFB;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.nav{background:#FAF8F5;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
@@ -52,7 +56,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:12px;transition:box-shadow .2s;}
 .card:hover{box-shadow:0 2px 16px rgba(0,0,0,.06);}
 /* 책 그리드 */
-.bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px;}
+.bg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .bi{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .bi:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
 .bc{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
@@ -61,6 +65,11 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .bt2{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .ba{font-size:11px;color:var(--muted);}
 .bb{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+.sort-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.sort-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:var(--font-body);}
+.sort-btn.on{background:var(--g);color:#fff;border-color:var(--g);}
+.adm-tab{background:none;border:none;padding:10px 18px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-body);font-weight:500;}
+.adm-tab.on{color:var(--g);border-bottom-color:var(--g);font-weight:600;}
 /* 배지 */
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
 .bpub{background:var(--gl);color:var(--g);border:1px solid var(--gb);}
@@ -161,8 +170,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .warn{background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#8A2010;font-size:14px;}
 .info{border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;}
 /* 로그인 */
-.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#F9F0F4 0%,#FFFDFB 50%,#F5EEF8 100%);}
-.lcard{background:#FFFDFB;border:1px solid var(--border);border-radius:16px;padding:48px 34px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(44,26,46,.12);}
+.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;}
+.lcard{background:transparent;border:none;border-radius:0;padding:48px 40px;width:100%;max-width:480px;box-shadow:none;}
 .ltitle{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--gold);text-align:center;letter-spacing:6px;margin-bottom:16px;}
 .lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:1.5px;}
 .atog{text-align:center;margin-top:14px;color:var(--muted);font-size:14px;}
@@ -247,9 +256,9 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
  <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">폰트</div>
  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
- <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Pretendard',sans-serif" onclick="setFont('pretendard')">Pretendard (기본)</button>
+ <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Noto Serif KR',serif" onclick="setFont('notoserif')">Noto Serif KR (기본)</button>
  <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Nanum Myeongjo',serif" onclick="setFont('myeongjo')">나눔명조</button>
- <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Noto Serif KR',serif" onclick="setFont('notoserif')">Noto Serif KR</button>
+ <button class="btn2" style="text-align:left;padding:10px 14px;font-family:'Pretendard',sans-serif" onclick="setFont('pretendard')">Pretendard (고딕)</button>
  </div>
  <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--txt)">테마</div>
  <div style="display:flex;gap:8px">
@@ -259,31 +268,38 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
 </div>
 
+<!-- 관리자 로그인 -->
+<div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FAF8F5;">
+  <div style="width:100%;max-width:360px;padding:48px 40px;text-align:center">
+    <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);letter-spacing:4px;margin-bottom:4px">AGORA</div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
+    <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="admin"/></div>
+    <div class="fg" style="text-align:left"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAuth()"/></div>
+    <div id="aErr" class="err-msg" style="display:none;margin-bottom:12px;text-align:left"></div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="doAuth()">로그인</button>
+    <div style="margin-top:24px"><span onclick="goAdminLogin()" style="font-size:12px;color:var(--muted);cursor:pointer">← 돌아가기</span></div>
+  </div>
+</div>
+
 <!-- 로그인 -->
 <div id="lw" class="lw active">
  <div class="lcard">
- <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-align:center;margin-bottom:28px;line-height:1.9;font-family:var(--font-body)">
- <span style="font-size:13px;color:var(--gold);font-weight:600;letter-spacing:1px">AGORA</span>는 고대 그리스의 토론 광장입니다.<br>
- 책을 읽고, 생각을 나누고, 연결되는 곳—<br>
- <span style="color:var(--gold);font-weight:500">현대의 아고라에 오신 것을 환영합니다.</span>
-</div>
-<div class="ltitle">AGORA</div>
- 
- <button class="bk-btn" onclick="loginKakao()">
- <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
- 카카오로 계속하기
- </button>
- <div style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.7">카카오 계정으로 간편하게 시작하세요<br>별도 회원가입이 필요 없습니다</div>
- <div id="aErr" class="err-msg" style="display:none;margin-top:12px"></div>
- <div id="adminArea" style="display:none;margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
- <div class="fg"><label style="color:var(--muted)">관리자 아이디</label><input id="aId" placeholder="admin"/></div>
- <div class="fg"><label style="color:var(--muted)">비밀번호</label><input id="aPw" type="password" placeholder="비밀번호"/></div>
- <div id="aErr" class="err-msg" style="display:none;margin-bottom:8px"></div>
- <button class="btn2" style="width:100%" onclick="doAuth()" id="adminLoginBtn">관리자 로그인</button>
-
- </div>
- <div style="text-align:center;margin-top:24px"><span onclick="toggleAdminArea()" style="font-size:11px;color:#ccc;cursor:pointer">관리자</span></div>
- </div>
+    <div class="ltitle">AGORA</div>
+    <div style="height:44px"></div>
+    <div style="font-size:14px;color:var(--muted);text-align:center;line-height:2.1;letter-spacing:.3px">
+      AGORA는 고대 그리스의 토론 광장입니다.<br>
+      책을 읽고, 생각을 나누고, 연결되는 곳—<br>
+      현대의 아고라에 오신 것을 환영합니다.
+    </div>
+    <div style="height:32px"></div>
+    <button class="bk-btn" onclick="loginKakao()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
+      카카오로 계속하기
+    </button>
+    <div style="height:10px"></div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;letter-spacing:.2px">카카오 계정으로 간편하게 시작하세요</div>
+    <div style="text-align:center;margin-top:36px"><span onclick="goAdminLogin()" style="font-size:11px;color:#FAF8F5;cursor:pointer;letter-spacing:1px">·</span></div>
+  </div>
 </div>
 
 <!-- 앱 -->
@@ -332,7 +348,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
  <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:140px" placeholder="책에 대한 생각을 자유롭게 적어보세요..."></textarea></div>
  <div class="fg">
- <label>사진 첨부 (여러 장 가능)</label>
+ <label>내용 사진 첨부 (인상 깊은 구절, 필사 등 · 여러 장 가능)</label>
  <div class="iua" onclick="document.getElementById('imgIn').click()">
  <input type="file" id="imgIn" accept="image/*" multiple onchange="onImgSel(event)"/>
  <div style="font-size:26px;margin-bottom:6px"></div>
@@ -514,6 +530,16 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </div>
 
 <script>
+
+// 카카오톡 인앱브라우저 대응
+(function(){
+  const ua = navigator.userAgent || '';
+  const isKakao = ua.includes('KAKAOTALK') || ua.includes('kakaotalk');
+  if(isKakao){
+    // 인앱브라우저에서 location.href 리다이렉트 허용
+    document.documentElement.setAttribute('data-kakao', 'true');
+  }
+})();
 // ══ 설정 ══
 const SB_URL='https://xtgfidsgcawfrlrzcmxf.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0Z2ZpZHNnY2F3ZnJscnpjbXhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3OTUyNzcsImV4cCI6MjA5MDM3MTI3N30.xotPU7iBBCph35lG8ohfBmLpZzC2s4kMHKaj8ntMgUo';
@@ -528,7 +554,7 @@ const today=()=>new Date().toISOString().slice(0,10);
 const ago=d=>{const m=Math.floor((Date.now()-new Date(d))/60000);if(m<1)return'방금 전';if(m<60)return m+'분 전';if(m<1440)return Math.floor(m/60)+'시간 전';return Math.floor(m/1440)+'일 전';};
 const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-let CU=null,aMode='login',isPub=false,isAnon=false,isPAnon=true;
+let CU=null,aMode='login',isPub=false,isAnon=false,isPAnon=true,sortMode='date_desc';
 let pFiles=[],eUrls=[],aPid=null,gCb=null;
 
 const load=v=>document.getElementById('lov').style.display=v?'flex':'none';
@@ -613,6 +639,16 @@ async function handleNaver(){
 
 // ══ 일반 로그인 ══
 
+
+function goAdminLogin(){
+  const w=document.getElementById('adminLoginWrap');
+  const lw=document.getElementById('lw');
+  if(w.style.display==='none'||!w.style.display){
+    w.style.display='flex';lw.style.display='none';
+  } else {
+    w.style.display='none';lw.style.display='flex';
+  }
+}
 function toggleAdminArea(){
  const a=document.getElementById('adminArea');
  a.style.display=a.style.display==='none'?'block':'none';
@@ -667,7 +703,7 @@ function go(name){
  ['pubTrk','anonTrk'].forEach(i=>document.getElementById(i).classList.remove('on'));
  document.getElementById('pubLbl').textContent='비공개';document.getElementById('pubLbl').style.color='var(--muted)';
  document.getElementById('anonLbl').textContent='이름 표시';document.getElementById('anonLbl').style.color='var(--muted)';
- pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';
+ pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';document.getElementById('bCoverUrl').value='';document.getElementById('selectedCover').style.display='none';document.getElementById('coverSearchResult').style.display='none';
  }
 }
 
@@ -706,15 +742,64 @@ function closeG(){document.getElementById('gov').classList.remove('open');gCb=nu
 document.getElementById('gov').addEventListener('click',e=>{if(e.target===document.getElementById('gov'))closeG();});
 
 // ══ 내 서재 ══
+
+function setSort(mode){
+  sortMode=mode;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('sort-'+mode);if(el)el.classList.add('on');
+  rLib();
+}
+
+// ── 책 표지 검색 (Open Library) ──
+async function searchBookCover(){
+  const title=document.getElementById('bTitle').value.trim();
+  if(!title){nt('책 제목을 먼저 입력해주세요.','err');return;}
+  const resEl=document.getElementById('coverSearchResult');
+  const listEl=document.getElementById('coverList');
+  listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중...</div>';
+  resEl.style.display='block';
+  try{
+    const res=await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=10&fields=title,author_name,cover_i,isbn`);
+    const data=await res.json();
+    const books=(data.docs||[]).filter(b=>b.cover_i);
+    if(!books.length){
+      listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">표지 이미지를 찾을 수 없습니다.<br>직접 사진을 업로드해주세요.</div>';
+      return;
+    }
+    listEl.innerHTML=books.slice(0,6).map(b=>{
+      const coverUrl=`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`;
+      return`<div onclick="selectCover('${coverUrl}')" style="cursor:pointer;border:2px solid transparent;border-radius:8px;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'">
+        <img src="${coverUrl}" style="width:60px;height:80px;object-fit:cover;display:block" loading="lazy"/>
+      </div>`;
+    }).join('');
+  }catch(e){
+    listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중 오류가 발생했습니다.</div>';
+  }
+}
+function selectCover(url){
+  document.getElementById('bCoverUrl').value=url;
+  document.getElementById('selectedCoverImg').src=url;
+  document.getElementById('selectedCover').style.display='flex';
+  document.getElementById('coverSearchResult').style.display='none';
+  nt('표지가 선택됐습니다.');
+}
+function clearCover(){
+  document.getElementById('bCoverUrl').value='';
+  document.getElementById('selectedCover').style.display='none';
+}
 async function rLib(){
  load(true);
  const[{data:bd},{data:hd},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),sb.from('agora_hearts').select('*'),sb.from('agora_book_images').select('*').order('sort_order',{ascending:true})]);
  load(false);
- const books=(bd||[]).map(b=>({...b,hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),images:(imgd||[]).filter(i=>i.book_id===b.id)}));
+ const books=(bd||[]).map(b=>({...b,hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),images:(imgd||[]).filter(i=>i.book_id===b.id)})).sort((a,b)=>{
+  if(sortMode==='date_asc') return new Date(a.created_at)-new Date(b.created_at);
+  if(sortMode==='title') return (a.title||'').localeCompare(b.title||'','ko');
+  return new Date(b.created_at)-new Date(a.created_at); // date_desc 기본
+});
  document.getElementById('libSub').textContent=`나의 독서 기록${books.length>0?` · ${books.length}권`:''}`;
  const el=document.getElementById('bookList');
  if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="go('addBook')">첫 번째 책 기록하기</button></div>`;return;}
- el.innerHTML=`<div class="bg">${books.map(b=>{const th=b.images[0]?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:`<div class="bph"></div>`;return`<div class="bi" onclick="openEdit('${b.id}')">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span>${b.is_anonymous?'<span class="badge banon">익명</span>':''}${b.is_public&&b.hearts.length>0?`<span style="font-size:10px;color:#C03020;font-weight:600">♥ ${b.hearts.length}</span>`:''}</div></div></div>`;}).join('')}</div>`;
+ el.innerHTML=`<div class="bg">${books.map(b=>{const th=b.cover_url?`<img class="bc" src="${b.cover_url}" loading="lazy"/>`:(b.images&&b.images[0])?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:`<div class="bph" style="background:linear-gradient(135deg,var(--gl),var(--gb));font-family:var(--font-serif);font-size:11px;color:var(--muted);text-align:center;padding:8px">${b.title.slice(0,15)}</div>`;return`<div class="bi" onclick="openEdit('${b.id}')">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span>${b.is_anonymous?'<span class="badge banon">익명</span>':''}${b.is_public&&b.hearts.length>0?`<span style="font-size:10px;color:#C03020;font-weight:600">♥ ${b.hearts.length}</span>`:''}</div></div></div>`;}).join('')}</div>`;
 }
 async function openEdit(id){
  load(true);
@@ -745,7 +830,7 @@ async function saveBook(){
  }
  load(true);
  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
- const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true'};
+ const coverUrl=document.getElementById('bCoverUrl').value;const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null};
  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
  await sb.from('agora_book_images').delete().eq('book_id',bid);
@@ -923,7 +1008,7 @@ function setColor(g,g2,gl,gb){
  localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
 }
 function setFont(f){
- const fonts={pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif",myeongjo:"'Nanum Myeongjo',serif",notoserif:"'Noto Serif KR',serif"};
+ const fonts={notoserif:"'Noto Serif KR',serif",myeongjo:"'Nanum Myeongjo',serif",pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif"};
  document.documentElement.style.setProperty('--font-body',fonts[f]);
  localStorage.setItem('agora_font',f);
 }
@@ -935,7 +1020,7 @@ function loadCustomize(){
  const color=localStorage.getItem('agora_color');
  if(color){const c=JSON.parse(color);const r=document.documentElement.style;r.setProperty('--g',c.g);r.setProperty('--g2',c.g2);r.setProperty('--gl',c.gl);r.setProperty('--gb',c.gb);}
  const font=localStorage.getItem('agora_font');
- if(font){const fonts={pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif",myeongjo:"'Nanum Myeongjo',serif",notoserif:"'Noto Serif KR',serif"};document.documentElement.style.setProperty('--font-body',fonts[font]);}
+ if(font){const fonts={notoserif:"'Noto Serif KR',serif",myeongjo:"'Nanum Myeongjo',serif",pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif"};document.documentElement.style.setProperty('--font-body',fonts[font]);}
  const theme=localStorage.getItem('agora_theme');
  if(theme==='dark')document.body.classList.add('dark');
 }
@@ -1131,6 +1216,50 @@ async function handlePay(){
 }
 
 // ══ 관리자 ══
+
+function switchAdmTab(tab){
+  ['pts','users','books','forum'].forEach(t=>{
+    document.getElementById('admSection-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('admTab-'+t).classList.toggle('on',t===tab);
+  });
+  if(tab==='books') loadAdmBooks();
+  if(tab==='forum') loadAdmForum();
+}
+
+async function loadAdmBooks(){
+  const{data:bd}=await sb.from('agora_books').select('*,agora_users(username)').eq('is_public',true).order('created_at',{ascending:false});
+  const el=document.getElementById('admBooks');
+  if(!bd||!bd.length){el.innerHTML='<div class="empty"><div class="et">공개 독후감이 없습니다</div></div>';return;}
+  el.innerHTML=bd.map(b=>`<div class="card" style="padding:14px 18px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:600;font-family:var(--font-serif);margin-bottom:4px">${esc(b.title)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${esc(b.author||'')} · ${esc(b.agora_users?.username||'알 수 없음')}</div>
+        ${b.review?`<div style="font-size:13px;color:var(--muted);line-height:1.7">${esc(b.review.slice(0,120))}${b.review.length>120?'…':''}</div>`:''}
+      </div>
+      ${b.cover_url?`<img src="${b.cover_url}" style="width:40px;height:54px;object-fit:cover;border-radius:4px;margin-left:12px;flex-shrink:0"/>`:''}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+      <span style="font-size:11px;color:var(--muted)">${ago(b.created_at)}</span>
+      <button class="btn2" style="font-size:11px;padding:4px 10px" onclick="giveQualityPts('${b.user_id}','${esc(b.agora_users?.username||'')}')">우수 3,000P</button>
+    </div>
+  </div>`).join('');
+}
+
+async function loadAdmForum(){
+  const{data:pd}=await sb.from('agora_posts').select('*, agora_comments(*), agora_users(username)').order('created_at',{ascending:false});
+  const el=document.getElementById('admPosts');
+  if(!pd||!pd.length){el.innerHTML='<div class="empty"><div class="et">게시글이 없습니다</div></div>';return;}
+  el.innerHTML=pd.map(p=>{
+    const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
+    return`<div class="card" style="padding:14px 18px;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.book_title)} · ${p.is_anonymous?'익명':esc(p.agora_users?.username||'')} · ${ago(p.created_at)}</div>
+      <div style="font-size:15px;font-family:var(--font-serif);margin-bottom:8px;line-height:1.6">${esc(p.question)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">답변 ${vis.length}개</div>
+      ${vis.map(c=>`<div style="background:var(--gl);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:var(--muted);line-height:1.6">${esc(c.content)}<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px">${ago(c.created_at)}</span><button class="btnd" style="font-size:11px;padding:2px 8px" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button></div></div>`).join('')}
+    </div>`;
+  }).join('');
+}
 async function rAdmin(){
  load(true);
  const[{data:ud},{data:pd},{data:reqs}]=await Promise.all([sb.from('agora_users').select('*'),sb.from('agora_posts').select('*, agora_comments(*)').order('created_at',{ascending:false}).limit(10),sb.from('agora_point_requests').select('*, agora_users(username)').eq('status','pending').order('created_at',{ascending:true})]);
