@@ -496,6 +496,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div class="sb-item on" id="sb-library" onclick="go('library')">내 서재</div>
     <div class="sb-item" id="sb-public" onclick="go('public')">공개 서재</div>
     <div class="sb-item" id="sb-forum" onclick="go('forum')">광장</div>
+    <div class="sb-item" id="sb-club" onclick="go('club')">독서모임</div>
     <div class="sb-item" id="sb-admin" onclick="go('admin')" style="display:none">관리자</div>
     <button class="sb-theme-btn" onclick="openCustom()">테마 변경</button>
   </div>
@@ -507,6 +508,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <span class="nl" id="n-library" onclick="go('library')">내 서재</span>
  <span class="nl" id="n-public" onclick="go('public')">공개 서재</span>
  <span class="nl" id="n-forum" onclick="go('forum')">광장</span>
+ <span class="nl" id="n-club" onclick="go('club')">독서모임</span>
  <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
  </div>
  <div class="nav-r">
@@ -519,6 +521,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="ti on" id="t-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>내 서재</div>
  <div class="ti" id="t-public" onclick="go('public')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>공개 서재</div>
  <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>광장</div>
+ <div class="ti" id="t-club" onclick="go('club')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>독서모임</div>
  <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M12 20c-4 0-7-2-7-4.5C5 13 8 11 12 11s7 2 7 4.5C19 18 16 20 12 20"/></svg>마이페이지</div>
  <div class="ti" id="t-admin" onclick="go('admin')" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>관리</div>
  </div>
@@ -786,7 +789,76 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
   </div></div>
 
-  <div class="page" id="p-admin"><div class="pg">
+ <!-- 독서모임 목록 -->
+ <div class="page" id="p-club"><div class="pg">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+    <div><div class="h1 serif">독서모임</div><div class="sub">지역별 오프라인 독서모임 · 닉네임으로 활동</div></div>
+  </div>
+  <!-- 지역 필터 -->
+  <div class="cat-bar" id="clubRegionBar" style="margin-bottom:12px">
+    <button class="cat-btn on" onclick="setClubRegion('')">전체</button>
+    <button class="cat-btn" onclick="setClubRegion('서울')">서울</button>
+    <button class="cat-btn" onclick="setClubRegion('경기')">경기</button>
+    <button class="cat-btn" onclick="setClubRegion('인천')">인천</button>
+    <button class="cat-btn" onclick="setClubRegion('부산')">부산</button>
+    <button class="cat-btn" onclick="setClubRegion('대구')">대구</button>
+    <button class="cat-btn" onclick="setClubRegion('대전')">대전</button>
+    <button class="cat-btn" onclick="setClubRegion('광주')">광주</button>
+    <button class="cat-btn" onclick="setClubRegion('기타')">기타</button>
+  </div>
+  <div id="clubList"></div>
+ </div></div>
+
+ <!-- 모임 상세 -->
+ <div class="page" id="p-clubDetail"><div class="pg-sm" style="max-width:680px">
+  <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('club')">← 독서모임으로</button>
+  <div id="clubDetailContent"></div>
+ </div></div>
+
+ <!-- 모임 만들기 -->
+ <div class="page" id="p-addClub"><div class="pg-sm">
+  <div class="h1 serif">모임 만들기</div>
+  <div class="sub" style="margin-bottom:18px">새로운 독서모임을 시작해보세요</div>
+  <div class="card" style="padding:22px 24px">
+    <div class="fg"><label>모임 이름 *</label><input id="clubName" placeholder="예: 홍대 소설 읽기 모임"/></div>
+    <div class="fg"><label>소개글 *</label><textarea id="clubDesc" style="min-height:110px" placeholder="모임 소개, 활동 방식, 분위기 등 자유롭게 써주세요"></textarea></div>
+    <div class="g2">
+      <div class="fg">
+        <label>지역 *</label>
+        <select id="clubRegion" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;color:var(--txt);background:#fff">
+          <option value="">선택</option>
+          <option value="서울">서울</option>
+          <option value="경기">경기</option>
+          <option value="인천">인천</option>
+          <option value="부산">부산</option>
+          <option value="대구">대구</option>
+          <option value="대전">대전</option>
+          <option value="광주">광주</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div class="fg"><label>상세 위치</label><input id="clubPlace" placeholder="예: 홍대 근처 카페"/></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>정원 *</label><input id="clubMax" type="number" placeholder="예: 8" min="2" max="50"/></div>
+      <div class="fg"><label>나이 제한</label><input id="clubAgeLimit" placeholder="예: 20-30대, 누구나"/></div>
+    </div>
+    <div class="fg"><label>모임 일정</label><input id="clubSchedule" placeholder="예: 매주 토요일 오후 2시"/></div>
+    <div class="fg">
+      <label>방장 한마디</label>
+      <textarea id="clubHostMsg" style="min-height:70px" placeholder="가입 전 멤버들에게 전하고 싶은 말..."></textarea>
+    </div>
+    <div style="background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">
+      📌 모임 운영의 책임은 방장에게 있습니다.<br>AGORA는 모임 장소를 제공하지 않으며, 만남의 기회만 연결합니다.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn2" onclick="go('club')">취소</button>
+      <button class="btn" onclick="saveClub()">모임 만들기</button>
+    </div>
+  </div>
+ </div></div>
+
+ <div class="page" id="p-admin"><div class="pg">
  <div class="h1 serif">관리자 패널</div>
  <div class="sub">커뮤니티 관리 · 포인트 승인</div>
  <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
@@ -1043,7 +1115,7 @@ function go(name){
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
  document.getElementById('p-'+name).classList.add('active');
- const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name;
+ const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name==='addClub'||name==='clubDetail'?'club':name;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
   // FAB 처리
@@ -1051,11 +1123,13 @@ function go(name){
   if(_fab){
     if(window.innerWidth<=600&&name==='library'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
     else if(window.innerWidth<=600&&name==='forum'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
+    else if(window.innerWidth<=600&&name==='club'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addClub');};}
     else{_fab.style.cssText='display:none!important';}
   }
   if(name==='library')rLib();
  if(name==='public')rPub();
  if(name==='forum')rForum();
+ if(name==='club')rClub();
  if(name==='admin')rAdmin();
  if(name==='points')rPoints();
  if(name==='addBook'){
@@ -1238,7 +1312,7 @@ async function openBook(id){
         <div style="display:flex;transition:transform .3s ease" id="sliderTrack_pub_${b.id}">
           ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
             <img src="${i.url}" loading="lazy"
-              style="width:100%;max-height:60vh;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
+              style="width:100%;aspect-ratio:1/1;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
               onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>
           </div>`).join('')}
         </div>
@@ -1302,7 +1376,7 @@ async function openBookModal(id){
         <div style="display:flex;transition:transform .3s ease" id="sliderTrack_my_${b.id}">
           ${imgs.map((i,midx)=>`<div style="flex:0 0 100%;position:relative">
             <img src="${i.url}" loading="lazy"
-              style="width:100%;max-height:60vh;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
+              style="width:100%;aspect-ratio:1/1;object-fit:contain;cursor:pointer;background:#f5f5f5;display:block"
               onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>
           </div>`).join('')}
         </div>
@@ -1894,7 +1968,7 @@ async function rForum(){
     (p.author||'').toLowerCase().includes(fQ)
   );
   if(forumCat) posts=posts.filter(p=>p.category&&p.category===forumCat);
-  const el=document.getElementById('forumList');
+  const el=document.getElementById('postList');
   if(!el) return;
   if(!posts.length){
     el.innerHTML=fQ?'<div class="empty"><div class="et">검색 결과가 없습니다</div></div>':'<div class="empty"><div class="et">아직 토론이 없습니다</div></div>';
@@ -2184,6 +2258,195 @@ async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select(
 async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
+
+// ══ 독서모임 ══
+let clubRegionFilter='';
+function setClubRegion(r){
+  clubRegionFilter=r;
+  document.querySelectorAll('#clubRegionBar .cat-btn').forEach(b=>b.classList.toggle('on',b.textContent===(r||'전체')));
+  rClub();
+}
+
+async function rClub(){
+  load(true);
+  const[{data:clubs},{data:members}]=await Promise.all([
+    sb.from('agora_clubs').select('*').order('created_at',{ascending:false}),
+    sb.from('agora_club_members').select('*').eq('user_id',CU.id)
+  ]);
+  load(false);
+  const myClubIds=new Set((members||[]).map(m=>m.club_id));
+  let list=clubs||[];
+  if(clubRegionFilter) list=list.filter(c=>c.region===clubRegionFilter);
+  const el=document.getElementById('clubList');
+  const makeBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('addClub')">+ 모임 만들기</button></div>`;
+  if(!list.length){
+    el.innerHTML=makeBtn+`<div class="empty"><div style="font-size:38px;margin-bottom:10px">📚</div><div class="et">${clubRegionFilter?clubRegionFilter+' 지역 모임이 없어요':'아직 독서모임이 없어요'}</div><div class="es">첫 번째 모임을 만들어보세요</div></div>`;
+    return;
+  }
+  el.innerHTML=makeBtn+list.map(c=>{
+    const full=c.max_members&&(c.member_count||0)>=c.max_members;
+    const isMine=myClubIds.has(c.id);
+    return`<div class="card" style="cursor:pointer;padding:20px 22px;margin-bottom:10px" onclick="openClub('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+        <div style="font-size:16px;font-weight:600;color:var(--txt);line-height:1.4">${esc(c.name)}</div>
+        <span class="badge ${isMine?'bpub':full?'banon':'bprv'}" style="flex-shrink:0">${isMine?'참여중':full?'정원마감':'참여 가능'}</span>
+      </div>
+      ${c.description?`<div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(c.description)}</div>`:''}
+      <div style="display:flex;gap:12px;font-size:12px;color:var(--muted);flex-wrap:wrap">
+        ${c.region?`<span>📍 ${esc(c.region)}${c.place?' · '+esc(c.place):''}</span>`:''}
+        ${c.schedule?`<span>🗓 ${esc(c.schedule)}</span>`:''}
+        ${c.age_limit?`<span>🎂 ${esc(c.age_limit)}</span>`:''}
+        <span>👥 ${c.member_count||0}/${c.max_members||'∞'}명</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openClub(id){
+  load(true);
+  const[{data:c},{data:members},{data:users},{data:posts}]=await Promise.all([
+    sb.from('agora_clubs').select('*').eq('id',id).single(),
+    sb.from('agora_club_members').select('*').eq('club_id',id),
+    sb.from('agora_users').select('id,username'),
+    sb.from('agora_club_posts').select('*').eq('club_id',id).order('created_at',{ascending:true})
+  ]);
+  load(false);
+  if(!c)return;
+  const userMap={};(users||[]).forEach(u=>userMap[u.id]=u.username);
+  const isMember=(members||[]).some(m=>m.user_id===CU.id);
+  const isHost=c.host_id===CU.id;
+  const full=c.max_members&&(members||[]).length>=c.max_members;
+  document.getElementById('clubDetailContent').innerHTML=`
+    <!-- 모임 정보 -->
+    <div class="card" style="padding:24px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px">
+        <div style="font-size:22px;font-family:var(--font-serif);font-weight:600">${esc(c.name)}</div>
+        ${isHost?`<span class="badge bpub">방장</span>`:''}
+      </div>
+      ${c.description?`<div style="font-size:14px;color:var(--txt);line-height:1.9;margin-bottom:14px;white-space:pre-wrap">${esc(c.description)}</div>`:''}
+      <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--muted);margin-bottom:16px">
+        ${c.region?`<div>📍 ${esc(c.region)}${c.place?' · '+esc(c.place):''}</div>`:''}
+        ${c.schedule?`<div>🗓 ${esc(c.schedule)}</div>`:''}
+        ${c.age_limit?`<div>🎂 나이제한: ${esc(c.age_limit)}</div>`:''}
+        <div>👥 ${(members||[]).length}/${c.max_members||'∞'}명</div>
+        <div>방장: <strong style="color:var(--txt)">${esc(userMap[c.host_id]||'알 수 없음')}</strong></div>
+      </div>
+      ${c.host_message?`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--g);line-height:1.7;margin-bottom:16px">💬 ${esc(c.host_message)}</div>`:''}
+      ${!isMember
+        ?full
+          ?`<button class="btn" style="width:100%;opacity:.5" disabled>정원이 가득 찼어요</button>`
+          :`<button class="btn" style="width:100%" onclick="joinClub('${c.id}')">모임 참여하기</button>`
+        :isHost
+          ?`<div style="display:flex;gap:8px"><button class="btn2" style="flex:1" onclick="editClub('${c.id}')">모임 수정</button><button class="btnd" style="flex:1" onclick="deleteClub('${c.id}')">모임 삭제</button></div>`
+          :`<button class="btn2" style="width:100%" onclick="leaveClub('${c.id}')">모임 탈퇴</button>`
+      }
+    </div>
+
+    <!-- 멤버 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:10px">멤버 ${(members||[]).length}명</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px">
+      ${(members||[]).map(m=>`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--g);font-weight:500">${m.user_id===c.host_id?'👑 ':''} ${esc(userMap[m.user_id]||'알 수 없음')}</div>`).join('')}
+    </div>
+
+    <!-- 게시판 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">모임 게시판</div>
+    ${!isMember?`<div class="info" style="background:var(--gl);border:1px solid var(--gb);color:var(--muted);font-size:13px;margin-bottom:12px">모임에 참여하면 게시판을 이용할 수 있어요.</div>`:''}
+    <div id="clubPosts">
+      ${(posts||[]).length===0
+        ?'<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px">아직 게시글이 없어요</div>'
+        :(posts||[]).map(p=>`
+        <div class="card" style="padding:16px 18px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':''} ${esc(userMap[p.user_id]||'알 수 없음')}</div>
+            <div style="font-size:11px;color:var(--muted)">${ago(p.created_at)}</div>
+          </div>
+          <div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--txt)">${esc(p.content)}</div>
+          ${p.user_id===CU.id||isHost?`<div style="text-align:right;margin-top:8px"><span onclick="deleteClubPost('${p.id}','${c.id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span></div>`:''}
+        </div>`).join('')
+      }
+    </div>
+    ${isMember?`
+    <div style="margin-top:14px">
+      <textarea id="clubPostTxt" placeholder="모임원들과 이야기를 나눠보세요..." style="min-height:80px;margin-bottom:8px"></textarea>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn" onclick="saveClubPost('${c.id}')">등록</button>
+      </div>
+    </div>`:''}
+  `;
+  go('clubDetail');
+}
+
+async function saveClubPost(clubId){
+  const txt=(document.getElementById('clubPostTxt')||{value:''}).value.trim();
+  if(!txt){nt('내용을 입력해주세요.','err');return;}
+  const{error}=await sb.from('agora_club_posts').insert({id:ID(),club_id:clubId,user_id:CU.id,content:txt});
+  if(error){nt('오류: '+error.message,'err');return;}
+  nt('등록됐습니다.');
+  openClub(clubId);
+}
+
+async function deleteClubPost(postId,clubId){
+  if(!confirm('삭제할까요?'))return;
+  await sb.from('agora_club_posts').delete().eq('id',postId);
+  openClub(clubId);
+}
+
+async function joinClub(clubId){
+  const{data:c}=await sb.from('agora_clubs').select('max_members,member_count').eq('id',clubId).single();
+  if(c&&c.max_members&&(c.member_count||0)>=c.max_members){nt('정원이 가득 찼어요.','err');return;}
+  await sb.from('agora_club_members').insert({id:ID(),club_id:clubId,user_id:CU.id});
+  await sb.from('agora_clubs').update({member_count:(c?.member_count||0)+1}).eq('id',clubId);
+  nt('모임에 참여했습니다! 🎉');
+  openClub(clubId);
+}
+
+async function leaveClub(clubId){
+  if(!confirm('모임을 탈퇴할까요?'))return;
+  await sb.from('agora_club_members').delete().eq('club_id',clubId).eq('user_id',CU.id);
+  const{data:c}=await sb.from('agora_clubs').select('member_count').eq('id',clubId).single();
+  await sb.from('agora_clubs').update({member_count:Math.max(0,(c?.member_count||1)-1)}).eq('id',clubId);
+  nt('모임을 탈퇴했습니다.');
+  go('club');
+}
+
+async function deleteClub(clubId){
+  if(!confirm('모임을 삭제할까요? 모든 데이터가 삭제됩니다.'))return;
+  await Promise.all([
+    sb.from('agora_club_members').delete().eq('club_id',clubId),
+    sb.from('agora_club_posts').delete().eq('club_id',clubId),
+    sb.from('agora_clubs').delete().eq('id',clubId)
+  ]);
+  nt('모임이 삭제됐습니다.');
+  go('club');
+}
+
+async function saveClub(){
+  const name=(document.getElementById('clubName')||{value:''}).value.trim();
+  const desc=(document.getElementById('clubDesc')||{value:''}).value.trim();
+  const region=(document.getElementById('clubRegion')||{value:''}).value;
+  const maxM=parseInt((document.getElementById('clubMax')||{value:''}).value)||null;
+  if(!name){nt('모임 이름을 입력해주세요.','err');return;}
+  if(!desc){nt('소개글을 입력해주세요.','err');return;}
+  if(!region){nt('지역을 선택해주세요.','err');return;}
+  if(!maxM){nt('정원을 입력해주세요.','err');return;}
+  const place=(document.getElementById('clubPlace')||{value:''}).value.trim();
+  const ageLimit=(document.getElementById('clubAgeLimit')||{value:''}).value.trim();
+  const schedule=(document.getElementById('clubSchedule')||{value:''}).value.trim();
+  const hostMsg=(document.getElementById('clubHostMsg')||{value:''}).value.trim();
+  const cid=ID();
+  load(true);
+  const{error}=await sb.from('agora_clubs').insert({
+    id:cid,host_id:CU.id,name,description:desc,region,place:place||null,
+    max_members:maxM,age_limit:ageLimit||null,schedule:schedule||null,
+    host_message:hostMsg||null,member_count:1
+  });
+  if(error){load(false);nt('오류: '+error.message,'err');return;}
+  await sb.from('agora_club_members').insert({id:ID(),club_id:cid,user_id:CU.id});
+  load(false);
+  nt('모임이 만들어졌습니다! 🎉');
+  ['clubName','clubDesc','clubMax','clubSchedule','clubPlace','clubAgeLimit','clubHostMsg'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  go('club');
+}
 
 // ══ 슬라이더 (독서록 모달 사진) ══
 const _sliderIdx={};
