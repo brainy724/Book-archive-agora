@@ -68,13 +68,16 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .sort-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .sort-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:var(--font-body);}
 .sort-btn.on{background:var(--g);color:#fff;border-color:var(--g);}
-@media(max-width:600px){.lib-add-btn{display:none!important;}}
+
 .adm-tab{background:none;border:none;padding:10px 18px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-body);font-weight:500;}
 .adm-tab.on{color:var(--g);border-bottom-color:var(--g);font-weight:600;}
 /* FAB 버튼 */
-.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:26px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:150;transition:transform .2s;}
-.fab:hover{transform:scale(1.08);}
+
 /* 정렬 드롭다운 */
+.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:26px;cursor:pointer;display:none!important;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:150;transition:transform .2s;}
+.fab:hover{transform:scale(1.08);}
+.show-fab .fab{display:flex;}
+@media(min-width:601px){.fab{display:none!important;}}
 .sort-dropdown{position:relative;display:inline-block;}
 .sort-dropdown-menu{position:absolute;right:0;top:36px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);z-index:300;min-width:130px;overflow:hidden;display:none;}
 .sort-dropdown-menu.open{display:block;}
@@ -344,7 +347,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
  </div>
  <div class="nav-r">
- <span class="nav-pts" id="navPts" onclick="go('points')" title="마이페이지"> 0P</span>
+ 
  <span class="uname" id="navUser" style="font-size:13px;color:var(--muted)"></span>
  <span class="admbadge" id="navAdm" style="display:none">관리자</span>
  <button class="btn-sm" onclick="openCustom()" style="font-size:16px;padding:4px 8px"></button><button class="btn-sm" onclick="logout()">로그아웃</button>
@@ -359,7 +362,17 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
 
  <div class="page" id="p-library"><div class="pg">
- <div class="rf"><div><div class="h1 serif">내 서재</div><div class="sub" id="libSub">나의 독서 기록</div></div><button class="btn" onclick="go('addBook')">+ 기록 추가</button></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <div><div class="h1 serif">내 서재</div><div class="sub" id="libSub" style="margin-bottom:0">나의 독서 기록</div></div>
+      <div class="sort-dropdown">
+        <button class="btn2" style="padding:7px 14px;font-size:13px" onclick="toggleSortMenu()">정렬 ▾</button>
+        <div class="sort-dropdown-menu" id="sortMenu">
+          <div class="sort-opt on" id="sopt-date_desc" onclick="setSort('date_desc')">최신순</div>
+          <div class="sort-opt" id="sopt-date_asc" onclick="setSort('date_asc')">오래된순</div>
+          <div class="sort-opt" id="sopt-title" onclick="setSort('title')">제목순</div>
+        </div>
+      </div>
+    </div>
  <div id="bookList"></div>
  </div></div>
 
@@ -532,8 +545,10 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </div>
 
 
+
+
 <!-- FAB -->
-<button class="fab" onclick="go('addBook')" id="fabAdd">+</button>
+<button class="fab" id="fabAdd" onclick="go('addBook')" style="display:none">+</button>
 
 <!-- 컨텍스트 메뉴 -->
 <div class="ctx-menu" id="ctxMenu">
@@ -904,6 +919,37 @@ function clearCover(){
   document.getElementById('bCoverUrl').value='';
   document.getElementById('selectedCover').style.display='none';
 }
+function setColorPreset(g,g2,gl,gb){
+  const r=document.documentElement.style;
+  r.setProperty('--g',g);r.setProperty('--g2',g2);r.setProperty('--gl',gl);r.setProperty('--gb',gb);
+  localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
+  const cp=document.getElementById('customColorPicker');if(cp)cp.value=g;
+  const hx=document.getElementById('colorHexDisplay');if(hx)hx.textContent=g;
+}
+function applyCustomColor(hex){
+  const r=parseInt(hex.slice(1,3),16),g2=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const gl=`rgba(${r},${g2},${b},0.08)`;const gb=`rgba(${r},${g2},${b},0.2)`;
+  const g2h='#'+[r,g2,b].map(x=>Math.max(0,x-30).toString(16).padStart(2,'0')).join('');
+  setColorPreset(hex,g2h,gl,gb);
+  const hx=document.getElementById('colorHexDisplay');if(hx)hx.textContent=hex;
+}
+async function saveNickname(){
+  const val=document.getElementById('nicknameInput').value.trim();
+  const msgEl=document.getElementById('nicknameMsg');
+  msgEl.style.display='block';
+  if(val.length<2||val.length>12){msgEl.textContent='2~12자로 입력해주세요.';msgEl.style.color='var(--red)';return;}
+  if(!/^[가-힣a-zA-Z0-9]+$/.test(val)){msgEl.textContent='한글, 영문, 숫자만 사용 가능합니다.';msgEl.style.color='var(--red)';return;}
+  if(val===CU.username){msgEl.textContent='현재 닉네임과 동일합니다.';msgEl.style.color='var(--muted)';return;}
+  const{data:dup}=await sb.from('agora_users').select('id').eq('username',val).neq('id',CU.id).maybeSingle();
+  if(dup){msgEl.textContent='이미 사용 중인 닉네임입니다.';msgEl.style.color='var(--red)';return;}
+  const{error}=await sb.from('agora_users').update({username:val}).eq('id',CU.id);
+  if(error){msgEl.textContent='오류가 발생했습니다.';msgEl.style.color='var(--red)';return;}
+  CU.username=val;localStorage.setItem('agora_sess',JSON.stringify(CU));
+  document.getElementById('navUser').textContent=val;
+  document.getElementById('currentNickname').textContent=val;
+  document.getElementById('nicknameInput').value='';
+  msgEl.textContent='닉네임이 변경됐습니다.';msgEl.style.color='var(--g)';
+}
 async function rLib(){
  load(true);
  const[{data:bd},{data:hd},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),sb.from('agora_hearts').select('*'),sb.from('agora_book_images').select('*').order('sort_order',{ascending:true})]);
@@ -916,7 +962,31 @@ async function rLib(){
  document.getElementById('libSub').textContent=`나의 독서 기록${books.length>0?` · ${books.length}권`:''}`;
  const el=document.getElementById('bookList');
  if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="go('addBook')">첫 번째 책 기록하기</button></div>`;return;}
- el.innerHTML=`<div class="bg">${books.map(b=>{const th=b.cover_url?`<img class="bc" src="${b.cover_url}" loading="lazy"/>`:(b.images&&b.images[0])?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:`<div class="bph" style="background:linear-gradient(135deg,var(--gl),var(--gb));font-family:var(--font-serif);font-size:11px;color:var(--muted);text-align:center;padding:8px">${b.title.slice(0,15)}</div>`;return`<div class="bi" onclick="openEdit('${b.id}')">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span>${b.is_anonymous?'<span class="badge banon">익명</span>':''}${b.is_public&&b.hearts.length>0?`<span style="font-size:10px;color:#C03020;font-weight:600">♥ ${b.hearts.length}</span>`:''}</div></div></div>`;}).join('')}</div>`;
+ el.innerHTML=`<div class="bg">${books.map(b=>{
+    const th=b.cover_url?`<img class="bc" src="${b.cover_url}" loading="lazy"/>`:
+      (b.images&&b.images[0])?`<img class="bc" src="${b.images[0].url}" loading="lazy"/>`:
+      `<div class="bph"></div>`;
+    return`<div class="bi" id="bi-${b.id}">${th}<div class="bin"><div class="bt2">${esc(b.title)}</div><div class="ba">${esc(b.author||'')}</div><div class="bb"><span class="badge ${b.is_public?'bpub':'bprv'}">${b.is_public?'공개':'비공개'}</span></div></div></div>`;
+  }).join('')}</div>`;
+  // 이벤트 바인딩
+  books.forEach(b=>{
+    const card=document.getElementById('bi-'+b.id);
+    if(!card)return;
+    let pt=null;
+    // 모바일: 짧은터치 → 상세, 꾹누르기(600ms) → 메뉴
+    card.addEventListener('touchstart',()=>{
+      pt=setTimeout(()=>{pt=null;openCtx({clientX:window.innerWidth/2,clientY:window.innerHeight*0.4},b.id);},600);
+    },{passive:true});
+    card.addEventListener('touchend',()=>{if(pt){clearTimeout(pt);pt=null;openBookModal(b.id);}});
+    card.addEventListener('touchmove',()=>{if(pt){clearTimeout(pt);pt=null;}});
+    // 데스크탑: 클릭→상세, 더블클릭→수정, 우클릭→메뉴
+    let ct=null;
+    card.addEventListener('click',()=>{
+      if(ct){clearTimeout(ct);ct=null;openEdit(b.id);return;}
+      ct=setTimeout(()=>{ct=null;openBookModal(b.id);},250);
+    });
+    card.addEventListener('contextmenu',e=>{e.preventDefault();openCtx(e,b.id);});
+  });
 }
 async function openEdit(id){
  load(true);
@@ -1288,6 +1358,9 @@ async function paySubscription(){
  }catch(e){nt('결제를 취소했습니다.');}
 }
 async function rPoints(){
+  const cn=document.getElementById('currentNickname');if(cn)cn.textContent=CU.username||'';
+  const ni=document.getElementById('nicknameInput');if(ni)ni.value='';
+  const nm=document.getElementById('nicknameMsg');if(nm)nm.style.display='none';
   document.getElementById('currentNickname').textContent=CU.username||'';
   document.getElementById('nicknameInput').value='';
   document.getElementById('nicknameMsg').style.display='none';
@@ -1433,15 +1506,15 @@ window.onload=async()=>{
 </script>
 </body>
 </html>  <div class="page" id="p-points"><div class="pg-sm">
-    <div class="h1 serif" style="margin-bottom:28px">마이페이지</div>
+    <div class="h1 serif" style="margin-bottom:32px">마이페이지</div>
 
     <!-- 닉네임 -->
     <div style="margin-bottom:32px">
-      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:12px">닉네임</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:6px">현재: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">닉네임</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">현재 닉네임: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
       <div style="display:flex;gap:8px">
-        <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12" style="flex:1"
-          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')"/>
+        <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12"
+          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')" style="flex:1"/>
         <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
       </div>
       <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
@@ -1451,23 +1524,23 @@ window.onload=async()=>{
 
     <!-- 테마 색상 -->
     <div style="margin-bottom:32px">
-      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:16px">테마 색상</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
-        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B"></div>
-        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7"></div>
-        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358"></div>
-        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A"></div>
-        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50"></div>
-        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355"></div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <div class="c-swatch" onclick="setColorPreset('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC')" style="background:#B8956A" title="골드"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B4A6B','#6E3555','#F9F0F4','#EECFDC')" style="background:#8B4A6B" title="딥로즈"></div>
+        <div class="c-swatch" onclick="setColorPreset('#7B5EA7','#5E4580','#F3EEFF','#D4C0F0')" style="background:#7B5EA7" title="라벤더"></div>
+        <div class="c-swatch" onclick="setColorPreset('#5B7E9A','#3D607A','#EEF4F8','#BDD4E4')" style="background:#5B7E9A" title="블루"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B6358','#6B4A40','#F8F0EE','#E4C8C0')" style="background:#8B6358" title="테라코타"></div>
+        <div class="c-swatch" onclick="setColorPreset('#4A7A6A','#35604F','#EEF6F2','#BCDDD2')" style="background:#4A7A6A" title="세이지"></div>
+        <div class="c-swatch" onclick="setColorPreset('#2C3E50','#1A2535','#EEF0F2','#B8C0C8')" style="background:#2C3E50" title="다크네이비"></div>
+        <div class="c-swatch" onclick="setColorPreset('#8B7355','#6B5535','#F5F0E8','#DDD0B8')" style="background:#8B7355" title="브라운"></div>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
         <input type="color" id="customColorPicker" value="#B8956A"
-          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:#fff"
+          style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px"
           oninput="applyCustomColor(this.value)"/>
         <span style="font-size:13px;color:var(--muted)">직접 선택</span>
-        <span style="font-size:13px;color:var(--muted)" id="colorHexDisplay">#B8956A</span>
+        <span style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</span>
       </div>
     </div>
 
@@ -1475,14 +1548,12 @@ window.onload=async()=>{
 
     <!-- 포인트 -->
     <div>
-      <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:16px">포인트</div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">포인트</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div style="font-size:28px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
+        <div style="font-size:30px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
         <button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('payment')">충전하기</button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">
-        독후감 공개 +1,000P · 광장 질문 +500P · 댓글 +300P
-      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">독후감 공개 +1,000P &nbsp;·&nbsp; 광장 질문 +500P &nbsp;·&nbsp; 댓글 +300P</div>
       <div id="myReqs"></div>
     </div>
   </div></div>
