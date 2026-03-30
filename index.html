@@ -229,7 +229,7 @@ textarea{resize:vertical;min-height:110px;line-height:1.7;}
 .vov.open{display:flex;}
 .vcl{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .viw{position:relative;display:flex;align-items:center;justify-content:center;width:100%;flex:1;overflow:hidden;}
-.vim{max-width:92vw;max-height:78vh;object-fit:contain;border-radius:6px;transition:transform .1s;transform-origin:center;user-select:none;}
+.vim{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:4px;transition:transform .2s;transform-origin:center;user-select:none;cursor:zoom-in;}
 .var{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;}
 .var.l{left:10px;}
 .var.r{right:10px;}
@@ -1028,8 +1028,9 @@ async function ok(u){
  if(!localStorage.getItem('agora_gender')){showGender();}
  document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
  document.getElementById('app').style.display='block';
- // 뒤로가기 방지 - 히스토리 스택 설정
+ // 뒤로가기 방지
  history.replaceState({page:'app'},'',location.href);
+ history.pushState({page:'app'},'',location.href);
  history.pushState({page:'app'},'',location.href);
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0); // navPts optional
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
@@ -2168,7 +2169,21 @@ async function unban(uid){await sb.from('agora_users').update({banned:false,stri
 
 // ══ 뷰어 ══
 let vIs=[],vI=0,vSc=1,vLD=0;
-function openV(urls,idx){vIs=urls;vI=idx;vSc=1;upV();document.getElementById('vov').classList.add('open');document.body.style.overflow='hidden';vTouch();}
+function openV(urls,idx){
+  vIs=urls;vI=idx;vSc=1;
+  upV();
+  document.getElementById('vov').classList.add('open');
+  document.body.style.overflow='hidden';
+  vTouch();
+  // 탭으로 확대/축소
+  const img=document.getElementById('vim');
+  img.onclick=function(){
+    vSc=vSc>1?1:2.5;
+    img.style.transition='transform .2s';
+    img.style.cursor=vSc>1?'zoom-out':'zoom-in';
+    img.style.transform='scale('+vSc+')';
+  };
+}
 function closeV(){document.getElementById('vov').classList.remove('open');document.body.style.overflow='';}
 function vBgClick(e){if(e.target===document.getElementById('vov'))closeV();}
 function vMove(d){vI=(vI+d+vIs.length)%vIs.length;vSc=1;upV();}
@@ -2179,12 +2194,18 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('vov').class
 // ══ 초기화 ══
 
 window.addEventListener('popstate', function(e){
-  if(CU && document.getElementById('app').style.display!=='none'){
+  const app=document.getElementById('app');
+  const lw=document.getElementById('lw');
+  if(CU && app && app.style.display!=='none'){
+    // 로그인 상태 - 뒤로가기 차단하고 내서재 유지
+    e.preventDefault();
     history.pushState({page:'app'},'',location.href);
     go('library');
-  } else if(!CU){
-    // 비로그인 상태면 로그인 화면 유지
-    history.pushState({},'',location.href);
+  } else {
+    // 비로그인 상태 - 로그인 화면 표시
+    history.pushState({page:'login'},'',location.href);
+    if(app)app.style.display='none';
+    if(lw)lw.style.display='flex';
   }
 });
 window.onload=async()=>{
