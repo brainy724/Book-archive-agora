@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <title>AGORA — 독서 아카이브</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -548,6 +549,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       </div>
     </div>
  <div style="margin-bottom:16px"><input id="libSearch" placeholder="제목, 저자 검색..." oninput="rLib()" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box"/></div>
+    <div id="libFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
     <div id="bookList"></div>
   </div></div>
 
@@ -731,6 +733,15 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
           oninput="applyCustomColor(this.value)"/>
         <span style="font-size:13px;font-weight:500;color:var(--g)" id="colorHexDisplay">#B8956A</span>
       </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <!-- 독서 기록 내보내기 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">독서 기록 내보내기</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">내 독서 기록을 엑셀 파일로 저장할 수 있어요.<br>책 이름, 저자, 읽은 날짜, 평점, 독후감이 포함됩니다.</div>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="exportToExcel()">엑셀로 저장하기</button>
     </div>
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
@@ -1038,6 +1049,7 @@ function go(name){
  document.getElementById('anonLbl').textContent='이름 표시';document.getElementById('anonLbl').style.color='var(--muted)';
  pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';
   const _bcEl=document.getElementById('bCoverUrl');if(_bcEl)_bcEl.value='';
+  setStar(0);document.getElementById('bRating').value='0';
   const _scEl=document.getElementById('selectedCover');if(_scEl)_scEl.style.display='none';
   const _crEl=document.getElementById('coverSearchResult');if(_crEl)_crEl.style.display='none';document.getElementById('bCoverUrl').value='';document.getElementById('selectedCover').style.display='none';document.getElementById('coverSearchResult').style.display='none';
  }
@@ -1267,6 +1279,9 @@ async function rLib(){
 });
  const libQ=(document.getElementById('libSearch')||{value:''}).value.trim().toLowerCase();
   const filteredBooks=libQ?books.filter(b=>(b.title||'').toLowerCase().includes(libQ)||(b.author||'').toLowerCase().includes(libQ)):books;
+  await renderLibFolders(books);
+  // 폴더 필터
+  if(libFolder!=='all'){const fi=window._libFolderItems&&window._libFolderItems[libFolder];books=books.filter(b=>fi&&fi.has(b.id));}
   document.getElementById('libSub').textContent=`나의 독서 기록${filteredBooks.length>0?` · ${filteredBooks.length}권`:''}`;
  const el=document.getElementById('bookList');
  if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 독서 기록이 없습니다</div><div class="es">읽은 책을 기록해보세요</div><button class="btn" onclick="go('addBook')">첫 번째 책 기록하기</button></div>`;return;}
@@ -1319,7 +1334,7 @@ async function saveBook(){
  
  load(true);
  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
- const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null,category:(document.getElementById('bCategory')||{value:''}).value||null};
+ const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null,category:(document.getElementById('bCategory')||{value:''}).value||null,rating:parseInt((document.getElementById('bRating')||{value:'0'}).value)||0};
  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
  try{await sb.from('agora_book_images').delete().eq('book_id',bid);if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));}catch(e){console.warn('이미지 저장 스킵:',e);}
@@ -1341,7 +1356,14 @@ function switchPubTab(tab){
 
 // ══ 폴더 시스템 ══
 
-let pubCat='', forumCat='';
+let pubCat='', forumCat='', libFolder='all';
+
+function setStar(v){
+  const ri=document.getElementById('bRating');if(ri)ri.value=v;
+  document.querySelectorAll('.star').forEach(s=>{
+    s.style.color=parseInt(s.dataset.v)<=v?'#E8A020':'#ccc';
+  });
+}
 function setPubCat(cat){
   pubCat=cat;
   document.querySelectorAll('#pubCatBar .cat-btn').forEach(b=>{
@@ -1362,24 +1384,89 @@ async function loadFolders(type){
   const{data}=await sb.from('agora_folders').select('*').eq('user_id',CU.id).eq('type',type).order('created_at',{ascending:true});
   return data||[];
 }
+
+// 폴더에 아이템 추가
+async function openAddToFolder(refId, refType){
+  const type=refType==='mybook'?'lib':refType==='book'?'pub':'forum';
+  const folders=await loadFolders(type);
+  if(!folders.length){nt('먼저 폴더를 만들어주세요.');return;}
+  // 현재 속한 폴더 확인
+  const{data:fi}=await sb.from('agora_folder_items').select('folder_id').eq('user_id',CU.id).eq('ref_id',refId).eq('ref_type',refType);
+  const myFolders=new Set((fi||[]).map(i=>i.folder_id));
+  const opts=folders.map(f=>`<option value="${f.id}" ${myFolders.has(f.id)?'selected':''}>${esc(f.name)}</option>`).join('');
+  const sel=`<select id="_folderSel" multiple style="width:100%;height:120px;border:1px solid var(--border);border-radius:8px;padding:4px;font-family:var(--font-body)">${opts}</select>`;
+  const confirmed=await new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:700;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:320px">
+      <div style="font-size:16px;font-weight:600;margin-bottom:16px">폴더 선택</div>
+      ${sel}
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">여러 개 선택 가능</div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn2" style="flex:1" onclick="this.closest('div[style*=fixed]').remove()">취소</button>
+        <button class="btn" style="flex:1" onclick="(async()=>{
+          const sels=[...document.getElementById('_folderSel').selectedOptions].map(o=>o.value);
+          await sb.from('agora_folder_items').delete().eq('user_id','${CU.id}').eq('ref_id','${refId}').eq('ref_type','${refType}');
+          if(sels.length) await sb.from('agora_folder_items').insert(sels.map(fid=>({id:ID(),folder_id:fid,ref_id:'${refId}',ref_type:'${refType}',user_id:'${CU.id}'})));
+          this.closest('div[style*=fixed]').remove();
+          nt('폴더가 업데이트됐습니다.');
+          if('${type}'==='pub')rPub();else rForum();
+        })()">저장</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+  });
+}
+
+async function renderLibFolders(allBooks){
+  const[folders,{data:fi}]=await Promise.all([
+    loadFolders('lib'),
+    sb.from('agora_folder_items').select('folder_id,ref_id').eq('user_id',CU.id).eq('ref_type','mybook')
+  ]);
+  const folderItemMap={};
+  (fi||[]).forEach(i=>{
+    if(!folderItemMap[i.folder_id])folderItemMap[i.folder_id]=new Set();
+    folderItemMap[i.folder_id].add(i.ref_id);
+  });
+  window._libFolderItems=folderItemMap;
+  const el=document.getElementById('libFolders');if(!el)return;
+  const items=[
+    {id:'all',name:'전체',color:'#888',count:allBooks.length},
+    ...(folders||[]).map(f=>({id:f.id,name:f.name,color:f.color,count:(folderItemMap[f.id]||new Set()).size,editable:true}))
+  ];
+  el.innerHTML=items.map(f=>`
+    <div class="folder-card ${libFolder===f.id?'on':''}" onclick="setLibFolder('${f.id}')"
+      ${f.editable?`oncontextmenu="event.preventDefault();openEditFolder('${f.id}','${esc(f.name)}','${f.color}','lib')"`:''}>
+      <div class="folder-card-dot" style="background:${f.color}"></div>
+      <div class="folder-card-name">${esc(f.name)}</div>
+      <div class="folder-card-count">${f.count}</div>
+    </div>`).join('')
+    +`<div class="folder-add" onclick="openNewFolder('lib')">+</div>`;
+}
+function setLibFolder(id){libFolder=id;rLib();}
 async function renderPubFolders(allBooks){
-  const folders=await loadFolders('pub');
+  const[folders,{data:fi}]=await Promise.all([
+    loadFolders('pub'),
+    sb.from('agora_folder_items').select('folder_id,ref_id').eq('user_id',CU.id).eq('ref_type','book')
+  ]);
   const favCount=allBooks.filter(b=>b.hearts.includes(CU.id)).length;
+  const folderItemMap={};(fi||[]).forEach(i=>{if(!folderItemMap[i.folder_id])folderItemMap[i.folder_id]=new Set();folderItemMap[i.folder_id].add(i.ref_id);});
   const el=document.getElementById('pubFolders');if(!el)return;
+  el.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px';
   const items=[
     {id:'all',name:'전체',color:'#888',count:allBooks.length},
     {id:'fav',name:'즐겨찾기',color:'#C0392B',count:favCount},
-    ...folders.map(f=>{
-      const cnt=allBooks.filter(b=>b.folder_ids&&b.folder_ids.includes(f.id)).length;
-      return{id:f.id,name:f.name,color:f.color,count:cnt,editable:true};
-    })
+    ...(folders||[]).map(f=>({id:f.id,name:f.name,color:f.color,count:(folderItemMap[f.id]||new Set()).size,editable:true}))
   ];
   el.innerHTML=items.map(f=>`
-    <div class="folder-card ${pubFolder===f.id?'on':''}" onclick="setPubFolder('${f.id}')" ${f.editable?`oncontextmenu="event.preventDefault();openEditFolder('${f.id}','${esc(f.name)}','${f.color}','pub')"`:''}>
+    <div class="folder-card ${pubFolder===f.id?'on':''}" onclick="setPubFolder('${f.id}')" ${f.editable?`oncontextmenu="event.preventDefault();openEditFolder('${f.id}','${esc(f.name)}','${f.color}','pub')"`:''}
+      style="cursor:pointer">
       <div class="folder-card-dot" style="background:${f.color}"></div>
       <div class="folder-card-name">${esc(f.name)}</div>
       <div class="folder-card-count">${f.count}</div>
     </div>`).join('')+`<div class="folder-add" onclick="openNewFolder('pub')">+</div>`;
+  // 폴더 필터 적용
+  window._pubFolderItems=folderItemMap;
 }
 async function renderForumFolders(allPosts){
   const folders=await loadFolders('forum');
@@ -1457,116 +1544,53 @@ async function togglePostHeart(postId,e){
 }
 
 async function rPub(){
- load(true);
- const[{data:bd},{data:hd},{data:imgd}]=await Promise.all([sb.from('agora_books').select('*').eq('is_public',true),sb.from('agora_hearts').select('*'),sb.from('agora_book_images').select('*').order('sort_order',{ascending:true})]);
- const{count:rc}=await sb.from('agora_daily_reads').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type','book').eq('read_date',today());
- load(false);
- const fl=Math.max(0,2-(rc||0));const iEl=document.getElementById('rdInfoB');
- iEl.style.display='block';iEl.style.background=fl>0?'var(--gl)':'var(--brl)';iEl.style.border=`1px solid ${fl>0?'var(--gb)':'var(--brb)'}`;iEl.style.color=fl>0?'var(--g)':'var(--br)';
- iEl.textContent=fl>0?`오늘 공개 서재 무료 열람 ${fl}회 남았습니다`:'오늘 무료 열람을 모두 사용했습니다. 열람 시 1,000P가 차감됩니다.';
- let books=(bd||[]).map(b=>({...b,hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),images:(imgd||[]).filter(i=>i.book_id===b.id)})).sort((a,b)=>b.hearts.length-a.hearts.length);
+  load(true);
+  const[{data:bd},{data:hd},{data:imgd},{data:ud}]=await Promise.all([
+    sb.from('agora_books').select('*').eq('is_public',true).order('created_at',{ascending:false}),
+    sb.from('agora_hearts').select('*'),
+    sb.from('agora_book_images').select('*').order('sort_order',{ascending:true}),
+    sb.from('agora_users').select('id,username')
+  ]);
+  load(false);
+  const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
+  let allBooks=(bd||[]).map(b=>({
+    ...b,
+    hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),
+    images:(imgd||[]).filter(i=>i.book_id===b.id),
+    username:userMap[b.user_id]||''
+  }));
+  await renderPubFolders(allBooks);
   const pubQ=(document.getElementById('pubSearch')||{value:''}).value.trim().toLowerCase();
-  if(pubTabMode==='fav') books=books.filter(b=>b.hearts.includes(CU.id));
+  let books=allBooks;
+  if(pubFolder==='fav') books=books.filter(b=>b.hearts.includes(CU.id));
+  else if(pubFolder!=='all'){const fi=window._pubFolderItems&&window._pubFolderItems[pubFolder];books=books.filter(b=>fi&&fi.has(b.id));}
   if(pubQ) books=books.filter(b=>(b.title||'').toLowerCase().includes(pubQ)||(b.author||'').toLowerCase().includes(pubQ));
   if(pubCat) books=books.filter(b=>b.category&&b.category===pubCat);
- const el=document.getElementById('pubList');
- if(!books.length){el.innerHTML=`<div class="empty"><div style="font-size:38px;margin-bottom:10px"></div><div class="et">아직 공개된 감상평이 없습니다</div></div>`;return;}
- el.innerHTML=books.map(b=>{
- const hasH=b.hearts.includes(CU.id),isOwn=b.user_id===CU.id;
- const dn=b.is_anonymous?'익명의 독서가':esc(b.username||'');
- const th=b.images[0]?`<img src="${b.images[0].url}" style="width:56px;height:72px;object-fit:cover;border-radius:6px;flex-shrink:0"/>`:`<div style="width:56px;height:72px;background:var(--gl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0"></div>`;
- return`<div class="card" style="cursor:pointer" onclick="openBook('${b.id}')">
- <div style="display:flex;gap:14px;align-items:flex-start">${th}
- <div style="flex:1;min-width:0">
- <div style="display:flex;justify-content:space-between;align-items:flex-start">
- <div style="flex:1"><div style="font-size:17px;font-family:'Cormorant Garamond',serif;font-weight:500">${esc(b.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div><div style="font-size:12px;color:var(--muted);margin-top:1px">${dn}</div></div>
- <button class="hrt ${hasH?'on':''}" onclick="event.stopPropagation();togHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.4"':''}>${hasH?'♥':'♡'} ${b.hearts.length}</button>
- </div>
- ${b.review?`<div style="margin-top:8px;font-size:13px;color:var(--muted);line-height:1.6">${esc(b.review.slice(0,80))}${b.review.length>80?'…':''}</div>`:''}
- </div>
- </div>
- </div>`;
- }).join('');
+  const el=document.getElementById('pubList');
+  if(!books.length){
+    el.innerHTML='<div class="empty"><div class="et">'+(pubFolder==='fav'?'즐겨찾기한 독후감이 없습니다':pubQ?'검색 결과가 없습니다':'아직 공개된 감상평이 없습니다')+'</div></div>';
+    return;
+  }
+  // 4열 그리드
+  el.innerHTML=`<div class="book-grid4">${books.map(b=>{
+    const img=b.cover_url||((b.images&&b.images[0])?b.images[0].url:'');
+    const cover=img
+      ?`<img class="book-card4-cover" src="${img}" loading="lazy" onerror="this.style.background='var(--gl)';this.src=''"/>`
+      :`<div class="book-card4-cover" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:10px;color:var(--muted);text-align:center;padding:6px">${esc(b.title.slice(0,12))}</div>`;
+    const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
+    // 닉네임: 익명 설정 시 표시 안함
+    const showName=!b.is_anonymous&&b.username;
+    const liked=b.hearts.includes(CU.id);
+    return`<div class="book-card4" onclick="openBook('${b.id}')">
+      ${cover}
+      <div class="book-card4-title">${esc(b.title)}</div>
+      <div class="book-card4-author">${esc(b.author||'')}</div>
+      ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
+      ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
+      ${showName?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${esc(b.username)}</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
 }
-async function openBook(id){
- await gate('book',id,async()=>{
- load(true);
- const[{data:b},{data:imgd},{data:hd}]=await Promise.all([sb.from('agora_books').select('*').eq('id',id).single(),sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true}),sb.from('agora_hearts').select('*').eq('book_id',id)]);
- load(false);if(!b)return;
- const hasH=!!(hd&&hd.find(h=>h.user_id===CU.id)),isOwn=b.user_id===CU.id;
- const dn=b.is_anonymous?'익명의 독서가':esc(b.username||CU.username);
- const imgs=imgd||[];
- document.getElementById('bdContent').innerHTML=`
- <div class="card" style="margin-bottom:16px">
- <div style="font-size:22px;font-family:'Cormorant Garamond',serif;font-weight:500;margin-bottom:6px">${esc(b.title)}</div>
- <div style="font-size:14px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
- <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
- ${b.start_date?`<span style="font-size:13px;color:var(--muted)"> ${b.start_date}</span>`:''}
- ${b.end_date?`<span style="font-size:13px;color:var(--muted)"> ${b.end_date}</span>`:''}
- <span style="font-size:12px;color:var(--muted)">by ${dn}</span>
- </div>
- ${imgs.length>0?mkSlider(imgs,id):''}
- ${b.review?`<div style="margin-top:16px;font-size:16px;line-height:1.85;color:var(--txt);border-left:3px solid var(--brb);padding-left:14px;font-style:italic">"${esc(b.review)}"</div>`:''}
- <div style="margin-top:16px;display:flex;justify-content:flex-end">
- <button class="hrt ${hasH?'on':''}" onclick="togHeart('${b.id}','${b.user_id}')" ${isOwn?'style="cursor:default;opacity:.4"':''}>${hasH?'♥':'♡'} ${(hd||[]).length}</button>
- </div>
- </div>`;
- go('bookDetail');
- });
-}
-function mkSlider(imgs,bid){
- if(!imgs.length)return'';
- if(imgs.length===1)return`<div style="border-radius:10px;overflow:hidden;cursor:pointer" onclick="openV(${JSON.stringify(imgs.map(i=>i.url))},0)"><img src="${imgs[0].url}" style="width:100%;max-height:260px;object-fit:cover"/></div>`;
- const sH=imgs.map((img,i)=>`<div class="isd"><img src="${img.url}" onclick="openV(${JSON.stringify(imgs.map(i=>i.url))},${i})"/></div>`).join('');
- const dH=imgs.map((_,i)=>`<div class="sdot${i===0?' on':''}" id="sd-${bid}-${i}"></div>`).join('');
- return`<div class="isl" id="sl-${bid}"><div class="ist" id="ist-${bid}">${sH}</div><button class="sar l" onclick="mvSlide('${bid}',-1,${imgs.length})">‹</button><button class="sar r" onclick="mvSlide('${bid}',1,${imgs.length})">›</button><div class="sdots">${dH}</div></div>`;
-}
-function mvSlide(id,dir,tot){const tr=document.getElementById('ist-'+id);if(!tr)return;const cur=parseInt(tr.dataset.cur||'0'),next=(cur+dir+tot)%tot;tr.dataset.cur=next;tr.style.transform=`translateX(-${next*100}%)`;for(let i=0;i<tot;i++){const d=document.getElementById(`sd-${id}-${i}`);if(d)d.classList.toggle('on',i===next);}}
-async function togHeart(bid,oid){if(oid===CU.id)return;const{data:hd}=await sb.from('agora_hearts').select('*').eq('user_id',CU.id).eq('book_id',bid);if(hd&&hd.length>0)await sb.from('agora_hearts').delete().eq('user_id',CU.id).eq('book_id',bid);else await sb.from('agora_hearts').insert({user_id:CU.id,book_id:bid});rPub();}
-
-// ══ 광장 ══
-
-// ── 광고 배너 ──
-// 나중에 여기에 실제 도서 광고 정보를 넣으세요
-// 쿠팡파트너스 또는 알라딘 제휴 링크로 교체하면 됩니다
-const AD_BOOKS = [
- {
- title: '준비 중',
- author: '곧 추천 도서를 소개할게요',
- cover: '',
- link: '#',
- desc: ' 추천 도서 광고 준비 중'
- }
-];
-
-async function renderAd(){
- const adEl=document.getElementById('adContent');
- if(!adEl)return;
- // 구독 회원은 광고 미표시
- const sub=await isSubscribed();
- if(sub){adEl.innerHTML='';return;}
- const book=AD_BOOKS[Math.floor(Math.random()*AD_BOOKS.length)];
- adEl.innerHTML=`
- <div class="ad-banner">
- <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600"> 추천 도서</div>
- <a class="ad-book" href="${book.link}" target="_blank" rel="noopener">
- ${book.cover
- ? `<img src="${book.cover}" alt="${book.title}"/>`
- : `<div style="width:52px;height:68px;background:var(--gb);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0"></div>`}
- <div class="ad-book-info">
- <div class="ad-book-title">${book.title}</div>
- <div class="ad-book-sub">${book.author}</div>
- <div style="font-size:11px;color:var(--muted);margin-top:4px">${book.desc}</div>
- <span class="ad-book-btn">자세히 보기 →</span>
- </div>
- </a>
- </div>
- <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">구독 시 광고가 사라집니다</div>`;
-}
-// 무료 오픈 종료일 (2025년 9월 30일)
-const FREE_OPEN_UNTIL = new Date('2025-09-30T23:59:59');
-
-async function canAccessForum(){return true;}
 
 async function rForum(){
   load(true);
@@ -1581,6 +1605,7 @@ async function rForum(){
   const fQ=(document.getElementById('forumSearch')||{value:''}).value.trim().toLowerCase();
   let posts=allPosts;
   if(forumFolder==='fav') posts=posts.filter(p=>p.liked);
+  else if(forumFolder!=='all'){const fi=window._forumFolderItems&&window._forumFolderItems[forumFolder];posts=posts.filter(p=>fi&&fi.has(p.id));}
   if(fQ) posts=posts.filter(p=>
     (p.book_title||'').toLowerCase().includes(fQ)||
     (p.question||'').toLowerCase().includes(fQ)||
@@ -1593,17 +1618,36 @@ async function rForum(){
     el.innerHTML=fQ?'<div class="empty"><div class="et">검색 결과가 없습니다</div></div>':'<div class="empty"><div class="et">아직 토론이 없습니다</div></div>';
     return;
   }
-  el.innerHTML=posts.map(p=>`
-    <div class="forum-row" onclick="openPost('${p.id}')">
-      <div class="forum-row-meta">${p.category?`<span class="cat-badge" style="margin-right:6px">${esc(p.category)}</span>`:''} ${esc(p.book_title||'')}${p.author?' · '+esc(p.author):''} · ${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</div>
-      <div class="forum-row-title">${esc(p.question)}</div>
-      <div class="forum-row-bottom">
-        <span style="font-size:12px;color:var(--muted)">답변 ${p.comments.length}개</span>
-        <button onclick="togglePostHeart('${p.id}',event)" style="background:none;border:none;cursor:pointer;font-size:16px;color:${p.liked?'#C0392B':'var(--muted)'}">
-          ${p.liked?'♥':'♡'}
-        </button>
+  // 책별 커버 이미지 모으기
+  const bookTitles=[...new Set(posts.map(p=>p.book_title).filter(Boolean))];
+  const coverMap={};
+  await Promise.all(bookTitles.slice(0,10).map(async t=>{
+    try{
+      const r=await fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(t)}&size=1`,{headers:{Authorization:`KakaoAK ${KK_REST_KEY}`}});
+      const d=await r.json();
+      if(d.documents&&d.documents[0]&&d.documents[0].thumbnail) coverMap[t]=d.documents[0].thumbnail;
+    }catch{}
+  }));
+
+  el.innerHTML=posts.map(p=>{
+    const cover=coverMap[p.book_title];
+    return`<div class="forum-row" onclick="openPost('${p.id}')" style="display:flex;gap:12px;align-items:flex-start">
+      ${cover
+        ?`<img src="${cover}" style="width:40px;height:55px;object-fit:cover;border-radius:5px;flex-shrink:0;margin-top:2px" loading="lazy"/>`
+        :`<div style="width:40px;height:55px;background:var(--gl);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);text-align:center;padding:3px">${esc((p.book_title||'').slice(0,6))}</div>`
+      }
+      <div style="flex:1;min-width:0">
+        <div class="forum-row-meta">${p.category?`<span class="cat-badge" style="margin-right:4px">${esc(p.category)}</span>`:''}${esc(p.book_title||'')}${p.author?' · '+esc(p.author):''} · ${ago(p.created_at)}</div>
+        <div class="forum-row-title">${esc(p.question)}</div>
+        <div class="forum-row-bottom">
+          <span style="font-size:12px;color:var(--muted)">답변 ${p.comments.length}개</span>
+          <button onclick="togglePostHeart('${p.id}',event)" style="background:none;border:none;cursor:pointer;font-size:16px;color:${p.liked?'#C0392B':'var(--muted)'}">
+            ${p.liked?'♥':'♡'}
+          </button>
+        </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   const nPostBtn=document.getElementById('nPostBtn');
   if(nPostBtn)nPostBtn.style.display=CU.banned?'none':'inline-block';
 }
