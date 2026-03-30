@@ -17,7 +17,7 @@
  --g:#B8956A;--g2:#8C6A3E;--gl:#FBF5EE;--gb:#E8D5BC;
  --br:#2C1A2E;--brl:#F7F3F8;--brb:#D9C9DF;
  --card:#FFFFFF;--border:#EDE5E8;--txt:#2C1A2E;--muted:#8A7590;--red:#C0392B;
- --bg-page:#FAF8F5;--nav-h:56px;--tab-h:60px;
+ --bg-page:#FFFFFF;--nav-h:56px;--tab-h:60px;
  --font-body:'Noto Serif KR','Apple SD Gothic Neo',serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
  --gold:#B8956A;--gold2:#8C6A3E;
@@ -29,7 +29,7 @@ body.dark{
 body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;}
 .serif{font-family:var(--font-serif);}
 /* NAV */
-.nav{background:#FAF8F5;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.nav{background:#FFFFFF;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--gold);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
@@ -68,8 +68,39 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .sort-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .sort-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:var(--font-body);}
 .sort-btn.on{background:var(--g);color:#fff;border-color:var(--g);}
+@media(max-width:600px){.lib-add-btn{display:none!important;}}
 .adm-tab{background:none;border:none;padding:10px 18px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-body);font-weight:500;}
 .adm-tab.on{color:var(--g);border-bottom-color:var(--g);font-weight:600;}
+/* FAB 버튼 */
+.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:26px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:150;transition:transform .2s;}
+.fab:hover{transform:scale(1.08);}
+/* 정렬 드롭다운 */
+.sort-dropdown{position:relative;display:inline-block;}
+.sort-dropdown-menu{position:absolute;right:0;top:36px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);z-index:300;min-width:130px;overflow:hidden;display:none;}
+.sort-dropdown-menu.open{display:block;}
+.sort-opt{padding:11px 16px;font-size:13px;cursor:pointer;color:var(--txt);font-family:var(--font-body);}
+.sort-opt:hover{background:var(--gl);}
+.sort-opt.on{color:var(--g);font-weight:600;}
+/* 컨텍스트 메뉴 */
+.ctx-menu{position:fixed;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:500;min-width:140px;overflow:hidden;display:none;}
+.ctx-menu.open{display:block;}
+.ctx-item{padding:13px 18px;font-size:14px;cursor:pointer;color:var(--txt);font-family:var(--font-body);}
+.ctx-item:hover{background:var(--gl);}
+.ctx-item.del{color:var(--red);}
+.ctx-item.del:hover{background:#FDECEA;}
+/* 책 상세 모달 */
+.book-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:none;align-items:flex-end;justify-content:center;}
+.book-modal-ov.open{display:flex;}
+.book-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:28px 24px 40px;}
+@media(min-width:601px){
+  .book-modal-ov{align-items:center;}
+  .book-modal{border-radius:16px;max-height:80vh;}
+  .fab{display:none!important;}
+}
+@media(max-width:600px){
+  .fab{display:flex;}
+}
+
 /* 배지 */
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
 .bpub{background:var(--gl);color:var(--g);border:1px solid var(--gb);}
@@ -170,7 +201,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .warn{background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#8A2010;font-size:14px;}
 .info{border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;}
 /* 로그인 */
-.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;}
+.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FFFFFF;}
 .lcard{background:transparent;border:none;border-radius:0;padding:48px 40px;width:100%;max-width:480px;box-shadow:none;}
 .ltitle{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--gold);text-align:center;letter-spacing:6px;margin-bottom:16px;}
 .lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;letter-spacing:1.5px;}
@@ -269,7 +300,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </div>
 
 <!-- 관리자 로그인 -->
-<div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FAF8F5;">
+<div id="adminLoginWrap" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:#FFFFFF;">
   <div style="width:100%;max-width:360px;padding:48px 40px;text-align:center">
     <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);letter-spacing:4px;margin-bottom:4px">AGORA</div>
     <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
@@ -313,7 +344,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
  </div>
  <div class="nav-r">
- <span class="nav-pts" id="navPts" onclick="go('points')"> 0P</span>
+ <span class="nav-pts" id="navPts" onclick="go('points')" title="마이페이지"> 0P</span>
  <span class="uname" id="navUser" style="font-size:13px;color:var(--muted)"></span>
  <span class="admbadge" id="navAdm" style="display:none">관리자</span>
  <button class="btn-sm" onclick="openCustom()" style="font-size:16px;padding:4px 8px"></button><button class="btn-sm" onclick="logout()">로그아웃</button>
@@ -323,7 +354,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="ti on" id="t-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>내 서재</div>
  <div class="ti" id="t-public" onclick="go('public')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>공개 서재</div>
  <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>광장</div>
- <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>포인트</div>
+ <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M12 20c-4 0-7-2-7-4.5C5 13 8 11 12 11s7 2 7 4.5C19 18 16 20 12 20"/></svg>마이페이지</div>
  <div class="ti" id="t-admin" onclick="go('admin')" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>관리</div>
  </div>
 
@@ -500,6 +531,23 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div></div>
 </div>
 
+
+<!-- FAB -->
+<button class="fab" onclick="go('addBook')" id="fabAdd">+</button>
+
+<!-- 컨텍스트 메뉴 -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxView()">내용 보기</div>
+  <div class="ctx-item" onclick="ctxEdit()">수정하기</div>
+  <div class="ctx-item del" onclick="ctxDelete()">삭제</div>
+</div>
+
+<!-- 책 상세 모달 -->
+<div class="book-modal-ov" id="bookModalOv" onclick="closeBookModal(event)">
+  <div class="book-modal" id="bookModalContent">
+    <div id="bookModalBody"></div>
+  </div>
+</div>
 <div class="lov" id="lov" style="display:none"><div class="sp"></div></div>
 
 <!-- 열람 게이트 -->
@@ -743,7 +791,76 @@ document.getElementById('gov').addEventListener('click',e=>{if(e.target===docume
 
 // ══ 내 서재 ══
 
+
+// ── 정렬 드롭다운 ──
+function toggleSortMenu(){
+  document.getElementById('sortMenu').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  const menu = document.getElementById('sortMenu');
+  if(menu && !e.target.closest('.sort-dropdown')) menu.classList.remove('open');
+  const ctx = document.getElementById('ctxMenu');
+  if(ctx && !e.target.closest('.ctx-menu') && !e.target.closest('.bi')) closeCtx();
+});
 function setSort(mode){
+  sortMode=mode;
+  document.querySelectorAll('.sort-opt').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('sopt-'+mode);if(el)el.classList.add('on');
+  document.getElementById('sortMenu').classList.remove('open');
+  rLib();
+}
+
+// ── 컨텍스트 메뉴 ──
+let ctxBookId=null;
+function openCtx(e, bookId){
+  ctxBookId=bookId;
+  const menu=document.getElementById('ctxMenu');
+  menu.style.top=(e.clientY)+'px';
+  menu.style.left=Math.min(e.clientX, window.innerWidth-150)+'px';
+  menu.classList.add('open');
+}
+function closeCtx(){document.getElementById('ctxMenu').classList.remove('open');}
+function ctxView(){closeCtx();openBookModal(ctxBookId);}
+function ctxEdit(){closeCtx();openEdit(ctxBookId);}
+function ctxDelete(){closeCtx();delBook(ctxBookId);}
+
+// ── 책 상세 모달 ──
+async function openBookModal(id){
+  const[{data:b},{data:imgd},{data:hd}]=await Promise.all([
+    sb.from('agora_books').select('*').eq('id',id).single(),
+    sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true}),
+    sb.from('agora_hearts').select('*').eq('book_id',id)
+  ]);
+  if(!b)return;
+  const imgs=imgd||[];
+  const isOwn=b.user_id===CU.id;
+  document.getElementById('bookModalBody').innerHTML=`
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px">
+      ${b.cover_url?`<img src="${b.cover_url}" style="width:70px;height:95px;object-fit:cover;border-radius:8px;flex-shrink:0"/>`:''}
+      <div style="flex:1">
+        <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:4px">${esc(b.title)}</div>
+        <div style="font-size:13px;color:var(--muted)">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
+        ${b.start_date||b.end_date?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${b.start_date||''} ${b.end_date?'→ '+b.end_date:''}</div>`:''}
+      </div>
+    </div>
+    ${imgs.length>0?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">${imgs.map(i=>`<img src="${i.url}" style="height:80px;border-radius:6px;cursor:pointer" onclick="openV(${JSON.stringify(imgs.map(x=>x.url))},${imgs.indexOf(i)})"/>`).join('')}</div>`:''}
+    ${b.review?`<div style="font-size:15px;line-height:1.9;color:var(--txt);border-left:3px solid var(--brb);padding-left:14px;font-style:italic;margin-bottom:20px">"${esc(b.review)}"</div>`:''}
+    ${isOwn?`<div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn2" style="font-size:13px;padding:8px 16px" onclick="closeBookModal();openEdit('${b.id}')">수정</button>
+      <button class="btnd" style="font-size:13px;padding:8px 16px" onclick="closeBookModal();delBook('${b.id}')">삭제</button>
+    </div>`:''}
+  `;
+  document.getElementById('bookModalOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeBookModal(e){
+  if(e&&e.target!==document.getElementById('bookModalOv'))return;
+  document.getElementById('bookModalOv').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ── (기존 setSort 제거됨) ──
+function _oldSetSort(){
   sortMode=mode;
   document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('sort-'+mode);if(el)el.classList.add('on');
@@ -1171,6 +1288,9 @@ async function paySubscription(){
  }catch(e){nt('결제를 취소했습니다.');}
 }
 async function rPoints(){
+  document.getElementById('currentNickname').textContent=CU.username||'';
+  document.getElementById('nicknameInput').value='';
+  document.getElementById('nicknameMsg').style.display='none';
  load(true);
  const{data:u}=await sb.from('agora_users').select('*').eq('id',CU.id).single();
  const{data:reqs}=await sb.from('agora_point_requests').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}).limit(20);
