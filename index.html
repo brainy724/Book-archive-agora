@@ -551,7 +551,22 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="sub" id="abSub" style="margin-bottom:18px">새로운 독서 기록을 남겨보세요</div>
  <div class="card" style="padding:22px 24px">
  <input type="hidden" id="editId"/>
- <div class="fg"><label>책 제목 *</label><input id="bTitle" placeholder="책 제목을 입력하세요"/></div>
+ <input type="hidden" id="bCoverUrl" value=""/>
+ <div class="fg">
+   <label>책 제목 *</label>
+   <div style="display:flex;gap:8px">
+     <input id="bTitle" placeholder="책 제목을 입력하세요" style="flex:1"/>
+     <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="searchBookCover()">표지 검색</button>
+   </div>
+   <div id="coverSearchResult" style="display:none;margin-top:10px">
+     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">표지 선택 (Open Library · 무료)</div>
+     <div id="coverList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+   </div>
+   <div id="selectedCover" style="display:none;margin-top:10px;align-items:center;gap:10px">
+     <img id="selectedCoverImg" src="" style="width:55px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"/>
+     <div><div style="font-size:13px;font-weight:500">표지 선택됨</div><span onclick="clearCover()" style="font-size:12px;color:var(--muted);cursor:pointer">제거</span></div>
+   </div>
+ </div>
  <div class="g2">
  <div class="fg"><label>글쓴이</label><input id="bAuthor" placeholder="저자명"/></div>
  <div class="fg"><label>출판사</label><input id="bPub" placeholder="출판사명"/></div>
@@ -1039,7 +1054,10 @@ function go(name){
  ['pubTrk','anonTrk'].forEach(i=>document.getElementById(i).classList.remove('on'));
  document.getElementById('pubLbl').textContent='비공개';document.getElementById('pubLbl').style.color='var(--muted)';
  document.getElementById('anonLbl').textContent='이름 표시';document.getElementById('anonLbl').style.color='var(--muted)';
- pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';document.getElementById('bCoverUrl').value='';document.getElementById('selectedCover').style.display='none';document.getElementById('coverSearchResult').style.display='none';
+ pFiles=[];eUrls=[];document.getElementById('ipl').innerHTML='';
+  const _bcEl=document.getElementById('bCoverUrl');if(_bcEl)_bcEl.value='';
+  const _scEl=document.getElementById('selectedCover');if(_scEl)_scEl.style.display='none';
+  const _crEl=document.getElementById('coverSearchResult');if(_crEl)_crEl.style.display='none';document.getElementById('bCoverUrl').value='';document.getElementById('selectedCover').style.display='none';document.getElementById('coverSearchResult').style.display='none';
  }
 }
 
@@ -1048,7 +1066,7 @@ function onImgSel(e){Array.from(e.target.files).forEach(f=>{if(!pFiles.find(p=>p
 function rImgPrev(){const w=document.getElementById('ipl');w.innerHTML=eUrls.map((u,i)=>`<div class="ipw"><img src="${u}"/><button class="idl" onclick="rmEImg(${i})">✕</button></div>`).join('')+pFiles.map((f,i)=>`<div class="ipw"><img src="${URL.createObjectURL(f)}"/><button class="idl" onclick="rmPImg(${i})">✕</button></div>`).join('');}
 function rmEImg(i){eUrls.splice(i,1);rImgPrev();}
 function rmPImg(i){pFiles.splice(i,1);rImgPrev();}
-async function upImgs(bid){const urls=[];for(const f of pFiles){const ext=f.name.split('.').pop();const path=`${bid}/${ID()}.${ext}`;const{error}=await sb.storage.from('book-images').upload(path,f,{upsert:true});if(!error){const{data:pd}=sb.storage.from('book-images').getPublicUrl(path);urls.push(pd.publicUrl);}}return urls;}
+async function upImgs(bid){const urls=[];for(const f of pFiles){try{const ext=f.name.split('.').pop();const path=`${bid}/${ID()}.${ext}`;const{error}=await sb.storage.from('book-images').upload(path,f,{upsert:true});if(!error){const{data:pd}=sb.storage.from('book-images').getPublicUrl(path);urls.push(pd.publicUrl);}}catch(e){console.warn('이미지 업로드 스킵:',e);}}return urls;}
 
 // ══ 토글 ══
 function togPub(){isPub=!isPub;document.getElementById('bPubV').value=String(isPub);document.getElementById('pubTrk').classList.toggle('on',isPub);document.getElementById('pubLbl').textContent=isPub?'공개':'비공개';document.getElementById('pubLbl').style.color=isPub?'var(--g)':'var(--muted)';}
@@ -1292,11 +1310,10 @@ async function saveBook(){
  }
  load(true);
  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
- const coverUrl=document.getElementById('bCoverUrl').value;const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null};
+ const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null};
  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
- await sb.from('agora_book_images').delete().eq('book_id',bid);
- if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));
+ try{await sb.from('agora_book_images').delete().eq('book_id',bid);if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));}catch(e){console.warn('이미지 저장 스킵:',e);}
  if(isNew)await reqPts('book',bid);
  load(false);nt(eid?'수정되었습니다.':'독서 기록이 추가되었습니다.');
  pFiles=[];eUrls=[];go('library');
