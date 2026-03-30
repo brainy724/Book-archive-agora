@@ -679,8 +679,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="card" style="padding:22px 24px">
  <div class="fg"><label>책 제목</label><input id="pfBook" placeholder="어떤 책에 관한 이야기인가요?"/></div>
  <div class="fg"><label>질문 또는 주제</label><textarea id="pfQ" style="min-height:140px" placeholder="책을 읽으면서 느낀 점, 궁금한 점..."></textarea></div>
- <div style="margin-bottom:16px"><label>익명 설정</label><div class="tgl" onclick="togPostAnon()"><div class="trk on" id="pAnonTrk"><div class="thm"></div></div><span id="pAnonLbl" style="font-size:13px;color:var(--g)">익명으로 게시</span></div><input type="hidden" id="pfAnon" value="true"/></div>
- <div style="background:var(--gl);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--g)"> 일반회원: 질문글 작성 시 <strong>+500P</strong> 자동 적립 · 주 3개 한도<br> 구독회원: 무제한 작성 (포인트 미지급)</div>
+ <!-- 익명 고정 -->
+ <input type="hidden" id="pfAnon" value="true"/></div>
  <div style="display:flex;gap:10px;justify-content:flex-end">
  <button class="btn2" onclick="go('forum')">취소</button>
  <button class="btn" onclick="savePost()">게시하기</button>
@@ -1212,50 +1212,39 @@ async function openBook(id){
   const imgUrls=imgs.map(i=>i.url);
   const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
   const liked=(hd||[]).some(h=>h.user_id===CU.id);
-  const authorName=b.is_anonymous?'익명의 독서가':(ud&&ud[0]?ud[0].username:'');
-
+  const uname=b.is_anonymous?'익명의 독서가':((ud&&ud[0])?ud[0].username:'');
   document.getElementById('bookModalBody').innerHTML=`
-    <!-- 헤더 -->
     <div style="position:relative;background:linear-gradient(180deg,var(--gl) 0%,#fff 100%);padding:32px 24px 24px;border-radius:20px 20px 0 0;text-align:center">
-      <button onclick="closeBookModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">✕</button>
+      <button onclick="closeBookModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1">✕</button>
       ${b.cover_url
         ?`<img src="${b.cover_url}" style="width:90px;height:125px;object-fit:cover;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);margin-bottom:16px"/>`
-        :`<div style="width:90px;height:125px;background:var(--gl);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:11px;color:var(--muted);margin-bottom:16px;text-align:center;padding:8px">${esc(b.title.slice(0,15))}</div>`
+        :`<div style="width:90px;height:125px;background:var(--gl);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);margin-bottom:16px;padding:8px;text-align:center">${esc(b.title.slice(0,15))}</div>`
       }
-      <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:4px">${esc(b.title)}</div>
-      ${b.author?`<div style="font-size:13px;color:var(--muted);margin-bottom:4px">${esc(b.author)}${b.publisher?' · '+esc(b.publisher):''}</div>`:''}
-      ${!b.is_anonymous&&authorName?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">by ${esc(authorName)}</div>`:''}
+      <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:6px">${esc(b.title)}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
+      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':'by '+esc(uname)}</div>`:''}
       ${stars?`<div style="font-size:20px;color:#E8A020;letter-spacing:3px;margin-bottom:4px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
     </div>
-
-    <!-- 읽은 날짜 (입력된 경우만) -->
     ${(b.start_date||b.end_date)?`
     <div style="display:flex;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border)">
-      ${b.start_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">시작일</div><div style="font-size:13px;font-weight:500">${b.start_date}</div></div>`:''}
-      ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
-    </div>`:''
-    }
-
-    <!-- 첨부 사진 (있을 때만) -->
+      ${b.start_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">시작일</div><div style="font-size:13px;font-weight:500">${b.start_date}</div></div>`:''}
+      ${b.end_date?`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">완독일</div><div style="font-size:13px;font-weight:500">${b.end_date}</div></div>`:''}
+    </div>`:''}
     ${imgs.length>0?`
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">사진 ${imgs.length}장</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        ${imgs.map((i,idx)=>`<img src="${i.url}" loading="lazy"
-          style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer"
-          onclick="openV(${JSON.stringify(imgUrls)},${idx})"/>`).join('')}
+    <div style="border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);padding:16px 24px 12px">사진 ${imgs.length}장 · 눌러서 크게 보기</div>
+      <div style="display:flex;flex-direction:column">
+        ${imgs.map((i,midx)=>`<img src="${i.url}" loading="lazy"
+          style="width:100%;max-height:75vh;object-fit:contain;cursor:pointer;background:#1a1a1a;display:block"
+          onclick="event.stopPropagation();openV(${JSON.stringify(imgUrls)},${midx})"/>`).join('')}
       </div>
     </div>`:''}
-
-    <!-- 독후감 (있을 때만) -->
     ${b.review?`
     <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
       <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap">${esc(b.review)}</div>
     </div>`:''}
-
-    <!-- 하트 버튼 -->
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
       <button onclick="(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});openBook('${b.id}');})()"
         style="background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'}">
@@ -1266,6 +1255,7 @@ async function openBook(id){
   document.getElementById('bookModalOv').classList.add('open');
   document.body.style.overflow='hidden';
 }
+
 async function openBookModal(id){
   const[{data:b},{data:imgd},{data:hd}]=await Promise.all([
     sb.from('agora_books').select('*').eq('id',id).single(),
@@ -1288,6 +1278,7 @@ async function openBookModal(id){
       <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
       ${stars?`<div style="font-size:22px;color:#E8A020;letter-spacing:3px;margin-bottom:6px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
+      ${(!b.is_anonymous&&b.username)?`<div style="font-size:11px;color:var(--muted);margin-top:6px">by ${esc(b.username||'')}</div>`:b.is_anonymous?`<div style="font-size:11px;color:var(--muted);margin-top:6px">익명의 독서가</div>`:''}
     </div>
     ${(b.start_date||b.end_date)?`
     <div style="display:flex;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border)">
@@ -1978,19 +1969,25 @@ async function isSubscribed(){
 }
 
 async function savePost(){
- const bt=document.getElementById('pfBook').value.trim(),q=document.getElementById('pfQ').value.trim();
- if(!bt||!q){nt('모든 항목을 입력해주세요.','err');return;}
- 
- const sub=await isSubscribed();
- // 일반회원 주간 질문글 한도 체크 (주 3개)
- load(true);const pid=ID();
- const{error}=await sb.from('agora_posts').insert({id:pid,user_id:CU.id,book_title:bt,question:q,is_anonymous:document.getElementById('pfAnon').value==='true'});
- if(error){load(false);nt('게시 중 오류가 발생했습니다.','err');return;}
- // 포인트 자동 지급 (일반회원만 500P)
- 
- load(false);
- document.getElementById('pfBook').value='';document.getElementById('pfQ').value='';
- nt('토론이 등록되었습니다.');go('forum');renderAd();
+  const bt=document.getElementById('pfBook').value.trim();
+  const q=document.getElementById('pfQ').value.trim();
+  if(!bt){nt('책 제목을 입력해주세요.','err');return;}
+  if(!q){nt('질문을 입력해주세요.','err');return;}
+  load(true);
+  const pid=ID();
+  const cat=(document.getElementById('pfCategory')||{value:''}).value||null;
+  const{error}=await sb.from('agora_posts').insert({
+    id:pid,user_id:CU.id,book_title:bt,question:q,
+    category:cat,
+    is_anonymous:true
+  });
+  if(error){load(false);nt('게시 오류: '+error.message,'err');return;}
+  load(false);
+  document.getElementById('pfBook').value='';
+  document.getElementById('pfQ').value='';
+  const pfCatEl=document.getElementById('pfCategory');if(pfCatEl)pfCatEl.value='';
+  nt('토론이 등록됐습니다.');
+  go('forum');
 }
 async function openPost(id){
  const ok2=await canAccessForum();
@@ -2001,7 +1998,7 @@ async function openPost(id){
  load(false);if(!p)return;
  const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
  document.getElementById('pdContent').innerHTML=`
- <div class="card" style="margin-bottom:16px"><div class="ftag"> ${esc(p.book_title)}</div><div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div><div style="font-size:12px;color:var(--muted)">${p.is_anonymous?'익명':'작성자'} · ${ago(p.created_at)}</div></div>
+ <div class="card" style="margin-bottom:16px"><div class="ftag"> ${esc(p.book_title)}</div><div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.65;margin-bottom:10px">${esc(p.question)}</div><div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div></div>
  <div style="font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500">답변 ${vis.length}개</div>
  ${vis.length===0?`<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:14px;border-bottom:1px solid var(--border);margin-bottom:18px">아직 답변이 없습니다.</div>`:''}
  ${vis.map(c=>`<div class="cm"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:15px;line-height:1.75;margin-bottom:4px">${esc(c.content)}</div><div style="font-size:12px;color:var(--muted)">익명 · ${ago(c.created_at)}</div></div>${CU.isAdmin?`<button class="btnd" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button>`:''}</div></div>`).join('')}`;
