@@ -716,13 +716,15 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
 
     <div>
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">포인트</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div style="font-size:30px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
-        <button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('payment')">충전하기</button>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
+      <div id="subStatusBox" style="background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:13px;color:var(--g);font-weight:600" id="subStatusText">확인 중...</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="subExpireText"></div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">독후감 공개 +1,000P &nbsp;·&nbsp; 광장 질문 +500P &nbsp;·&nbsp; 댓글 +300P</div>
-      <div id="myReqs"></div>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="go('payment')">구독하기 · 월 9,900원</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center;line-height:1.8">
+        가입 후 1개월 무료 체험<br>이후 광장 이용 시 구독 필요
+      </div>
     </div>
   </div></div>
 
@@ -1334,20 +1336,14 @@ async function saveBook(){
  const title=document.getElementById('bTitle').value.trim();if(!title){nt('책 제목을 입력해주세요.','err');return;}
  const eid=document.getElementById('editId').value,bid=eid||ID(),isNew=!eid;
  // 독후감 공개 월 6회 한도 (일반회원, 신규 등록만)
- if(isNew && document.getElementById('bPubV').value==='true'){
- const sub=await isSubscribed();
- if(!sub){
- const cnt=await checkMonthlyPublicLimit();
- if(cnt>=6){nt('일반회원은 이번 달 공개 독후감 한도(6회)에 도달했습니다.','err');load(false);return;}
- }
- }
+ 
  load(true);
  const newUrls=await upImgs(bid);const allUrls=[...eUrls,...newUrls];
  const coverUrl=(document.getElementById('bCoverUrl')||{value:''}).value||'';const pl={title,author:document.getElementById('bAuthor').value,publisher:document.getElementById('bPub').value,start_date:document.getElementById('bStart').value,end_date:document.getElementById('bEnd').value,review:document.getElementById('bReview').value,is_public:document.getElementById('bPubV').value==='true',cover_url:coverUrl||null};
  const{error}=eid?await sb.from('agora_books').update(pl).eq('id',eid):await sb.from('agora_books').insert({id:bid,user_id:CU.id,...pl});
  if(error){load(false);nt('저장 중 오류가 발생했습니다.','err');return;}
  try{await sb.from('agora_book_images').delete().eq('book_id',bid);if(allUrls.length>0)await sb.from('agora_book_images').insert(allUrls.map((url,i)=>({id:ID(),book_id:bid,url,sort_order:i})));}catch(e){console.warn('이미지 저장 스킵:',e);}
- if(isNew)await reqPts('book',bid);
+ 
  load(false);nt(eid?'수정되었습니다.':'독서 기록이 추가되었습니다.');
  pFiles=[];eUrls=[];go('library');
 }
@@ -1574,16 +1570,16 @@ async function renderAd(){
 const FREE_OPEN_UNTIL = new Date('2025-09-30T23:59:59');
 
 async function canAccessForum(){
- if(!CU) return false;
- // 무료 오픈 기간 체크
- if(new Date() <= FREE_OPEN_UNTIL) return true;
- // 정규 구독 확인
- const{data:u}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
- if(u?.subscription_expires && new Date(u.subscription_expires)>new Date()) return true;
- // 포인트 이용권 확인
- const{data:pass}=await sb.from('agora_forum_passes').select('*').eq('user_id',CU.id).gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);
- return !!(pass&&pass.length>0);
+  if(!CU) return false;
+  // 가입일 기준 1달 무료 체험
+  const joinDate = new Date(CU.created_at || Date.now());
+  const trialEnd = new Date(joinDate);
+  trialEnd.setMonth(trialEnd.getMonth() + 1);
+  if(new Date() < trialEnd) return true; // 체험 기간
+  // 체험 종료 후 구독자만
+  return await isSubscribed();
 }
+
 async function rForum(){
  load(true);
  const[{data},hasAccess]=await Promise.all([
@@ -1598,7 +1594,7 @@ async function rForum(){
  iEl.textContent=isFree?' 오픈 기념 무료 이용 기간 (~ 2025년 9월 30일)':'광장 이용 중 ';
  } else {
  iEl.style.display='block';iEl.style.background='var(--brl)';iEl.style.border='1px solid var(--brb)';iEl.style.color='var(--br)';
- iEl.innerHTML='광장은 <strong>정규 구독(월 9,900원)</strong> 또는 <strong>10,000P 이용권</strong>이 필요합니다. <span onclick="go(\'payment\')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
+ iEl.innerHTML='무료 체험이 종료됐습니다. <strong>월 9,900원 구독</strong>으로 광장을 이용할 수 있어요. <span onclick="go(\'payment\')" style="text-decoration:underline;cursor:pointer">구독하기 →</span>';
  }
  let posts=(data||[]).map(p=>({...p,comments:(p.agora_comments||[]).filter(c=>!c.is_deleted)}));
   const fQ=(document.getElementById('forumSearch')||{value:''}).value.trim().toLowerCase();
@@ -1662,16 +1658,13 @@ async function giveQualityPts(uid,uname){
 }
 
 // ── 독후감 공개 월 6회 한도 ──
-async function checkMonthlyPublicLimit(){
- const monthStart=new Date();monthStart.setDate(1);monthStart.setHours(0,0,0,0);
- const{count}=await sb.from('agora_books').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('is_public',true).gte('created_at',monthStart.toISOString());
- return (count||0);
-}
+
 async function isSubscribed(){
- const{data:u}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
- return !!(u?.subscription_expires && new Date(u.subscription_expires)>new Date());
+  if(!CU) return false;
+  const{data}=await sb.from('agora_users').select('subscription_expires').eq('id',CU.id).single();
+  if(!data||!data.subscription_expires) return false;
+  return new Date(data.subscription_expires) > new Date();
 }
-function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.toISOString();}
 
 async function savePost(){
  const bt=document.getElementById('pfBook').value.trim(),q=document.getElementById('pfQ').value.trim();
@@ -1733,50 +1726,9 @@ async function delCmt(cid,cuid){
 
 // ══ 포인트 ══
 
-async function autoAddPts(amount){
- const np=(CU.points||0)+amount;
- await sb.from('agora_users').update({points:np}).eq('id',CU.id);
- CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
-}
-async function reqPts(type,refId){
- const{count}=await sb.from('agora_point_requests').select('id',{count:'exact',head:true}).eq('user_id',CU.id).eq('ref_type',type).gte('created_at',today()+'T00:00:00');
- if((count||0)>=2){nt('오늘 포인트 신청 한도(2회)에 도달했습니다.');return;}
- await sb.from('agora_point_requests').insert({id:ID(),user_id:CU.id,ref_type:type,ref_id:refId,points:1000,status:'pending'});
- nt('포인트 1,000P 신청 완료! 관리자 승인 후 지급됩니다 ');
-}
 
-async function buyForumPass(){
- const pts=CU.points||0;
- if(pts<10000){nt('포인트가 부족합니다. (10,000P 필요)','err');return;}
- if(!confirm('10,000P를 차감하여 광장 1개월 이용권을 구매할까요?'))return;
- const exp=new Date();exp.setMonth(exp.getMonth()+1);
- const np=pts-10000;
- await Promise.all([
- sb.from('agora_forum_passes').insert({id:ID(),user_id:CU.id,expires_at:exp.toISOString(),points_used:10000}),
- sb.from('agora_users').update({points:np}).eq('id',CU.id)
- ]);
- CU.points=np;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(np);
- nt('광장 1개월 이용권이 활성화되었습니다! 🎉');go('forum');
-}
 
-let selectedPts=0;
-function showSubModal(){
- const pts=CU.points||0;
- document.getElementById('modalMyPts').textContent=pts.toLocaleString();
- document.getElementById('payMyPts').textContent=pts.toLocaleString();
- selectedPts=0;updateSubPrice();
- // 차감 가능 포인트 버튼 (1,000P 단위, 최대 9,000P)
- const max=Math.min(Math.floor(pts/1000)*1000,9000);
- const btns=document.getElementById('ptsBtns');
- btns.innerHTML='<button onclick="selPts(0)" class="btn2" style="padding:5px 12px;font-size:13px">0P</button>';
- for(let i=1000;i<=max;i+=1000){
- btns.innerHTML+=`<button onclick="selPts(${i})" class="btn2" style="padding:5px 12px;font-size:13px">${i.toLocaleString()}P</button>`;
- }
- document.getElementById('subModal').style.display='flex';
-}
-function selPts(p){selectedPts=p;updateSubPrice();document.querySelectorAll('#ptsBtns button').forEach(b=>{b.style.background=parseInt(b.textContent)===p?'var(--g)':'';b.style.color=parseInt(b.textContent)===p?'#fff':'';})}
-function updateSubPrice(){document.getElementById('ptsDiscount').textContent=`-${selectedPts.toLocaleString()}원`;document.getElementById('finalAmount').textContent=`${(9900-selectedPts).toLocaleString()}원`;}
-function closeSubModal(){document.getElementById('subModal').style.display='none';}
+
 async function paySubscription(){
  const amount=9900-selectedPts;
  if(amount<=0){
@@ -2010,13 +1962,15 @@ window.onload=async()=>{
 
     <!-- 포인트 -->
     <div>
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">포인트</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div style="font-size:30px;font-weight:700;color:var(--g);font-family:var(--font-serif)" id="myPtsNum">0 P</div>
-        <button class="btn" style="padding:9px 18px;font-size:13px" onclick="go('payment')">충전하기</button>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
+      <div id="subStatusBox" style="background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:13px;color:var(--g);font-weight:600" id="subStatusText">확인 중...</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="subExpireText"></div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8">독후감 공개 +1,000P &nbsp;·&nbsp; 광장 질문 +500P &nbsp;·&nbsp; 댓글 +300P</div>
-      <div id="myReqs"></div>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="go('payment')">구독하기 · 월 9,900원</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center;line-height:1.8">
+        가입 후 1개월 무료 체험<br>이후 광장 이용 시 구독 필요
+      </div>
     </div>
   </div></div>
 
