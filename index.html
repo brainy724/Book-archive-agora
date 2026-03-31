@@ -1410,21 +1410,22 @@ async function doAuth(){
  await ok({...data,isAdmin:data.is_admin});
 }
 async function ok(u){
- // DB에서 최신 유저 정보 가져오기 (trial_started_at, premium_until 반영)
+ // DB에서 최신 유저 정보 가져오기
  try{
    const{data:fresh}=await sb.from('agora_users').select('*').eq('id',u.id).single();
    if(fresh) u={...u,...fresh,isAdmin:u.isAdmin??fresh.is_admin};
  }catch{}
  CU=u;localStorage.setItem('agora_sess',JSON.stringify(u));
- // 성별 확인 (최초 1회)
- if(!localStorage.getItem('agora_gender')){showGender();}
- document.getElementById('lw').classList.remove('active');document.getElementById('lw').style.display='none';
+ // 모든 로그인 화면 숨기기
+ document.getElementById('lw').classList.remove('active');
+ document.getElementById('lw').style.display='none';
+ document.getElementById('adminLoginWrap').style.display='none';
  document.getElementById('app').style.display='block';
+ load(false);
  history.replaceState({tab:'library',page:'library'},'',location.href);
  for(let _i=0;_i<20;_i++) history.pushState({tab:'library',page:'library'},'',location.href);
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0);
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
- load(false);
  updateNavTabs();
  // 무료체험 팝업: 관리자 제외, 한 세션당 1번만
  const s=getMembershipStatus();
@@ -1432,12 +1433,14 @@ async function ok(u){
    sessionStorage.setItem('trialPopupShown','1');
    setTimeout(()=>showTrialPopup(),800);
  }
+ // 성별 확인 (최초 1회, 관리자 제외)
+ if(!u.isAdmin&&!localStorage.getItem('agora_gender')){showGender();}
  go('library');
  loadNotifSettings();
  checkUnreadNotifs();
  initNotifRealtime();
 }
-function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('lw').style.display='flex';document.getElementById('aId').value='';document.getElementById('aPw').value='';}
+function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('adminLoginWrap').style.display='none';document.getElementById('lw').style.display='flex';const ai=document.getElementById('aId');if(ai)ai.value='';const ap=document.getElementById('aPw');if(ap)ap.value='';}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('lw').style.display!=='none')doAuth();});
 
 // ══ 페이지 이동 ══
