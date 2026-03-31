@@ -1,9 +1,10 @@
-const CACHE_NAME = 'agora-v2';
+const CACHE_NAME = 'agora-v3';
 const CACHE_URLS = [
   '/',
   '/index.html',
   '/splash.html',
-  '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
   '/manifest.json'
 ];
 
@@ -25,6 +26,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.url.includes('supabase.co')) return;
+  if (e.request.url.includes('kakao')) return;
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
