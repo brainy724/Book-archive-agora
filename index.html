@@ -660,6 +660,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <button class="cat-btn" onclick="setPubCat('경제경영')">경제경영</button>
       <button class="cat-btn" onclick="setPubCat('역사')">역사</button>
       <button class="cat-btn" onclick="setPubCat('과학')">과학</button>
+      <button class="cat-btn" onclick="setPubCat('시')">시</button>
+      <button class="cat-btn" onclick="setPubCat('기타')">기타</button>
     </div>
 <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
       <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;"/>
@@ -697,16 +699,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
  <!-- 전체 글 영역 -->
  <div id="forumAllSection">
- <div class="cat-bar" id="forumCatBar">
-      <button class="cat-btn on" onclick="setForumCat('')">전체</button>
-      <button class="cat-btn" onclick="setForumCat('소설')">소설</button>
-      <button class="cat-btn" onclick="setForumCat('에세이')">에세이</button>
-      <button class="cat-btn" onclick="setForumCat('자기계발')">자기계발</button>
-      <button class="cat-btn" onclick="setForumCat('인문')">인문</button>
-      <button class="cat-btn" onclick="setForumCat('경제경영')">경제경영</button>
-      <button class="cat-btn" onclick="setForumCat('역사')">역사</button>
-      <button class="cat-btn" onclick="setForumCat('과학')">과학</button>
-    </div>
 <div style="display:flex;justify-content:center;margin-bottom:16px">
       <input id="forumSearch" placeholder="책 제목 · 저자 · 질문 검색" oninput="rForum()" style="width:100%;max-width:480px;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;text-align:center"/>
     </div>
@@ -1096,7 +1088,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 <!-- 무료체험 팝업 -->
 <div id="trialPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
-    <div style="font-size:36px;margin-bottom:12px">📚</div>
     <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--g);margin-bottom:8px">30일 무료체험</div>
     <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px">
       지금 시작하면 30일 동안<br>아고라의 주요 기능을 무료로 이용할 수 있어요.
@@ -1109,7 +1100,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         ❌ &nbsp;독서모임 (프리미엄 전용)
       </div>
     </div>
-    <button class="btn" style="width:100%;padding:13px;font-size:15px;margin-bottom:10px" onclick="startTrial()">30일 무료체험 시작하기 🌿</button>
+    <button class="btn" style="width:100%;padding:13px;font-size:14px;margin-bottom:10px" onclick="startTrial()">30일 무료체험 시작하기</button>
     <button class="btn2" style="width:100%;padding:11px;font-size:13px" onclick="skipTrial()">괜찮아요, 나중에 할게요</button>
     <div style="font-size:11px;color:var(--muted);margin-top:12px">체험 후 자동 결제되지 않아요 · 언제든 시작 가능</div>
   </div>
@@ -1118,7 +1109,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 <!-- 프리미엄 유도 모달 -->
 <div id="premiumGate" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
-    <div style="font-size:36px;margin-bottom:12px">🔒</div>
     <div style="font-family:var(--font-serif);font-size:20px;font-weight:600;margin-bottom:8px" id="premGateTitle">프리미엄 전용 기능이에요</div>
     <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px" id="premGateDesc">월 6,900원으로 아고라의 모든 기능을 이용하세요.</div>
     <button class="btn" style="width:100%;padding:13px;font-size:14px;margin-bottom:10px" onclick="closePremGate();go('points')">구독하러 가기</button>
@@ -1262,7 +1252,6 @@ function updateNavTabs(){
   const isTrial=s==='trial';
   const hasClub=isPrem;
   const hasFull=isPrem||isTrial;
-  const lock='🔒 ';
   // 사이드바
   ['sb-public','sb-forum'].forEach(id=>{
     const el=document.getElementById(id);
@@ -2352,7 +2341,6 @@ async function rForum(){
     (p.question||'').toLowerCase().includes(fQ)||
     (p.author||'').toLowerCase().includes(fQ)
   );
-  if(forumCat) posts=posts.filter(p=>p.category&&p.category===forumCat);
   const el=document.getElementById('postList');
   if(!el) return;
   if(!posts.length){
