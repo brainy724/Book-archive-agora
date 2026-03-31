@@ -8,6 +8,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <title>AGORA — 독서 아카이브</title>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#B8956A"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="AGORA"/>
+<link rel="apple-touch-icon" href="/icon.svg"/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
@@ -33,7 +41,6 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .nav{background:#FFFFFF;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--g);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
-@media(min-width:601px){.nav-links{display:none!important;}}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
@@ -1030,27 +1037,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
 
 
-<!-- 멤버십 부여 모달 -->
-<div id="membershipModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:340px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div style="font-size:17px;font-weight:600" id="mmTitle">멤버십 관리</div>
-      <button onclick="closeMembershipModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:20px" id="mmSub"></div>
-    <div id="mmCurrentStatus" style="background:var(--gl);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:var(--txt)"></div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn" style="padding:12px;font-size:13px" onclick="grantTrial()">30일 무료체험 부여</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(1)">프리미엄 1개월</button>
-        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(3)">3개월</button>
-        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(12)">1년</button>
-      </div>
-      <button class="btnd" style="padding:11px;font-size:13px;background:#fff" onclick="revokeMembership()">멤버십 초기화</button>
-    </div>
-  </div>
-</div>
-
 <!-- 신고 모달 -->
 <div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:340px">
@@ -1499,12 +1485,10 @@ function go(name){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
- document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on')); // 사이드바 초기화
  document.getElementById('p-'+name).classList.add('active');
  const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name==='addClub'||name==='clubDetail'?'club':name;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
- const se=document.getElementById('sb-'+nk);if(se)se.classList.add('on'); // 사이드바 활성화
  // 탭 기억 & 히스토리 관리
  if(_tabPages.includes(name)){
    _currentTab=name;
@@ -2753,7 +2737,8 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--txt);line-height:2">
           공개 서재 · 광장 · 독서모임 · 엑셀 내보내기
         </div>
-      </div>`;
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요</div>`;
   } else if(s==='trial'){
     const d=daysLeftTrial();
     el.innerHTML=`
@@ -2762,7 +2747,7 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
         <div style="font-size:12px;color:var(--txt);line-height:2;margin-bottom:6px">공개 서재 · 광장 · 엑셀 저장 이용 가능</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:16px">독서모임은 프리미엄 전용입니다</div>
-        <div style="background:#F9F9F9;border-radius:10px;padding:12px;font-size:12px;color:var(--muted);text-align:center">프리미엄 구독 서비스 준비 중이에요</div>
+        <button class="btn" style="width:100%;padding:12px;font-size:13px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
       </div>`;
   } else {
     el.innerHTML=`
@@ -2772,15 +2757,27 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--txt);line-height:2.2;margin-bottom:16px">
           공개 서재 · 광장<br>독서모임 (오프라인 + 채팅)<br>엑셀 내보내기
         </div>
-        <div style="background:#F9F9F9;border-radius:10px;padding:12px;font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px">구독 서비스 준비 중이에요</div>
+        <button class="btn" style="width:100%;padding:12px;font-size:13px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
         ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
       </div>`;
   }
 }
 
 async function startPremiumPayment(){
-  nt('결제 기능은 곧 오픈될 예정이에요. 조금만 기다려주세요 🙏');
-  return;
+  const oid='PREM_'+ID();
+  try{
+    const tp=TossPayments(TOSS_KEY);
+    const pm=tp.payment({customerKey:CU.id});
+    await pm.requestPayment({
+      method:'CARD',
+      amount:{currency:'KRW',value:PREMIUM_PRICE},
+      orderId:oid,
+      orderName:'아고라 프리미엄 구독 (1개월)',
+      customerName:CU.username,
+      successUrl:`${location.origin}${location.pathname}?payment=premium&orderId=${oid}`,
+      failUrl:`${location.origin}${location.pathname}?payment=fail`
+    });
+  }catch(e){nt('결제를 취소했습니다.');}
 }
 
 // ══ 결제 콜백 처리 ══
@@ -2788,7 +2785,7 @@ async function handlePay(){
   const params=new URLSearchParams(location.search);
   const type=params.get('payment');
   const orderId=params.get('orderId');
-  history.replaceState({},'',location.pathname);
+  history.replaceState({},'',location.pathname); // URL 파라미터 제거
 
   if(type==='fail'){
     nt('결제가 취소되었습니다.','err');
@@ -2796,12 +2793,22 @@ async function handlePay(){
   }
 
   if(type==='premium'){
-    // 결제 연동 준비 중 — 실제 키 연동 후 활성화
-    nt('결제 서비스 준비 중이에요.','err');
+    // 프리미엄 구독 처리: premium_until = 지금 + 30일
+    load(true);
+    const now=new Date();
+    const until=new Date(now);
+    until.setDate(until.getDate()+30);
+    const premiumUntil=until.toISOString();
+    await sb.from('agora_users').update({premium_until:premiumUntil}).eq('id',CU.id);
+    CU.premium_until=premiumUntil;
+    localStorage.setItem('agora_sess',JSON.stringify(CU));
+    load(false);
+    nt('🎉 프리미엄 구독이 시작됐습니다!');
     return;
   }
 
   if(type==='success'){
+    // 기존 포인트 결제 처리
     const points=parseInt(params.get('points')||'0');
     if(points>0&&CU){
       load(true);
@@ -2839,59 +2846,6 @@ async function loadAdmBooks(){
 
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
-
-// ══ 멤버십 부여 ══
-let _mmUserId=null;
-async function openMembershipModal(uid,username){
-  _mmUserId=uid;
-  document.getElementById('mmTitle').textContent=username+' 님';
-  document.getElementById('mmSub').textContent='멤버십을 부여하거나 초기화할 수 있어요';
-  // 현재 상태 조회
-  const{data:u}=await sb.from('agora_users').select('trial_started_at,premium_until').eq('id',uid).single();
-  const now=new Date();
-  let statusHtml='현재 상태: ';
-  if(u?.premium_until&&new Date(u.premium_until)>now){
-    const d=Math.ceil((new Date(u.premium_until)-now)/86400000);
-    statusHtml+=`<strong style="color:var(--g)">프리미엄</strong> · 남은 기간 ${d}일`;
-  } else if(u?.trial_started_at){
-    const end=new Date(u.trial_started_at);end.setDate(end.getDate()+30);
-    if(now<end){
-      const d=Math.ceil((end-now)/86400000);
-      statusHtml+=`<strong style="color:#4A8A4A">무료체험 중</strong> · 남은 기간 ${d}일`;
-    } else {
-      statusHtml+='<strong style="color:#999">체험 종료 (무료)</strong>';
-    }
-  } else {
-    statusHtml+='<strong style="color:#999">무료</strong>';
-  }
-  document.getElementById('mmCurrentStatus').innerHTML=statusHtml;
-  document.getElementById('membershipModal').style.display='flex';
-}
-function closeMembershipModal(){
-  document.getElementById('membershipModal').style.display='none';
-  _mmUserId=null;
-}
-async function grantTrial(){
-  if(!_mmUserId)return;
-  const now=new Date().toISOString();
-  await sb.from('agora_users').update({trial_started_at:now}).eq('id',_mmUserId);
-  nt('30일 무료체험이 부여됐습니다.');
-  closeMembershipModal();rAdmin();
-}
-async function grantPremium(months){
-  if(!_mmUserId)return;
-  const until=new Date();until.setMonth(until.getMonth()+months);
-  await sb.from('agora_users').update({premium_until:until.toISOString()}).eq('id',_mmUserId);
-  nt(`프리미엄 ${months}개월이 부여됐습니다.`);
-  closeMembershipModal();rAdmin();
-}
-async function revokeMembership(){
-  if(!_mmUserId)return;
-  if(!confirm('멤버십을 초기화할까요? 무료 상태로 돌아갑니다.'))return;
-  await sb.from('agora_users').update({trial_started_at:null,premium_until:null}).eq('id',_mmUserId);
-  nt('멤버십이 초기화됐습니다.');
-  closeMembershipModal();rAdmin();
-}
 
 // ══ 신고 시스템 ══
 function openReportModal(targetId, targetType, targetUserId){
@@ -3032,31 +2986,20 @@ async function rAdmin(){
   }
 
   // 회원 목록
-  document.getElementById('uList').innerHTML=normal.map(u=>{
-    const now=new Date();
-    const hasTrial=u.trial_started_at&&(()=>{const e=new Date(u.trial_started_at);e.setDate(e.getDate()+30);return now<e;})();
-    const hasPremium=u.premium_until&&new Date(u.premium_until)>now;
-    const statusBadge=hasPremium
-      ?`<span style="font-size:10px;background:var(--gl);color:var(--g);border:1px solid var(--gb);border-radius:10px;padding:2px 7px;margin-left:6px">프리미엄</span>`
-      :hasTrial
-      ?`<span style="font-size:10px;background:#F0F8F0;color:#4A8A4A;border:1px solid #C0DCC0;border-radius:10px;padding:2px 7px;margin-left:6px">체험중</span>`
-      :`<span style="font-size:10px;background:#F5F5F5;color:#999;border-radius:10px;padding:2px 7px;margin-left:6px">무료</span>`;
-    return`<div class="card" style="padding:12px 16px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="cursor:pointer" onclick="openMembershipModal('${u.id}','${esc(u.username)}')">
-          <div style="font-size:14px;font-weight:500;display:flex;align-items:center">${esc(u.username)}${statusBadge}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          ${u.banned
-            ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
-            :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
-          }
-          <button class="btnd" style="font-size:12px;padding:5px 10px;background:#fff" onclick="deleteAccount('${u.id}','${esc(u.username)}')">삭제</button>
-        </div>
+  document.getElementById('uList').innerHTML=normal.map(u=>`
+    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div>
+        <div style="font-size:14px;font-weight:500">${esc(u.username)}</div>
+        <div style="font-size:11px;color:var(--muted)">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
       </div>
-    </div>`;
-  }).join('');
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        ${u.banned
+          ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
+          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
+        }
+        <button class="btnd" style="font-size:12px;padding:5px 10px;background:#fff" onclick="deleteAccount('${u.id}','${esc(u.username)}')">삭제</button>
+      </div>
+    </div>`).join('');
 
   switchAdmTab('reports');
 }
@@ -3762,14 +3705,12 @@ function _goWithoutHistory(name){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
- document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on'));
  const el=document.getElementById('p-'+name);
  if(!el)return;
  el.classList.add('active');
  const nk=_tabPages.includes(name)?name:_currentTab;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
- const se=document.getElementById('sb-'+nk);if(se)se.classList.add('on');
  _currentTab=nk;
  const _fab=document.getElementById('fabAdd');
  if(_fab){
@@ -3804,6 +3745,15 @@ window.onload=async()=>{
  if(window.naver&&NV_ID!=='YOUR_NAVER_CLIENT_ID'){const nl=new naver.LoginWithNaverId({clientId:NV_ID,callbackUrl:location.origin+location.pathname,isPopup:false,loginButton:{color:'green',type:3,height:40}});nl.init();}
  if(window.Kakao&&KK_JS_KEY!=='YOUR_KAKAO_JS_KEY'&&!Kakao.isInitialized()) Kakao.init(KK_JS_KEY);
 };
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(r=>console.log('SW registered'))
+      .catch(e=>console.log('SW error',e));
+  });
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "name": "AGORA — 독서 아카이브",
+  "short_name": "AGORA",
+  "description": "여성 전용 독서 커뮤니티 아고라",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF5EE",
+  "theme_color": "#B8956A",
+  "orientation": "portrait",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
