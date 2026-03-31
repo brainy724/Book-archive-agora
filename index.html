@@ -2907,11 +2907,14 @@ async function rAdmin(){
   const pending=rpts.filter(r=>r.status==='pending');
   const pendingInq=inqs.filter(i=>!i.admin_reply);
   document.getElementById('admStats').innerHTML=[
-    {l:'전체 회원',v:normal.length+'명'},
-    {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},
-    {l:'신고 대기',v:pending.length+'건',c:pending.length?'var(--red)':'var(--txt)'},
-    {l:'미답변 문의',v:pendingInq.length+'건',c:pendingInq.length?'var(--red)':'var(--txt)'}
-  ].map(s=>`<div class="sb"><div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+    {l:'전체 회원',v:normal.length+'명',tab:'users'},
+    {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)',tab:'users'},
+    {l:'신고 대기',v:pending.length+'건',c:pending.length?'var(--red)':'var(--txt)',tab:'reports'},
+    {l:'미답변 문의',v:pendingInq.length+'건',c:pendingInq.length?'var(--red)':'var(--txt)',tab:'inquiries'}
+  ].map(s=>`<div class="sb" onclick="switchAdmTab('${s.tab}')" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+    <div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div>
+    <div class="sl">${s.l}</div>
+  </div>`).join('');
 
   // 신고 목록
   const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
@@ -2956,7 +2959,10 @@ async function rAdmin(){
         <div class="card" style="padding:14px 18px;margin-bottom:8px;border-left:3px solid ${inq.admin_reply?'var(--g)':'var(--red)'}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:11px;font-weight:600;color:${inq.admin_reply?'var(--g)':'var(--red)'}">${inq.admin_reply?'답변완료':'미답변'}</span>
-            <span style="font-size:11px;color:var(--muted)">${esc(userMap[inq.user_id]||'알 수 없음')} · ${ago(inq.created_at)}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:11px;color:var(--muted)">${esc(userMap[inq.user_id]||'알 수 없음')} · ${ago(inq.created_at)}</span>
+              <button class="btnd" style="font-size:11px;padding:3px 8px;background:#fff" onclick="deleteInquiry('${inq.id}')">삭제</button>
+            </div>
           </div>
           <div style="font-size:14px;font-weight:500;margin-bottom:4px">${esc(inq.title)}</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:${inq.admin_reply?'10px':'8px'};line-height:1.7;white-space:pre-wrap">${esc(inq.content)}</div>
@@ -3076,6 +3082,12 @@ async function rMyInquiries(){
       <div style="font-size:13px;color:var(--muted);line-height:1.7">${esc(inq.content)}</div>
       ${inq.admin_reply?`<div style="background:var(--gl);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.7;margin-top:8px"><strong style="font-size:11px;color:var(--g)">관리자 답변</strong><br>${esc(inq.admin_reply)}</div>`:''}
     </div>`).join('');
+}
+async function deleteInquiry(inqId){
+  if(!confirm('이 문의를 삭제할까요?'))return;
+  await sb.from('agora_inquiries').delete().eq('id',inqId);
+  nt('문의가 삭제됐습니다.');
+  rAdmin();
 }
 async function replyInquiry(inqId){
   const el=document.getElementById('inqReply_'+inqId);
