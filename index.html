@@ -33,6 +33,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .nav{background:#FFFFFF;border-bottom:1px solid var(--border);padding:0 24px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--g);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
+@media(min-width:601px){.nav-links{display:none!important;}}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
@@ -1498,10 +1499,12 @@ function go(name){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
+ document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on')); // 사이드바 초기화
  document.getElementById('p-'+name).classList.add('active');
  const nk=name==='addBook'?'library':name==='addPost'||name==='postDetail'?'forum':name==='bookDetail'?'public':name==='addClub'||name==='clubDetail'?'club':name;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
+ const se=document.getElementById('sb-'+nk);if(se)se.classList.add('on'); // 사이드바 활성화
  // 탭 기억 & 히스토리 관리
  if(_tabPages.includes(name)){
    _currentTab=name;
@@ -2750,8 +2753,7 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--txt);line-height:2">
           공개 서재 · 광장 · 독서모임 · 엑셀 내보내기
         </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요</div>`;
+      </div>`;
   } else if(s==='trial'){
     const d=daysLeftTrial();
     el.innerHTML=`
@@ -2760,7 +2762,7 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
         <div style="font-size:12px;color:var(--txt);line-height:2;margin-bottom:6px">공개 서재 · 광장 · 엑셀 저장 이용 가능</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:16px">독서모임은 프리미엄 전용입니다</div>
-        <button class="btn" style="width:100%;padding:12px;font-size:13px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
+        <div style="background:#F9F9F9;border-radius:10px;padding:12px;font-size:12px;color:var(--muted);text-align:center">프리미엄 구독 서비스 준비 중이에요</div>
       </div>`;
   } else {
     el.innerHTML=`
@@ -2770,27 +2772,15 @@ function renderMembershipSection(){
         <div style="font-size:12px;color:var(--txt);line-height:2.2;margin-bottom:16px">
           공개 서재 · 광장<br>독서모임 (오프라인 + 채팅)<br>엑셀 내보내기
         </div>
-        <button class="btn" style="width:100%;padding:12px;font-size:13px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
+        <div style="background:#F9F9F9;border-radius:10px;padding:12px;font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px">구독 서비스 준비 중이에요</div>
         ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
       </div>`;
   }
 }
 
 async function startPremiumPayment(){
-  const oid='PREM_'+ID();
-  try{
-    const tp=TossPayments(TOSS_KEY);
-    const pm=tp.payment({customerKey:CU.id});
-    await pm.requestPayment({
-      method:'CARD',
-      amount:{currency:'KRW',value:PREMIUM_PRICE},
-      orderId:oid,
-      orderName:'아고라 프리미엄 구독 (1개월)',
-      customerName:CU.username,
-      successUrl:`${location.origin}${location.pathname}?payment=premium&orderId=${oid}`,
-      failUrl:`${location.origin}${location.pathname}?payment=fail`
-    });
-  }catch(e){nt('결제를 취소했습니다.');}
+  nt('결제 기능은 곧 오픈될 예정이에요. 조금만 기다려주세요 🙏');
+  return;
 }
 
 // ══ 결제 콜백 처리 ══
@@ -2798,7 +2788,7 @@ async function handlePay(){
   const params=new URLSearchParams(location.search);
   const type=params.get('payment');
   const orderId=params.get('orderId');
-  history.replaceState({},'',location.pathname); // URL 파라미터 제거
+  history.replaceState({},'',location.pathname);
 
   if(type==='fail'){
     nt('결제가 취소되었습니다.','err');
@@ -2806,22 +2796,12 @@ async function handlePay(){
   }
 
   if(type==='premium'){
-    // 프리미엄 구독 처리: premium_until = 지금 + 30일
-    load(true);
-    const now=new Date();
-    const until=new Date(now);
-    until.setDate(until.getDate()+30);
-    const premiumUntil=until.toISOString();
-    await sb.from('agora_users').update({premium_until:premiumUntil}).eq('id',CU.id);
-    CU.premium_until=premiumUntil;
-    localStorage.setItem('agora_sess',JSON.stringify(CU));
-    load(false);
-    nt('🎉 프리미엄 구독이 시작됐습니다!');
+    // 결제 연동 준비 중 — 실제 키 연동 후 활성화
+    nt('결제 서비스 준비 중이에요.','err');
     return;
   }
 
   if(type==='success'){
-    // 기존 포인트 결제 처리
     const points=parseInt(params.get('points')||'0');
     if(points>0&&CU){
       load(true);
@@ -3782,12 +3762,14 @@ function _goWithoutHistory(name){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
+ document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on'));
  const el=document.getElementById('p-'+name);
  if(!el)return;
  el.classList.add('active');
  const nk=_tabPages.includes(name)?name:_currentTab;
  const ne=document.getElementById('n-'+nk);if(ne)ne.classList.add('on');
  const te=document.getElementById('t-'+nk);if(te)te.classList.add('on');
+ const se=document.getElementById('sb-'+nk);if(se)se.classList.add('on');
  _currentTab=nk;
  const _fab=document.getElementById('fabAdd');
  if(_fab){
