@@ -57,7 +57,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:12px;transition:box-shadow .2s;}
 .card:hover{box-shadow:0 2px 16px rgba(0,0,0,.06);}
 /* 책 그리드 */
-.bg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.bg{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
 .bi{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .bi:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
 .bc{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
@@ -125,7 +125,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .search-center input{width:100%;max-width:480px;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;color:var(--txt);outline:none;}
 .search-center input:focus{border-color:var(--g);}
 /* 책 그리드 4열 */
-.book-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.book-grid4{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
 .book-card4{cursor:pointer;transition:opacity .2s;}
 .book-card4:hover{opacity:.8;}
 .book-card4-cover{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;background:var(--gl);}
@@ -139,8 +139,8 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .forum-row-bottom{display:flex;justify-content:space-between;align-items:center;}
 @media(max-width:600px){
   .folder-grid{grid-template-columns:repeat(2,1fr);}
-  .book-grid4{grid-template-columns:repeat(2,1fr);}
-  .bg{grid-template-columns:1fr;}
+  .book-grid4{grid-template-columns:repeat(3,1fr);gap:8px;}
+  .bg{grid-template-columns:repeat(3,1fr);gap:8px;}
 }
 .search-bar{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
 .search-bar input{flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;color:var(--txt);outline:none;}
@@ -320,7 +320,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  .lcard{padding:30px 20px;}
  .nav{padding:0 16px;}
  .rf{flex-direction:column;gap:10px;}
- .bg{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+ .bg{grid-template-columns:repeat(3,1fr);gap:8px;}
+ .book-card4-title{font-size:10px;}
+ .book-card4-author{font-size:9px;}
+ .bt2{font-size:11px;}
+ .ba{font-size:10px;}
+ .bin{padding:6px 8px 8px;}
 }
 @media(min-width:601px){.btab{display:none!important;}}
 </style>
@@ -829,41 +834,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
 
-    <!-- 알림 설정 -->
-    <div style="margin-bottom:32px">
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">알림 설정</div>
-      <div style="background:var(--gl);border-radius:12px;padding:16px 18px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div>
-            <div style="font-size:14px;font-weight:500;color:var(--txt)">알림 받기</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">모든 알림을 켜거나 끕니다</div>
-          </div>
-          <div class="tgl" onclick="toggleNotifSetting('all')"><div class="trk on" id="notifTrk_all"><div class="thm"></div></div></div>
-        </div>
-        <div id="notifSubSettings">
-          <div style="height:1px;background:var(--border);margin-bottom:14px"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <div style="font-size:13px;color:var(--txt)">💬 내 글에 댓글</div>
-            <div class="tgl" onclick="toggleNotifSetting('comment')"><div class="trk on" id="notifTrk_comment"><div class="thm"></div></div></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <div style="font-size:13px;color:var(--txt)">↩ 내 댓글에 대댓글</div>
-            <div class="tgl" onclick="toggleNotifSetting('reply')"><div class="trk on" id="notifTrk_reply"><div class="thm"></div></div></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <div style="font-size:13px;color:var(--txt)">♥ 독서록 하트</div>
-            <div class="tgl" onclick="toggleNotifSetting('heart')"><div class="trk on" id="notifTrk_heart"><div class="thm"></div></div></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:13px;color:var(--txt)">💬 모임 채팅</div>
-            <div class="tgl" onclick="toggleNotifSetting('chat')"><div class="trk on" id="notifTrk_chat"><div class="thm"></div></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
-
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
 
@@ -1018,23 +988,62 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="h1 serif">관리자 패널</div>
  <div class="sub">커뮤니티 관리 · 포인트 승인</div>
  <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
- <div style="font-size:15px;font-weight:600;margin-bottom:10px"> 우수 콘텐츠 포인트 지급</div>
- <div style="background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--g)">
- 고품질 독후감·질문·댓글 작성자에게 3,000P를 지급합니다.<br>회원 목록에서 해당 회원의 버튼을 눌러주세요.
+ <!-- 탭 -->
+ <div class="tab-bar" style="margin-bottom:20px">
+   <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')">신고 접수</button>
+   <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')">회원 목록</button>
+   <button class="tab-btn" id="admTab-posts" onclick="switchAdmTab('posts')">최근 토론</button>
  </div>
- <div style="font-size:15px;font-weight:600;margin-bottom:10px"> 포인트 승인 대기</div>
- <div id="pendPts"></div>
- <hr/>
- <div style="font-size:15px;font-weight:600;margin-bottom:10px">회원 목록</div>
- <div id="uList"></div>
- <hr/>
- <div style="font-size:15px;font-weight:600;margin-bottom:10px">최근 토론</div>
- <div id="admPosts"></div>
+ <!-- 신고 목록 -->
+ <div id="admReportsSection">
+   <div id="admReports"></div>
+ </div>
+ <!-- 회원 목록 -->
+ <div id="admUsersSection" style="display:none">
+   <div style="background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--g)">
+   고품질 독후감·질문·댓글 작성자에게 3,000P를 지급합니다.
+   </div>
+   <div id="uList"></div>
+ </div>
+ <!-- 최근 토론 -->
+ <div id="admPostsSection" style="display:none">
+   <div id="admPosts"></div>
+ </div>
  </div></div>
 </div>
 
 
 
+
+<!-- 신고 모달 -->
+<div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:340px">
+    <div style="font-size:17px;font-weight:600;margin-bottom:6px">신고하기</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px">허위 신고 시 이용이 제한될 수 있습니다.</div>
+    <input type="hidden" id="reportTargetId"/>
+    <input type="hidden" id="reportTargetType"/>
+    <input type="hidden" id="reportTargetUserId"/>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:normal">
+        <input type="radio" name="reportReason" value="inappropriate" style="width:16px;height:16px;accent-color:var(--g)"/> 부적절한 단어 사용
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:normal">
+        <input type="radio" name="reportReason" value="male" style="width:16px;height:16px;accent-color:var(--g)"/> 남성으로 의심됨
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:normal">
+        <input type="radio" name="reportReason" value="spam" style="width:16px;height:16px;accent-color:var(--g)"/> 스팸 · 광고
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:normal">
+        <input type="radio" name="reportReason" value="other" style="width:16px;height:16px;accent-color:var(--g)"/> 기타
+      </label>
+    </div>
+    <div class="fg"><textarea id="reportDetail" placeholder="추가 설명 (선택)" style="min-height:70px;font-size:13px"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn2" style="flex:1" onclick="closeReportModal()">취소</button>
+      <button class="btn" style="flex:1" onclick="submitReport()">신고 제출</button>
+    </div>
+  </div>
+</div>
 
 <!-- FAB -->
 <button class="fab" id="fabAdd" onclick="go('addBook')" style="display:none">+</button>
@@ -1225,7 +1234,7 @@ async function startTrial(){
   await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
   CU.trial_started_at=now;
   localStorage.setItem('agora_sess',JSON.stringify(CU));
-  nt('🌿 30일 무료체험이 시작됐습니다!');
+  nt('30일 무료체험이 시작됐습니다!');
   updateNavTabs();
 }
 function skipTrial(){
@@ -2523,10 +2532,12 @@ async function openPost(id){
    ${p.content?`<div style="font-size:14px;line-height:1.9;color:var(--txt);white-space:pre-wrap;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px">${esc(p.content)}</div>`:''}
    <div style="display:flex;justify-content:space-between;align-items:center">
      <div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div>
-     ${isMyPost?`<div style="display:flex;gap:8px">
-       <span onclick="editPost('${p.id}','${esc(p.question).replace(/'/g,"\\'")}','${esc(p.book_title).replace(/'/g,"\\'")}') " style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>
-       <span onclick="delPost('${p.id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span>
-     </div>`:''}
+     <div style="display:flex;gap:8px;align-items:center">
+       ${isMyPost?`
+         <span onclick="editPost('${p.id}','${esc(p.question).replace(/'/g,"\\'")}','${esc(p.book_title).replace(/'/g,"\\'")}') " style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>
+         <span onclick="delPost('${p.id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span>
+       `:`<span onclick="openReportModal('${p.id}','post','${p.user_id}')" style="font-size:12px;color:var(--muted);cursor:pointer">신고</span>`}
+     </div>
    </div>
  </div>
  <div style="font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500">답변 ${roots.length}개</div>
@@ -2543,6 +2554,7 @@ async function openPost(id){
        <div style="display:flex;gap:8px;flex-shrink:0">
          ${isMyCmt?`<span onclick="editCmt('${c.id}','${c.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:12px;color:var(--muted);cursor:pointer">수정</span>`:''}
          ${isMyCmt||CU.isAdmin?`<span onclick="delCmt('${c.id}','${isMyCmt?'':c.user_id}')" style="font-size:12px;color:var(--red);cursor:pointer">삭제</span>`:''}
+         ${!isMyCmt?`<span onclick="openReportModal('${c.id}','comment','${c.user_id}')" style="font-size:12px;color:var(--muted);cursor:pointer">신고</span>`:''}
        </div>
      </div>
      <span onclick="toggleReplyForm('${c.id}')" style="font-size:12px;color:var(--g);cursor:pointer;margin-bottom:8px;display:inline-block">↩ 답글 달기</span>
@@ -2558,6 +2570,7 @@ async function openPost(id){
            <div style="display:flex;gap:8px;flex-shrink:0">
              ${isMyReply?`<span onclick="editCmt('${r.id}','${r.content.replace(/'/g,"\\'").replace(/\n/g,'\\n')}')" style="font-size:11px;color:var(--muted);cursor:pointer">수정</span>`:''}
              ${isMyReply||CU.isAdmin?`<span onclick="delCmt('${r.id}','')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
+             ${!isMyReply?`<span onclick="openReportModal('${r.id}','comment','${r.user_id}')" style="font-size:11px;color:var(--muted);cursor:pointer">신고</span>`:''}
            </div>
          </div>
        </div>`;
@@ -2695,41 +2708,33 @@ function renderMembershipSection(){
     const d=daysLeftPremium();
     el.innerHTML=`
       <div style="background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:20px">👑</span>
-          <span style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--g)">프리미엄 구독 중</span>
-        </div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong></div>
-        <div style="font-size:13px;color:var(--txt);line-height:2.2">
-          ✅ 공개 서재 · 광장<br>✅ 독서모임 (오프라인 + 채팅)<br>✅ 엑셀 내보내기
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--g);margin-bottom:6px">프리미엄 구독 중</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong></div>
+        <div style="font-size:12px;color:var(--txt);line-height:2">
+          공개 서재 · 광장 · 독서모임 · 엑셀 내보내기
         </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요 🌿</div>`;
+      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요</div>`;
   } else if(s==='trial'){
     const d=daysLeftTrial();
     el.innerHTML=`
       <div style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:20px">🌿</span>
-          <span style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--g)">30일 무료체험 중</span>
-        </div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
-        <div style="font-size:13px;color:var(--txt);line-height:2.2;margin-bottom:16px">
-          ✅ 공개 서재 · 광장 · 엑셀 저장<br>❌ 독서모임 (프리미엄 전용)
-        </div>
-        <div style="font-size:12px;color:var(--g);font-weight:600;margin-bottom:10px">독서모임까지 이용하려면 구독하세요</div>
-        <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--g);margin-bottom:6px">30일 무료체험 중</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
+        <div style="font-size:12px;color:var(--txt);line-height:2;margin-bottom:6px">공개 서재 · 광장 · 엑셀 저장 이용 가능</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">독서모임은 프리미엄 전용입니다</div>
+        <button class="btn" style="width:100%;padding:12px;font-size:13px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
       </div>`;
   } else {
     el.innerHTML=`
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="font-family:var(--font-serif);font-size:18px;font-weight:600;margin-bottom:6px">AGORA 프리미엄</div>
-        <div style="font-size:26px;font-weight:700;color:var(--g);margin-bottom:4px">월 6,900원</div>
-        <div style="font-size:13px;color:var(--txt);line-height:2.2;margin-bottom:16px">
-          ✅ 공개 서재 · 광장<br>✅ 독서모임 (오프라인 + 채팅)<br>✅ 엑셀 내보내기
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;margin-bottom:6px">AGORA 프리미엄</div>
+        <div style="font-size:22px;font-weight:700;color:var(--g);margin-bottom:10px">월 6,900원</div>
+        <div style="font-size:12px;color:var(--txt);line-height:2.2;margin-bottom:16px">
+          공개 서재 · 광장<br>독서모임 (오프라인 + 채팅)<br>엑셀 내보내기
         </div>
-        <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
-        ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기 🌿</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
+        <button class="btn" style="width:100%;padding:12px;font-size:13px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
+        ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
       </div>`;
   }
 }
@@ -2877,6 +2882,147 @@ async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select(
 async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
+
+// ══ 신고 시스템 ══
+function openReportModal(targetId, targetType, targetUserId){
+  document.getElementById('reportTargetId').value=targetId;
+  document.getElementById('reportTargetType').value=targetType;
+  document.getElementById('reportTargetUserId').value=targetUserId;
+  document.querySelectorAll('input[name="reportReason"]').forEach(r=>r.checked=false);
+  document.getElementById('reportDetail').value='';
+  document.getElementById('reportModal').style.display='flex';
+}
+function closeReportModal(){
+  document.getElementById('reportModal').style.display='none';
+}
+async function submitReport(){
+  const reason=document.querySelector('input[name="reportReason"]:checked')?.value;
+  if(!reason){nt('신고 사유를 선택해주세요.','err');return;}
+  const targetId=document.getElementById('reportTargetId').value;
+  const targetType=document.getElementById('reportTargetType').value;
+  const targetUserId=document.getElementById('reportTargetUserId').value;
+  const detail=document.getElementById('reportDetail').value.trim();
+  // 중복 신고 방지
+  const{data:dup}=await sb.from('agora_reports').select('id')
+    .eq('reporter_id',CU.id).eq('target_id',targetId).maybeSingle();
+  if(dup){nt('이미 신고한 게시물이에요.','err');closeReportModal();return;}
+  const reasonLabels={inappropriate:'부적절한 단어 사용',male:'남성으로 의심됨',spam:'스팸 · 광고',other:'기타'};
+  await sb.from('agora_reports').insert({
+    id:ID(),reporter_id:CU.id,target_id:targetId,target_type:targetType,
+    target_user_id:targetUserId||null,reason:reasonLabels[reason],detail:detail||null,status:'pending'
+  });
+  closeReportModal();
+  nt('신고가 접수됐습니다. 검토 후 조치할게요.');
+}
+
+// ══ 관리자 탭 전환 ══
+function switchAdmTab(tab){
+  ['reports','users','posts'].forEach(t=>{
+    const btn=document.getElementById('admTab-'+t);
+    const sec=document.getElementById('adm'+t.charAt(0).toUpperCase()+t.slice(1)+'Section');
+    if(btn)btn.classList.toggle('on',t===tab);
+    if(sec)sec.style.display=t===tab?'block':'none';
+  });
+}
+
+async function rAdmin(){
+  load(true);
+  const[{data:ud},{data:pd},{data:rpts}]=await Promise.all([
+    sb.from('agora_users').select('*').order('created_at',{ascending:false}),
+    sb.from('agora_posts').select('*,agora_comments(*)').order('created_at',{ascending:false}),
+    sb.from('agora_reports').select('*').order('created_at',{ascending:false})
+  ]);
+  load(false);
+  const normal=(ud||[]).filter(u=>!u.is_admin);
+  const pending=(rpts||[]).filter(r=>r.status==='pending');
+  document.getElementById('admStats').innerHTML=[
+    {l:'전체 회원',v:normal.length+'명'},
+    {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},
+    {l:'신고 대기',v:pending.length+'건',c:pending.length?'var(--red)':'var(--txt)'},
+    {l:'토론 게시글',v:(pd||[]).length+'개'}
+  ].map(s=>`<div class="sb"><div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+
+  // 신고 목록
+  const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
+  const admReportsEl=document.getElementById('admReports');
+  if(admReportsEl){
+    if(!rpts||!rpts.length){
+      admReportsEl.innerHTML='<div class="empty"><div class="et">접수된 신고가 없습니다</div></div>';
+    } else {
+      admReportsEl.innerHTML=rpts.map(r=>{
+        const reportedUser=userMap[r.target_user_id]||'알 수 없음';
+        const isBanned=(ud||[]).find(u=>u.id===r.target_user_id)?.banned;
+        return`<div class="card" style="padding:14px 18px;margin-bottom:8px;border-left:3px solid ${r.status==='pending'?'var(--red)':r.status==='resolved'?'var(--g)':'var(--border)'}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+            <div>
+              <span style="font-size:11px;font-weight:600;color:${r.status==='pending'?'var(--red)':r.status==='resolved'?'var(--g)':'var(--muted)'};letter-spacing:1px">${r.status==='pending'?'검토중':r.status==='resolved'?'처리완료':'기각'}</span>
+              <span style="font-size:11px;color:var(--muted);margin-left:8px">${ago(r.created_at)}</span>
+            </div>
+            <span style="font-size:11px;color:var(--muted)">${r.target_type==='post'?'게시글':'댓글'}</span>
+          </div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:3px">사유: ${esc(r.reason)}</div>
+          ${r.detail?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">"${esc(r.detail)}"</div>`:''}
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">신고 대상: <strong style="color:var(--txt)">${esc(reportedUser)}</strong>${isBanned?' · 이용제한중':''}</div>
+          ${r.status==='pending'?`<div style="display:flex;gap:6px">
+            ${r.target_user_id&&!isBanned?`<button class="btnd" style="font-size:12px;padding:5px 12px" onclick="banFromReport('${r.id}','${r.target_user_id}')">계정 차단</button>`:''}
+            <button class="btn2" style="font-size:12px;padding:5px 12px" onclick="resolveReport('${r.id}')">처리완료</button>
+            <button class="btn2" style="font-size:12px;padding:5px 12px" onclick="dismissReport('${r.id}')">기각</button>
+          </div>`:''}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // 회원 목록
+  document.getElementById('uList').innerHTML=normal.map(u=>`
+    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:14px;font-weight:500">${esc(u.username)}</div>
+        <div style="font-size:11px;color:var(--muted)">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${u.banned
+          ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
+          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">이용 제한</button>`
+        }
+      </div>
+    </div>`).join('');
+
+  // 최근 토론
+  document.getElementById('admPosts').innerHTML=!(pd||[]).length
+    ?`<div class="empty"><div class="et">게시글이 없습니다</div></div>`
+    :pd.map(p=>{
+      const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted).length;
+      return`<div class="card" style="padding:12px 18px;margin-bottom:8px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">${esc(p.book_title)}</div>
+        <div style="font-size:14px">${esc((p.question||'').length>80?p.question.slice(0,80)+'…':p.question)}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <span style="font-size:12px;color:var(--muted)">답변 ${vis}개 · ${ago(p.created_at)}</span>
+          <button class="btn2" style="font-size:12px;padding:4px 10px" onclick="openPost('${p.id}')">보기</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  switchAdmTab('reports');
+}
+
+async function banFromReport(reportId, userId){
+  if(!confirm('이 사용자를 차단하고 신고를 처리완료로 변경할까요?'))return;
+  await Promise.all([
+    sb.from('agora_users').update({banned:true}).eq('id',userId),
+    sb.from('agora_reports').update({status:'resolved'}).eq('id',reportId)
+  ]);
+  nt('계정이 차단되고 신고가 처리됐습니다.');
+  rAdmin();
+}
+async function resolveReport(reportId){
+  await sb.from('agora_reports').update({status:'resolved'}).eq('id',reportId);
+  nt('처리완료로 변경됐습니다.');rAdmin();
+}
+async function dismissReport(reportId){
+  await sb.from('agora_reports').update({status:'dismissed'}).eq('id',reportId);
+  nt('신고가 기각됐습니다.');rAdmin();
+}
 
 // ══ 알림 시스템 ══
 let notifSettings={all:true,comment:true,reply:true,heart:true,chat:true};
