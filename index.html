@@ -588,7 +588,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="searchBookCover()">표지 검색</button>
    </div>
    <div id="coverSearchResult" style="display:none;margin-top:10px">
-     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">표지 선택 (Open Library · 무료)</div>
+     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">표지 선택</div>
      <div id="coverList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
    </div>
    <div id="selectedCover" style="display:none;margin-top:10px;align-items:center;gap:10px">
@@ -1249,8 +1249,11 @@ async function startTrial(){
   await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
   CU.trial_started_at=now;
   localStorage.setItem('agora_sess',JSON.stringify(CU));
+  localStorage.setItem('agora_trial_started','1'); // 영구 기록
+  sessionStorage.setItem('trialPopupShown','1');
   nt('30일 무료체험이 시작됐습니다!');
   updateNavTabs();
+  renderMembershipSection();
 }
 function skipTrial(){
   const p=document.getElementById('trialPopup');
@@ -1427,9 +1430,11 @@ async function ok(u){
  const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0);
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  updateNavTabs();
- // 무료체험 팝업: 관리자 제외, 한 세션당 1번만
+ // 무료체험 팝업: 관리자 제외, 이미 시작했거나 한 세션당 1번만
  const s=getMembershipStatus();
- if(!u.isAdmin&&s==='free'&&!u.trial_started_at&&!sessionStorage.getItem('trialPopupShown')){
+ if(!u.isAdmin&&s==='free'&&!u.trial_started_at
+    &&!localStorage.getItem('agora_trial_started')
+    &&!sessionStorage.getItem('trialPopupShown')){
    sessionStorage.setItem('trialPopupShown','1');
    setTimeout(()=>showTrialPopup(),800);
  }
@@ -1830,8 +1835,7 @@ async function searchBookCover(){
         <img src="${b.url}" style="width:60px;height:85px;object-fit:cover;border-radius:6px;border:2px solid transparent;display:block;transition:border .15s"
           onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'"
           loading="lazy" onerror="this.parentElement.style.display='none'"/>
-        <div style="font-size:9px;color:var(--muted);margin-top:3px;width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.author)}</div>
-        <div style="font-size:8px;color:var(--g);margin-top:1px">${b.source}${b.category?' · '+b.category:''}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:1px;width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.author)}</div>
       </div>`).join('');
   }catch(e){
     console.error('책검색오류:',e);
@@ -2840,50 +2844,6 @@ async function loadAdmForum(){
     </div>`;
   }).join('');
 }
-async function rAdmin(){
-  load(true);
-  const[{data:ud},{data:pd}]=await Promise.all([
-    sb.from('agora_users').select('*').order('created_at',{ascending:false}),
-    sb.from('agora_posts').select('*,agora_comments(*)').order('created_at',{ascending:false})
-  ]);
-  load(false);
-  const normal=(ud||[]).filter(u=>!u.is_admin);
-  document.getElementById('admStats').innerHTML=[
-    {l:'전체 회원',v:normal.length+'명'},
-    {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},
-    {l:'토론 게시글',v:(pd||[]).length+'개'}
-  ].map(s=>`<div class="sb"><div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
-  // 회원 목록
-  document.getElementById('uList').innerHTML=normal.map(u=>`
-    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-size:14px;font-weight:500">${esc(u.username)}</div>
-        <div style="font-size:11px;color:var(--muted)">${ago(u.created_at)}</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        ${u.banned
-          ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
-          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">이용 제한</button>`
-        }
-      </div>
-    </div>`).join('');
-  // 최근 토론
-  document.getElementById('admPosts').innerHTML=!(pd||[]).length
-    ?`<div class="empty"><div class="et">게시글이 없습니다</div></div>`
-    :pd.map(p=>{
-      const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted).length;
-      return`<div class="card" style="padding:12px 18px;margin-bottom:8px">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">${esc(p.book_title)}</div>
-        <div style="font-size:14px">${esc(p.question.length>80?p.question.slice(0,80)+'…':p.question)}</div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <span style="font-size:12px;color:var(--muted)">답변 ${vis}개 · ${ago(p.created_at)}</span>
-          <button class="btn2" style="font-size:12px;padding:4px 10px" onclick="openPost('${p.id}')">보기</button>
-        </div>
-      </div>`;
-    }).join('');
-  switchAdmTab('users');
-}
-
 async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select('points').eq('id',uid).single();const np=(u?.points||0)+1000;await Promise.all([sb.from('agora_point_requests').update({status:'approved'}).eq('id',rid),sb.from('agora_users').update({points:np}).eq('id',uid)]);nt('1,000P 승인 완료');rAdmin();}
 async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
@@ -2933,15 +2893,18 @@ function switchAdmTab(tab){
 
 async function rAdmin(){
   load(true);
-  const[{data:ud},{data:rpts},{data:inqs}]=await Promise.all([
+  const[usersRes,rptsRes,inqsRes]=await Promise.all([
     sb.from('agora_users').select('*').order('created_at',{ascending:false}),
     sb.from('agora_reports').select('*').order('created_at',{ascending:false}),
-    sb.from('agora_inquiries').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}))
+    sb.from('agora_inquiries').select('*').order('created_at',{ascending:false})
   ]);
   load(false);
-  const normal=(ud||[]).filter(u=>!u.is_admin);
-  const pending=(rpts||[]).filter(r=>r.status==='pending');
-  const pendingInq=(inqs||[]).filter(i=>!i.admin_reply);
+  const ud=usersRes.data||[];
+  const rpts=rptsRes.data||[];
+  const inqs=inqsRes.data||[];
+  const normal=ud.filter(u=>!u.is_admin);
+  const pending=rpts.filter(r=>r.status==='pending');
+  const pendingInq=inqs.filter(i=>!i.admin_reply);
   document.getElementById('admStats').innerHTML=[
     {l:'전체 회원',v:normal.length+'명'},
     {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},
@@ -3073,7 +3036,14 @@ async function submitInquiry(){
   load(true);
   const{error}=await sb.from('agora_inquiries').insert({id:ID(),user_id:CU.id,title,content});
   load(false);
-  if(error){nt('오류: '+error.message,'err');return;}
+  if(error){
+    if(error.message&&error.message.includes('schema cache')){
+      nt('서비스 준비 중입니다. Supabase SQL을 먼저 실행해주세요.','err');
+    } else {
+      nt('오류: '+error.message,'err');
+    }
+    return;
+  }
   document.getElementById('inquiryTitle').value='';
   document.getElementById('inquiryContent').value='';
   nt('문의가 접수됐습니다. 순서대로 답변드릴게요.');
