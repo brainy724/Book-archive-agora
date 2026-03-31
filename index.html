@@ -1246,11 +1246,17 @@ async function startTrial(){
   if(p)p.style.display='none';
   if(!CU)return;
   const now=new Date().toISOString();
-  await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
+  // 로컬 먼저 저장 (DB 실패해도 팝업 반복 방지)
   CU.trial_started_at=now;
   localStorage.setItem('agora_sess',JSON.stringify(CU));
-  localStorage.setItem('agora_trial_started','1'); // 영구 기록
+  localStorage.setItem('agora_trial_started','1');
   sessionStorage.setItem('trialPopupShown','1');
+  // DB 저장
+  const{error}=await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
+  if(error){
+    nt('체험 시작 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.','err');
+    return;
+  }
   nt('30일 무료체험이 시작됐습니다!');
   updateNavTabs();
   renderMembershipSection();
@@ -1458,7 +1464,7 @@ function go(name){
  const gated={'public':true,'forum':true,'club':true};
  if(gated[name]){
    if(!canAccess(name)){
-     if(getMembershipStatus()==='free'&&!CU.trial_started_at){
+     if(getMembershipStatus()==='free'&&!CU.trial_started_at&&!localStorage.getItem('agora_trial_started')){
        showTrialPopup();
      } else if(name==='club'){
        openPremGate('독서모임은 프리미엄 전용이에요','월 6,900원 구독 후 오프라인 모임에 참여하고 실시간 채팅을 즐겨보세요.');
@@ -1894,7 +1900,7 @@ async function saveNickname(){
 async function exportToExcel(){
   if(!canAccess('excel')){
     const s=getMembershipStatus();
-    if(s==='free'&&!CU.trial_started_at){showTrialPopup();}
+    if(s==='free'&&!CU.trial_started_at&&!localStorage.getItem('agora_trial_started')){showTrialPopup();}
     else{openPremGate('엑셀 저장은 구독 후 이용 가능해요','무료체험 또는 프리미엄 구독으로 내 독서 기록을 엑셀로 저장하세요.');}
     return;
   }
@@ -2830,22 +2836,6 @@ async function loadAdmBooks(){
   </div>`).join('');
 }
 
-async function loadAdmForum(){
-  const{data:pd}=await sb.from('agora_posts').select('*, agora_comments(*), agora_users(username)').order('created_at',{ascending:false});
-  const el=document.getElementById('admPosts');
-  if(!pd||!pd.length){el.innerHTML='<div class="empty"><div class="et">게시글이 없습니다</div></div>';return;}
-  el.innerHTML=pd.map(p=>{
-    const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted);
-    return`<div class="card" style="padding:14px 18px;margin-bottom:10px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.book_title)} · 익명 · ${ago(p.created_at)}</div>
-      <div style="font-size:15px;font-family:var(--font-serif);margin-bottom:8px;line-height:1.6">${esc(p.question)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">답변 ${vis.length}개</div>
-      ${vis.map(c=>`<div style="background:var(--gl);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:var(--muted);line-height:1.6">${esc(c.content)}<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px">${ago(c.created_at)}</span><button class="btnd" style="font-size:11px;padding:2px 8px" onclick="delCmt('${c.id}','${c.user_id}')">삭제</button></div></div>`).join('')}
-    </div>`;
-  }).join('');
-}
-async function appPt(rid,uid){const{data:u}=await sb.from('agora_users').select('points').eq('id',uid).single();const np=(u?.points||0)+1000;await Promise.all([sb.from('agora_point_requests').update({status:'approved'}).eq('id',rid),sb.from('agora_users').update({points:np}).eq('id',uid)]);nt('1,000P 승인 완료');rAdmin();}
-async function rejPt(rid){await sb.from('agora_point_requests').update({status:'rejected'}).eq('id',rid);nt('반려되었습니다.');rAdmin();}
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
 
@@ -2879,6 +2869,17 @@ async function submitReport(){
   });
   closeReportModal();
   nt('신고가 접수됐습니다. 검토 후 조치할게요.');
+  // 관리자에게 알림
+  const{data:admins}=await sb.from('agora_users').select('id').eq('is_admin',true);
+  if(admins&&admins.length){
+    await Promise.all(admins.map(a=>
+      sb.from('agora_notifications').insert({
+        id:ID(),user_id:a.id,type:'report',
+        message:`새 신고가 접수됐어요: ${reasonLabels[reason]}`,
+        ref_id:targetId||null,is_read:false
+      })
+    ));
+  }
 }
 
 // ══ 관리자 탭 전환 ══
@@ -3034,7 +3035,7 @@ async function submitInquiry(){
   if(!title){nt('제목을 입력해주세요.','err');return;}
   if(!content){nt('내용을 입력해주세요.','err');return;}
   load(true);
-  const{error}=await sb.from('agora_inquiries').insert({id:ID(),user_id:CU.id,title,content});
+  const{data:inserted,error}=await sb.from('agora_inquiries').insert({id:ID(),user_id:CU.id,title,content}).select().single();
   load(false);
   if(error){
     if(error.message&&error.message.includes('schema cache')){
@@ -3043,6 +3044,17 @@ async function submitInquiry(){
       nt('오류: '+error.message,'err');
     }
     return;
+  }
+  // 관리자에게 알림
+  const{data:admins}=await sb.from('agora_users').select('id').eq('is_admin',true);
+  if(admins&&admins.length){
+    await Promise.all(admins.map(a=>
+      sb.from('agora_notifications').insert({
+        id:ID(),user_id:a.id,type:'report',
+        message:`새 1:1 문의가 접수됐어요: "${title.slice(0,20)}"`,
+        ref_id:inserted?.id||null,is_read:false
+      })
+    ));
   }
   document.getElementById('inquiryTitle').value='';
   document.getElementById('inquiryContent').value='';
@@ -3069,7 +3081,17 @@ async function replyInquiry(inqId){
   const el=document.getElementById('inqReply_'+inqId);
   const reply=el?el.value.trim():'';
   if(!reply){nt('답변 내용을 입력해주세요.','err');return;}
+  // 문의 조회해서 user_id 가져오기
+  const{data:inq}=await sb.from('agora_inquiries').select('user_id,title').eq('id',inqId).single();
   await sb.from('agora_inquiries').update({admin_reply:reply,replied_at:new Date().toISOString()}).eq('id',inqId);
+  // 유저에게 알림
+  if(inq&&inq.user_id){
+    await sb.from('agora_notifications').insert({
+      id:ID(),user_id:inq.user_id,type:'inquiry',
+      message:`1:1 문의 "${(inq.title||'').slice(0,20)}"에 답변이 달렸어요`,
+      ref_id:inqId,is_read:false
+    });
+  }
   nt('답변이 등록됐습니다.');rAdmin();
 }
 
@@ -3142,6 +3164,8 @@ function notifIcon(type){
   if(type==='comment'||type==='reply') return '💬';
   if(type==='heart') return '♥';
   if(type==='chat') return '📣';
+  if(type==='inquiry') return '📩';
+  if(type==='report') return '🚨';
   return '🔔';
 }
 
@@ -3150,6 +3174,8 @@ function handleNotifClick(type,refId){
   if(type==='comment'||type==='reply') openPost(refId);
   else if(type==='heart') go('library');
   else if(type==='chat') go('club');
+  else if(type==='inquiry') go('points'); // 마이페이지 1:1 문의로
+  else if(type==='report') go('admin');   // 관리자 패널로
 }
 
 async function markAllRead(){
@@ -3185,11 +3211,11 @@ function initNotifRealtime(){
       payload=>{
         const n=payload.new;
         if(!notifSettings.all)return;
-        if(!notifSettings[n.type])return;
-        // 벨 뱃지 표시
+        // inquiry/report 타입은 항상 표시 (설정 무관)
+        const alwaysShow=n.type==='inquiry'||n.type==='report';
+        if(!alwaysShow&&!notifSettings[n.type])return;
         const badge=document.getElementById('bellBadge');
         if(badge)badge.style.display='block';
-        // 토스트 알림
         nt(`${notifIcon(n.type)} ${n.message}`);
       }
     )
