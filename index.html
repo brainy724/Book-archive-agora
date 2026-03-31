@@ -1037,6 +1037,27 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
 
 
+<!-- 멤버십 부여 모달 -->
+<div id="membershipModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:340px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:17px;font-weight:600" id="mmTitle">멤버십 관리</div>
+      <button onclick="closeMembershipModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="mmSub"></div>
+    <div id="mmCurrentStatus" style="background:var(--gl);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:var(--txt)"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn" style="padding:12px;font-size:13px" onclick="grantTrial()">30일 무료체험 부여</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(1)">프리미엄 1개월</button>
+        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(3)">3개월</button>
+        <button class="btn2" style="flex:1;padding:11px;font-size:13px" onclick="grantPremium(12)">1년</button>
+      </div>
+      <button class="btnd" style="padding:11px;font-size:13px;background:#fff" onclick="revokeMembership()">멤버십 초기화</button>
+    </div>
+  </div>
+</div>
+
 <!-- 신고 모달 -->
 <div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:340px">
@@ -2847,6 +2868,58 @@ async function loadAdmBooks(){
 async function ban(uid){await sb.from('agora_users').update({banned:true}).eq('id',uid);nt('이용이 제한되었습니다.');rAdmin();}
 async function unban(uid){await sb.from('agora_users').update({banned:false,strikes:0}).eq('id',uid);nt('이용 제한이 해제되었습니다.');rAdmin();}
 
+// ══ 멤버십 부여 모달 ══
+let _mmUserId=null;
+async function openMembershipModal(uid,username){
+  _mmUserId=uid;
+  document.getElementById('mmTitle').textContent=username+' 님';
+  document.getElementById('mmSub').textContent='멤버십을 부여하거나 초기화할 수 있어요';
+  const{data:u}=await sb.from('agora_users').select('trial_started_at,premium_until').eq('id',uid).single();
+  const now=new Date();
+  let statusHtml='현재 상태: ';
+  if(u?.premium_until&&new Date(u.premium_until)>now){
+    const d=Math.ceil((new Date(u.premium_until)-now)/86400000);
+    statusHtml+=`<strong style="color:var(--g)">프리미엄</strong> · 남은 기간 ${d}일`;
+  } else if(u?.trial_started_at){
+    const end=new Date(u.trial_started_at);end.setDate(end.getDate()+30);
+    if(now<end){
+      const d=Math.ceil((end-now)/86400000);
+      statusHtml+=`<strong style="color:#4A8A4A">무료체험 중</strong> · 남은 기간 ${d}일`;
+    } else {
+      statusHtml+='<strong style="color:#999">체험 종료 (무료)</strong>';
+    }
+  } else {
+    statusHtml+='<strong style="color:#999">무료</strong>';
+  }
+  document.getElementById('mmCurrentStatus').innerHTML=statusHtml;
+  document.getElementById('membershipModal').style.display='flex';
+}
+function closeMembershipModal(){
+  document.getElementById('membershipModal').style.display='none';
+  _mmUserId=null;
+}
+async function grantTrial(){
+  if(!_mmUserId)return;
+  const now=new Date().toISOString();
+  await sb.from('agora_users').update({trial_started_at:now}).eq('id',_mmUserId);
+  nt('30일 무료체험이 부여됐습니다.');
+  closeMembershipModal();rAdmin();
+}
+async function grantPremium(months){
+  if(!_mmUserId)return;
+  const until=new Date();until.setMonth(until.getMonth()+months);
+  await sb.from('agora_users').update({premium_until:until.toISOString()}).eq('id',_mmUserId);
+  nt(`프리미엄 ${months}개월이 부여됐습니다.`);
+  closeMembershipModal();rAdmin();
+}
+async function revokeMembership(){
+  if(!_mmUserId)return;
+  if(!confirm('멤버십을 초기화할까요?'))return;
+  await sb.from('agora_users').update({trial_started_at:null,premium_until:null}).eq('id',_mmUserId);
+  nt('멤버십이 초기화됐습니다.');
+  closeMembershipModal();rAdmin();
+}
+
 // ══ 신고 시스템 ══
 function openReportModal(targetId, targetType, targetUserId){
   document.getElementById('reportTargetId').value=targetId;
@@ -2986,20 +3059,31 @@ async function rAdmin(){
   }
 
   // 회원 목록
-  document.getElementById('uList').innerHTML=normal.map(u=>`
-    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-      <div>
-        <div style="font-size:14px;font-weight:500">${esc(u.username)}</div>
-        <div style="font-size:11px;color:var(--muted)">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
+  document.getElementById('uList').innerHTML=normal.map(u=>{
+    const now=new Date();
+    const hasTrial=u.trial_started_at&&(()=>{const e=new Date(u.trial_started_at);e.setDate(e.getDate()+30);return now<e;})();
+    const hasPremium=u.premium_until&&new Date(u.premium_until)>now;
+    const statusBadge=hasPremium
+      ?`<span style="font-size:10px;background:var(--gl);color:var(--g);border:1px solid var(--gb);border-radius:10px;padding:2px 7px;margin-left:6px">프리미엄</span>`
+      :hasTrial
+      ?`<span style="font-size:10px;background:#F0F8F0;color:#4A8A4A;border:1px solid #C0DCC0;border-radius:10px;padding:2px 7px;margin-left:6px">체험중</span>`
+      :`<span style="font-size:10px;background:#F5F5F5;color:#999;border-radius:10px;padding:2px 7px;margin-left:6px">무료</span>`;
+    return`<div class="card" style="padding:12px 16px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="cursor:pointer" onclick="openMembershipModal('${u.id}','${esc(u.username)}')">
+          <div style="font-size:14px;font-weight:500;display:flex;align-items:center">${esc(u.username)}${statusBadge}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${u.banned
+            ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
+            :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
+          }
+          <button class="btnd" style="font-size:12px;padding:5px 10px;background:#fff" onclick="deleteAccount('${u.id}','${esc(u.username)}')">삭제</button>
+        </div>
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        ${u.banned
-          ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
-          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
-        }
-        <button class="btnd" style="font-size:12px;padding:5px 10px;background:#fff" onclick="deleteAccount('${u.id}','${esc(u.username)}')">삭제</button>
-      </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   switchAdmTab('reports');
 }

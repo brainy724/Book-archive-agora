@@ -1,7 +1,8 @@
-const CACHE_NAME = 'agora-v1';
+const CACHE_NAME = 'agora-v2';
 const CACHE_URLS = [
   '/',
   '/index.html',
+  '/splash.html',
   '/icon.svg',
   '/manifest.json'
 ];
@@ -23,7 +24,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Supabase API 요청은 캐싱 안 함
   if (e.request.url.includes('supabase.co')) return;
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
