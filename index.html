@@ -884,10 +884,27 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
 
-    <!-- 구독 -->
-    <div>
-      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
-      <div id="membershipSection"></div>
+    <!-- 1:1 고객센터 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">1:1 고객센터</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">문의사항을 남겨주세요. 순서대로 확인 후 답변드립니다.</div>
+      <div id="myInquiries" style="margin-bottom:12px"></div>
+      <div class="card" style="padding:18px 20px">
+        <div class="fg"><label>제목</label><input id="inquiryTitle" placeholder="문의 제목을 입력해주세요"/></div>
+        <div class="fg"><textarea id="inquiryContent" style="min-height:100px" placeholder="문의 내용을 자세히 적어주세요..."></textarea></div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn" style="padding:10px 20px;font-size:13px" onclick="submitInquiry()">문의 제출</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 구독 (관리자는 숨김) -->
+    <div id="membershipWrap">
+      <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
+        <div id="membershipSection"></div>
+      </div>
     </div>
 
   </div></div>
@@ -986,28 +1003,25 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
  <div class="page" id="p-admin"><div class="pg">
  <div class="h1 serif">관리자 패널</div>
- <div class="sub">커뮤니티 관리 · 포인트 승인</div>
+ <div class="sub">커뮤니티 관리</div>
  <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
  <!-- 탭 -->
  <div class="tab-bar" style="margin-bottom:20px">
    <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')">신고 접수</button>
+   <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')">1:1 문의</button>
    <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')">회원 목록</button>
-   <button class="tab-btn" id="admTab-posts" onclick="switchAdmTab('posts')">최근 토론</button>
  </div>
  <!-- 신고 목록 -->
  <div id="admReportsSection">
    <div id="admReports"></div>
  </div>
+ <!-- 1:1 문의 -->
+ <div id="admInquiriesSection" style="display:none">
+   <div id="admInquiries"></div>
+ </div>
  <!-- 회원 목록 -->
  <div id="admUsersSection" style="display:none">
-   <div style="background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--g)">
-   고품질 독후감·질문·댓글 작성자에게 3,000P를 지급합니다.
-   </div>
    <div id="uList"></div>
- </div>
- <!-- 최근 토론 -->
- <div id="admPostsSection" style="display:none">
-   <div id="admPosts"></div>
  </div>
  </div></div>
 </div>
@@ -1194,11 +1208,12 @@ function getMembershipStatus(){
 }
 // 접근 가능 여부
 function canAccess(feature){
+  if(CU&&CU.isAdmin)return true;
   const s=getMembershipStatus();
   if(s==='premium')return true;
   if(feature==='library'||feature==='mypage')return true;
-  if(s==='trial'&&feature==='club')return false; // 체험은 독서모임 불가
-  if(s==='trial')return true; // 체험은 나머지 다 가능 (excel 포함)
+  if(s==='trial'&&feature==='club')return false;
+  if(s==='trial')return true;
   return false;
 }
 function daysLeftTrial(){
@@ -1256,12 +1271,18 @@ function closePremGate(){
 
 // 탭 표시 업데이트
 function updateNavTabs(){
+  if(CU&&CU.isAdmin){
+    ['sb-public','sb-forum','sb-club','n-public','n-forum','n-club','t-public','t-forum','t-club','t-points','t-library'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.style.opacity='1';el.title='';}
+    });
+    return;
+  }
   const s=getMembershipStatus();
   const isPrem=s==='premium';
   const isTrial=s==='trial';
   const hasClub=isPrem;
   const hasFull=isPrem||isTrial;
-  // 사이드바
   ['sb-public','sb-forum'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
@@ -1270,14 +1291,12 @@ function updateNavTabs(){
   });
   const sbClub=document.getElementById('sb-club');
   if(sbClub){sbClub.style.opacity=hasClub?'1':'0.45';sbClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
-  // 상단 nav
   ['n-public','n-forum'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.style.opacity=hasFull?'1':'0.45';el.title=hasFull?'':'무료체험 또는 구독 후 이용 가능';}
   });
   const nClub=document.getElementById('n-club');
   if(nClub){nClub.style.opacity=hasClub?'1':'0.45';nClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
-  // 하단탭 (마이페이지/내서재는 항상 100%)
   const tPoints=document.getElementById('t-points');if(tPoints)tPoints.style.opacity='1';
   const tLib=document.getElementById('t-library');if(tLib)tLib.style.opacity='1';
   ['t-public','t-forum'].forEach(id=>{
@@ -1407,9 +1426,9 @@ async function ok(u){
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  load(false);
  updateNavTabs();
- // 무료체험 팝업: 한 세션당 1번만, trial_started_at 없고 premium도 아닌 경우
+ // 무료체험 팝업: 관리자 제외, 한 세션당 1번만
  const s=getMembershipStatus();
- if(s==='free'&&!u.trial_started_at&&!sessionStorage.getItem('trialPopupShown')){
+ if(!u.isAdmin&&s==='free'&&!u.trial_started_at&&!sessionStorage.getItem('trialPopupShown')){
    sessionStorage.setItem('trialPopupShown','1');
    setTimeout(()=>showTrialPopup(),800);
  }
@@ -2670,33 +2689,17 @@ async function paySubscription(){
  }catch(e){nt('결제를 취소했습니다.');}
 }
 async function rPoints(){
-  const _cn=document.getElementById('currentNickname');if(_cn)_cn.textContent=CU.username||'';
-  const _ni=document.getElementById('nicknameInput');if(_ni)_ni.value='';
-  const _nm=document.getElementById('nicknameMsg');if(_nm)_nm.style.display='none';
-  if(typeof renderSavedColors==="function")renderSavedColors();
-  // 현재 색상 피커에 반영
-  const _col=localStorage.getItem('agora_color');
-  if(_col){try{const _c=JSON.parse(_col);const cp=document.getElementById('mainColorPicker');if(cp)cp.value=_c.g;const hx=document.getElementById('pickerHexDisplay');if(hx)hx.textContent=_c.g;}catch{}}
-  const _sc=localStorage.getItem('agora_color');
-  if(_sc){try{const _c=JSON.parse(_sc);setColorPreset(_c.g,_c.g2,_c.gl,_c.gb);}catch{}}
   const cn=document.getElementById('currentNickname');if(cn)cn.textContent=CU.username||'';
   const ni=document.getElementById('nicknameInput');if(ni)ni.value='';
   const nm=document.getElementById('nicknameMsg');if(nm)nm.style.display='none';
-  document.getElementById('currentNickname').textContent=CU.username||'';
-  document.getElementById('nicknameInput').value='';
-  document.getElementById('nicknameMsg').style.display='none';
- load(true);
- const{data:u}=await sb.from('agora_users').select('*').eq('id',CU.id).single();
- const{data:reqs}=await sb.from('agora_point_requests').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}).limit(20);
- load(false);
- if(u){CU.points=u.points||0;localStorage.setItem('agora_sess',JSON.stringify(CU));upPts(CU.points);}
- const _mpn=document.getElementById('myPtsNum');if(_mpn)_mpn.textContent=(CU.points||0).toLocaleString()+' P';
- const el=document.getElementById('myReqs');if(!el)return;
- if(!reqs||!reqs.length){el.innerHTML=`<div class="empty" style="padding:24px 0"><div class="et">신청 내역이 없습니다</div></div>`;return;}
-  try{
- const tp=TossPayments(TOSS_KEY);const pm=tp.payment({customerKey:CU.id});
- await pm.requestPayment({method:'CARD',amount:{currency:'KRW',value:amount},orderId:oid,orderName:`아고라 포인트 ${points.toLocaleString()}P`,customerName:CU.username,successUrl:`${location.origin}${location.pathname}?payment=success&orderId=${oid}&points=${points}`,failUrl:`${location.origin}${location.pathname}?payment=fail`});
- }catch(e){nt('결제를 취소했습니다.');}
+  if(typeof renderSavedColors==='function')renderSavedColors();
+  const col=localStorage.getItem('agora_color');
+  if(col){try{const c=JSON.parse(col);const cp=document.getElementById('mainColorPicker');if(cp)cp.value=c.g;const hx=document.getElementById('pickerHexDisplay');if(hx)hx.textContent=c.g;setColorPreset(c.g,c.g2,c.gl,c.gb);}catch{}}
+  // 관리자 구독 섹션 숨김
+  const mw=document.getElementById('membershipWrap');
+  if(mw)mw.style.display=CU.isAdmin?'none':'block';
+  renderMembershipSection();
+  rMyInquiries();
 }
 
 // ══ 멤버십 렌더 & 결제 ══
@@ -2917,7 +2920,7 @@ async function submitReport(){
 
 // ══ 관리자 탭 전환 ══
 function switchAdmTab(tab){
-  ['reports','users','posts'].forEach(t=>{
+  ['reports','inquiries','users'].forEach(t=>{
     const btn=document.getElementById('admTab-'+t);
     const sec=document.getElementById('adm'+t.charAt(0).toUpperCase()+t.slice(1)+'Section');
     if(btn)btn.classList.toggle('on',t===tab);
@@ -2927,19 +2930,20 @@ function switchAdmTab(tab){
 
 async function rAdmin(){
   load(true);
-  const[{data:ud},{data:pd},{data:rpts}]=await Promise.all([
+  const[{data:ud},{data:rpts},{data:inqs}]=await Promise.all([
     sb.from('agora_users').select('*').order('created_at',{ascending:false}),
-    sb.from('agora_posts').select('*,agora_comments(*)').order('created_at',{ascending:false}),
-    sb.from('agora_reports').select('*').order('created_at',{ascending:false})
+    sb.from('agora_reports').select('*').order('created_at',{ascending:false}),
+    sb.from('agora_inquiries').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}))
   ]);
   load(false);
   const normal=(ud||[]).filter(u=>!u.is_admin);
   const pending=(rpts||[]).filter(r=>r.status==='pending');
+  const pendingInq=(inqs||[]).filter(i=>!i.admin_reply);
   document.getElementById('admStats').innerHTML=[
     {l:'전체 회원',v:normal.length+'명'},
     {l:'이용제한',v:normal.filter(u=>u.banned).length+'명',c:'var(--red)'},
     {l:'신고 대기',v:pending.length+'건',c:pending.length?'var(--red)':'var(--txt)'},
-    {l:'토론 게시글',v:(pd||[]).length+'개'}
+    {l:'미답변 문의',v:pendingInq.length+'건',c:pendingInq.length?'var(--red)':'var(--txt)'}
   ].map(s=>`<div class="sb"><div class="sn" style="color:${s.c||'var(--txt)'}">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
 
   // 신고 목록
@@ -2951,7 +2955,8 @@ async function rAdmin(){
     } else {
       admReportsEl.innerHTML=rpts.map(r=>{
         const reportedUser=userMap[r.target_user_id]||'알 수 없음';
-        const isBanned=(ud||[]).find(u=>u.id===r.target_user_id)?.banned;
+        const targetU=(ud||[]).find(u=>u.id===r.target_user_id);
+        const isBanned=targetU?.banned;
         return`<div class="card" style="padding:14px 18px;margin-bottom:8px;border-left:3px solid ${r.status==='pending'?'var(--red)':r.status==='resolved'?'var(--g)':'var(--border)'}">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
             <div>
@@ -2963,8 +2968,9 @@ async function rAdmin(){
           <div style="font-size:14px;font-weight:500;margin-bottom:3px">사유: ${esc(r.reason)}</div>
           ${r.detail?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">"${esc(r.detail)}"</div>`:''}
           <div style="font-size:12px;color:var(--muted);margin-bottom:10px">신고 대상: <strong style="color:var(--txt)">${esc(reportedUser)}</strong>${isBanned?' · 이용제한중':''}</div>
-          ${r.status==='pending'?`<div style="display:flex;gap:6px">
-            ${r.target_user_id&&!isBanned?`<button class="btnd" style="font-size:12px;padding:5px 12px" onclick="banFromReport('${r.id}','${r.target_user_id}')">계정 차단</button>`:''}
+          ${r.status==='pending'?`<div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${r.target_user_id&&!isBanned?`<button class="btnd" style="font-size:12px;padding:5px 12px" onclick="banFromReport('${r.id}','${r.target_user_id}')">차단</button>`:''}
+            ${r.target_user_id?`<button class="btnd" style="font-size:12px;padding:5px 12px;background:#fff" onclick="deleteAccountFromReport('${r.id}','${r.target_user_id}','${esc(reportedUser)}')">계정 삭제</button>`:''}
             <button class="btn2" style="font-size:12px;padding:5px 12px" onclick="resolveReport('${r.id}')">처리완료</button>
             <button class="btn2" style="font-size:12px;padding:5px 12px" onclick="dismissReport('${r.id}')">기각</button>
           </div>`:''}
@@ -2973,47 +2979,78 @@ async function rAdmin(){
     }
   }
 
+  // 1:1 문의 목록
+  const admInqEl=document.getElementById('admInquiries');
+  if(admInqEl){
+    if(!inqs||!inqs.length){
+      admInqEl.innerHTML='<div class="empty"><div class="et">접수된 문의가 없습니다</div></div>';
+    } else {
+      admInqEl.innerHTML=inqs.map(inq=>`
+        <div class="card" style="padding:14px 18px;margin-bottom:8px;border-left:3px solid ${inq.admin_reply?'var(--g)':'var(--red)'}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;font-weight:600;color:${inq.admin_reply?'var(--g)':'var(--red)'}">${inq.admin_reply?'답변완료':'미답변'}</span>
+            <span style="font-size:11px;color:var(--muted)">${esc(userMap[inq.user_id]||'알 수 없음')} · ${ago(inq.created_at)}</span>
+          </div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px">${esc(inq.title)}</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:${inq.admin_reply?'10px':'8px'};line-height:1.7;white-space:pre-wrap">${esc(inq.content)}</div>
+          ${inq.admin_reply
+            ?`<div style="background:var(--gl);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.7"><strong style="color:var(--g);font-size:11px">관리자 답변</strong><br>${esc(inq.admin_reply)}</div>`
+            :`<textarea id="inqReply_${inq.id}" placeholder="답변을 입력해주세요..." style="min-height:70px;font-size:13px;margin-bottom:6px"></textarea>
+             <div style="display:flex;justify-content:flex-end">
+               <button class="btn" style="font-size:12px;padding:7px 16px" onclick="replyInquiry('${inq.id}')">답변 등록</button>
+             </div>`
+          }
+        </div>`).join('');
+    }
+  }
+
   // 회원 목록
   document.getElementById('uList').innerHTML=normal.map(u=>`
-    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+    <div class="card" style="padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
       <div>
         <div style="font-size:14px;font-weight:500">${esc(u.username)}</div>
         <div style="font-size:11px;color:var(--muted)">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-shrink:0">
         ${u.banned
           ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
-          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">이용 제한</button>`
+          :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
         }
+        <button class="btnd" style="font-size:12px;padding:5px 10px;background:#fff" onclick="deleteAccount('${u.id}','${esc(u.username)}')">삭제</button>
       </div>
     </div>`).join('');
-
-  // 최근 토론
-  document.getElementById('admPosts').innerHTML=!(pd||[]).length
-    ?`<div class="empty"><div class="et">게시글이 없습니다</div></div>`
-    :pd.map(p=>{
-      const vis=(p.agora_comments||[]).filter(c=>!c.is_deleted).length;
-      return`<div class="card" style="padding:12px 18px;margin-bottom:8px">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">${esc(p.book_title)}</div>
-        <div style="font-size:14px">${esc((p.question||'').length>80?p.question.slice(0,80)+'…':p.question)}</div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <span style="font-size:12px;color:var(--muted)">답변 ${vis}개 · ${ago(p.created_at)}</span>
-          <button class="btn2" style="font-size:12px;padding:4px 10px" onclick="openPost('${p.id}')">보기</button>
-        </div>
-      </div>`;
-    }).join('');
 
   switchAdmTab('reports');
 }
 
-async function banFromReport(reportId, userId){
-  if(!confirm('이 사용자를 차단하고 신고를 처리완료로 변경할까요?'))return;
+async function banFromReport(reportId,userId){
+  if(!confirm('이 사용자를 차단할까요?'))return;
   await Promise.all([
     sb.from('agora_users').update({banned:true}).eq('id',userId),
     sb.from('agora_reports').update({status:'resolved'}).eq('id',reportId)
   ]);
-  nt('계정이 차단되고 신고가 처리됐습니다.');
-  rAdmin();
+  nt('차단되고 신고가 처리됐습니다.');rAdmin();
+}
+async function deleteAccountFromReport(reportId,userId,username){
+  if(!confirm(`'${username}' 계정을 삭제할까요? 되돌릴 수 없습니다.`))return;
+  await Promise.all([
+    sb.from('agora_books').delete().eq('user_id',userId),
+    sb.from('agora_posts').delete().eq('user_id',userId),
+    sb.from('agora_comments').delete().eq('user_id',userId),
+    sb.from('agora_reports').update({status:'resolved'}).eq('id',reportId)
+  ]);
+  await sb.from('agora_users').delete().eq('id',userId);
+  nt('계정이 삭제됐습니다.');rAdmin();
+}
+async function deleteAccount(userId,username){
+  if(!confirm(`'${username}' 계정을 삭제할까요? 되돌릴 수 없습니다.`))return;
+  await Promise.all([
+    sb.from('agora_books').delete().eq('user_id',userId),
+    sb.from('agora_posts').delete().eq('user_id',userId),
+    sb.from('agora_comments').delete().eq('user_id',userId)
+  ]);
+  await sb.from('agora_users').delete().eq('id',userId);
+  nt('계정이 삭제됐습니다.');rAdmin();
 }
 async function resolveReport(reportId){
   await sb.from('agora_reports').update({status:'resolved'}).eq('id',reportId);
@@ -3022,6 +3059,45 @@ async function resolveReport(reportId){
 async function dismissReport(reportId){
   await sb.from('agora_reports').update({status:'dismissed'}).eq('id',reportId);
   nt('신고가 기각됐습니다.');rAdmin();
+}
+
+// ══ 1:1 고객센터 ══
+async function submitInquiry(){
+  const title=document.getElementById('inquiryTitle').value.trim();
+  const content=document.getElementById('inquiryContent').value.trim();
+  if(!title){nt('제목을 입력해주세요.','err');return;}
+  if(!content){nt('내용을 입력해주세요.','err');return;}
+  load(true);
+  const{error}=await sb.from('agora_inquiries').insert({id:ID(),user_id:CU.id,title,content});
+  load(false);
+  if(error){nt('오류: '+error.message,'err');return;}
+  document.getElementById('inquiryTitle').value='';
+  document.getElementById('inquiryContent').value='';
+  nt('문의가 접수됐습니다. 순서대로 답변드릴게요.');
+  rMyInquiries();
+}
+async function rMyInquiries(){
+  const el=document.getElementById('myInquiries');
+  if(!el)return;
+  const{data,error}=await sb.from('agora_inquiries').select('*').eq('user_id',CU.id).order('created_at',{ascending:false});
+  if(error||!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--muted);margin-bottom:12px">아직 문의 내역이 없어요.</div>';return;}
+  el.innerHTML=data.map(inq=>`
+    <div class="card" style="padding:14px 18px;margin-bottom:8px;border-left:3px solid ${inq.admin_reply?'var(--g)':'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600;color:${inq.admin_reply?'var(--g)':'var(--muted)'}">${inq.admin_reply?'답변완료':'답변 대기'}</span>
+        <span style="font-size:11px;color:var(--muted)">${ago(inq.created_at)}</span>
+      </div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px">${esc(inq.title)}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">${esc(inq.content)}</div>
+      ${inq.admin_reply?`<div style="background:var(--gl);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.7;margin-top:8px"><strong style="font-size:11px;color:var(--g)">관리자 답변</strong><br>${esc(inq.admin_reply)}</div>`:''}
+    </div>`).join('');
+}
+async function replyInquiry(inqId){
+  const el=document.getElementById('inqReply_'+inqId);
+  const reply=el?el.value.trim():'';
+  if(!reply){nt('답변 내용을 입력해주세요.','err');return;}
+  await sb.from('agora_inquiries').update({admin_reply:reply,replied_at:new Date().toISOString()}).eq('id',inqId);
+  nt('답변이 등록됐습니다.');rAdmin();
 }
 
 // ══ 알림 시스템 ══
