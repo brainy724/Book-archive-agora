@@ -4,15 +4,21 @@
   "description": "여성 전용 독서 커뮤니티 아고라",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FBF5EE",
+  "background_color": "#FFFFFF",
   "theme_color": "#B8956A",
   "orientation": "portrait",
   "lang": "ko",
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icon-192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ]
