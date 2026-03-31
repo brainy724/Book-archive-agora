@@ -2,12 +2,14 @@
   "name": "AGORA — 독서 아카이브",
   "short_name": "AGORA",
   "description": "여성 전용 독서 커뮤니티 아고라",
+  "id": "/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#B8956A",
   "orientation": "portrait",
   "lang": "ko",
+  "categories": ["books", "lifestyle", "social"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -20,6 +22,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "AGORA 독서 아카이브"
     }
   ]
 }
