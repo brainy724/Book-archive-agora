@@ -918,14 +918,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       </div>
     </div>
 
-    <!-- 구독 (관리자는 숨김) -->
-    <div id="membershipWrap">
-      <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
-      <div>
-        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">구독</div>
-        <div id="membershipSection"></div>
-      </div>
-    </div>
+
 
   </div></div>
 
@@ -1150,34 +1143,12 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   </div>
 </div>
 <!-- 무료체험 팝업 -->
-<div id="trialPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
-    <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--g);margin-bottom:8px">30일 무료체험</div>
-    <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px">
-      지금 시작하면 30일 동안<br>아고라의 주요 기능을 무료로 이용할 수 있어요.
-    </div>
-    <div style="background:var(--gl);border-radius:12px;padding:14px 18px;margin-bottom:20px;text-align:left">
-      <div style="font-size:13px;color:var(--txt);line-height:2.2">
-        ✅ &nbsp;공개 서재 — 다른 분들의 독서록 열람<br>
-        ✅ &nbsp;광장 — 책 토론 익명 참여<br>
-        ✅ &nbsp;엑셀로 내 독서 기록 저장<br>
-        ❌ &nbsp;독서모임 (프리미엄 전용)
-      </div>
-    </div>
-    <button class="btn" style="width:100%;padding:13px;font-size:14px;margin-bottom:10px" onclick="startTrial()">30일 무료체험 시작하기</button>
-    <button class="btn2" style="width:100%;padding:11px;font-size:13px" onclick="skipTrial()">괜찮아요, 나중에 할게요</button>
-    <div style="font-size:11px;color:var(--muted);margin-top:12px">체험 후 자동 결제되지 않아요 · 언제든 시작 가능</div>
+
   </div>
 </div>
 
 <!-- 프리미엄 유도 모달 -->
-<div id="premiumGate" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:800;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;text-align:center">
-    <div style="font-family:var(--font-serif);font-size:20px;font-weight:600;margin-bottom:8px" id="premGateTitle">프리미엄 전용 기능이에요</div>
-    <div style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px" id="premGateDesc">월 6,900원으로 아고라의 모든 기능을 이용하세요.</div>
-    <button class="btn" style="width:100%;padding:13px;font-size:14px;margin-bottom:10px" onclick="closePremGate();go('points')">구독하러 가기</button>
-    <button class="btn2" style="width:100%;padding:11px;font-size:13px" onclick="closePremGate()">닫기</button>
-  </div>
+
 </div>
 
 <div class="lov" id="lov" style="display:none"><div class="sp"></div></div>
@@ -1249,13 +1220,7 @@ function getMembershipStatus(){
 }
 // 접근 가능 여부
 function canAccess(feature){
-  if(CU&&CU.isAdmin)return true;
-  const s=getMembershipStatus();
-  if(s==='premium')return true;
-  if(feature==='library'||feature==='mypage')return true;
-  if(s==='trial'&&feature==='club')return false;
-  if(s==='trial')return true;
-  return false;
+  return true; // 전체 무료 오픈
 }
 function daysLeftTrial(){
   if(!CU||!CU.trial_started_at)return 0;
@@ -1278,34 +1243,9 @@ function nt(msg,t='ok'){document.querySelectorAll('.notif').forEach(e=>e.remove(
 function upPts(p){const _npEl=document.getElementById('navPts');if(_npEl)_npEl.textContent=' '+(p||0).toLocaleString()+'P';}
 
 // ══ 무료체험 팝업 ══
-function showTrialPopup(){
-  const p=document.getElementById('trialPopup');
-  if(p)p.style.display='flex';
-}
-async function startTrial(){
-  const p=document.getElementById('trialPopup');
-  if(p)p.style.display='none';
-  if(!CU)return;
-  const now=new Date().toISOString();
-  // 로컬 먼저 저장 (DB 실패해도 팝업 반복 방지)
-  CU.trial_started_at=now;
-  localStorage.setItem('agora_sess',JSON.stringify(CU));
-  localStorage.setItem('agora_trial_started','1');
-  sessionStorage.setItem('trialPopupShown','1');
-  // DB 저장
-  const{error}=await sb.from('agora_users').update({trial_started_at:now}).eq('id',CU.id);
-  if(error){
-    nt('체험 시작 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.','err');
-    return;
-  }
-  nt('30일 무료체험이 시작됐습니다!');
-  updateNavTabs();
-  renderMembershipSection();
-}
-function skipTrial(){
-  const p=document.getElementById('trialPopup');
-  if(p)p.style.display='none';
-}
+function showTrialPopup(){}
+async function startTrial(){}
+function skipTrial(){}
 function openPremGate(title,desc){
   const p=document.getElementById('premiumGate');
   const t=document.getElementById('premGateTitle');
@@ -1314,47 +1254,14 @@ function openPremGate(title,desc){
   if(d)d.textContent=desc||'월 6,900원으로 아고라의 모든 기능을 이용하세요.';
   if(p)p.style.display='flex';
 }
-function closePremGate(){
-  const p=document.getElementById('premiumGate');
-  if(p)p.style.display='none';
-}
+function closePremGate(){}
 
 // 탭 표시 업데이트
 function updateNavTabs(){
-  if(CU&&CU.isAdmin){
-    ['sb-public','sb-forum','sb-club','n-public','n-forum','n-club','t-public','t-forum','t-club','t-points','t-library'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){el.style.opacity='1';el.title='';}
-    });
-    return;
-  }
-  const s=getMembershipStatus();
-  const isPrem=s==='premium';
-  const isTrial=s==='trial';
-  const hasClub=isPrem;
-  const hasFull=isPrem||isTrial;
-  ['sb-public','sb-forum'].forEach(id=>{
+  ['sb-public','sb-forum','sb-club','n-public','n-forum','n-club','t-public','t-forum','t-club','t-points','t-library'].forEach(id=>{
     const el=document.getElementById(id);
-    if(!el)return;
-    el.style.opacity=hasFull?'1':'0.45';
-    el.title=hasFull?'':'무료체험 또는 구독 후 이용 가능';
+    if(el){el.style.opacity='1';el.title='';}
   });
-  const sbClub=document.getElementById('sb-club');
-  if(sbClub){sbClub.style.opacity=hasClub?'1':'0.45';sbClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
-  ['n-public','n-forum'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.style.opacity=hasFull?'1':'0.45';el.title=hasFull?'':'무료체험 또는 구독 후 이용 가능';}
-  });
-  const nClub=document.getElementById('n-club');
-  if(nClub){nClub.style.opacity=hasClub?'1':'0.45';nClub.title=hasClub?'':'프리미엄 구독 후 이용 가능';}
-  const tPoints=document.getElementById('t-points');if(tPoints)tPoints.style.opacity='1';
-  const tLib=document.getElementById('t-library');if(tLib)tLib.style.opacity='1';
-  ['t-public','t-forum'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.style.opacity=hasFull?'1':'0.45';
-  });
-  const tClub=document.getElementById('t-club');
-  if(tClub)tClub.style.opacity=hasClub?'1':'0.45';
 }
 async function loginGoogle(){load(true);await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});}
 function loginNaver(){
@@ -1478,13 +1385,7 @@ async function ok(u){
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  updateNavTabs();
  // 무료체험 팝업: 관리자 제외, 이미 시작했거나 한 세션당 1번만
- const s=getMembershipStatus();
- if(!u.isAdmin&&s==='free'&&!u.trial_started_at
-    &&!localStorage.getItem('agora_trial_started')
-    &&!sessionStorage.getItem('trialPopupShown')){
-   sessionStorage.setItem('trialPopupShown','1');
-   setTimeout(()=>showTrialPopup(),800);
- }
+ // 전체 무료 오픈 - 팝업 비활성화
  // 성별 확인 (최초 1회, 관리자 제외)
  if(!u.isAdmin&&!localStorage.getItem('agora_gender')){showGender();}
  go('library');
@@ -1504,16 +1405,7 @@ function go(name){
  // 접근 제어
  const gated={'public':true,'forum':true,'club':true};
  if(gated[name]){
-   if(!canAccess(name)){
-     if(getMembershipStatus()==='free'&&!CU.trial_started_at&&!localStorage.getItem('agora_trial_started')){
-       showTrialPopup();
-     } else if(name==='club'){
-       openPremGate('독서모임은 프리미엄 전용이에요','월 6,900원 구독 후 오프라인 모임에 참여하고 실시간 채팅을 즐겨보세요.');
-     } else {
-       openPremGate('이 기능을 이용하려면 구독이 필요해요','마이페이지에서 구독하거나 무료체험을 시작해보세요.');
-     }
-     return;
-   }
+
  }
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('.nl').forEach(n=>n.classList.remove('on'));
@@ -1543,7 +1435,7 @@ function go(name){
  if(name==='forum')rForum();
  if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
- if(name==='points'){rPoints();renderMembershipSection();}
+ if(name==='points'){rPoints();}
  if(name==='addBook'){
  document.getElementById('abTitle').textContent='독서 기록 추가';
  document.getElementById('abSub').textContent='새로운 독서 기록을 남겨보세요';
@@ -1939,12 +1831,7 @@ async function saveNickname(){
 }
 
 async function exportToExcel(){
-  if(!canAccess('excel')){
-    const s=getMembershipStatus();
-    if(s==='free'&&!CU.trial_started_at&&!localStorage.getItem('agora_trial_started')){showTrialPopup();}
-    else{openPremGate('엑셀 저장은 구독 후 이용 가능해요','무료체험 또는 프리미엄 구독으로 내 독서 기록을 엑셀로 저장하세요.');}
-    return;
-  }
+
   if(typeof XLSX==='undefined'){
     nt('잠시 후 다시 시도해주세요.','err');
     // SheetJS 다시 로드
@@ -2749,52 +2636,12 @@ async function rPoints(){
   if(typeof renderSavedColors==='function')renderSavedColors();
   const col=localStorage.getItem('agora_color');
   if(col){try{const c=JSON.parse(col);const cp=document.getElementById('mainColorPicker');if(cp)cp.value=c.g;const hx=document.getElementById('pickerHexDisplay');if(hx)hx.textContent=c.g;setColorPreset(c.g,c.g2,c.gl,c.gb);}catch{}}
-  // 관리자 구독 섹션 숨김
-  const mw=document.getElementById('membershipWrap');
-  if(mw)mw.style.display=CU.isAdmin?'none':'block';
-  renderMembershipSection();
+
   rMyInquiries();
 }
 
 // ══ 멤버십 렌더 & 결제 ══
-function renderMembershipSection(){
-  const el=document.getElementById('membershipSection');
-  if(!el)return;
-  const s=getMembershipStatus();
-  if(s==='premium'){
-    const d=daysLeftPremium();
-    el.innerHTML=`
-      <div style="background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--g);margin-bottom:6px">프리미엄 구독 중</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong></div>
-        <div style="font-size:12px;color:var(--txt);line-height:2">
-          공개 서재 · 광장 · 독서모임 · 엑셀 내보내기
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center">구독 연장은 마이페이지에서 가능해요</div>`;
-  } else if(s==='trial'){
-    const d=daysLeftTrial();
-    el.innerHTML=`
-      <div style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--g);margin-bottom:6px">30일 무료체험 중</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">남은 기간 <strong style="color:var(--g)">${d}일</strong> · 자동 결제 없음</div>
-        <div style="font-size:12px;color:var(--txt);line-height:2;margin-bottom:6px">공개 서재 · 광장 · 엑셀 저장 이용 가능</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">독서모임은 프리미엄 전용입니다</div>
-        <button class="btn" style="width:100%;padding:12px;font-size:13px" onclick="startPremiumPayment()">프리미엄 구독하기 — 월 6,900원</button>
-      </div>`;
-  } else {
-    el.innerHTML=`
-      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
-        <div style="font-family:var(--font-serif);font-size:16px;font-weight:600;margin-bottom:6px">AGORA 프리미엄</div>
-        <div style="font-size:22px;font-weight:700;color:var(--g);margin-bottom:10px">월 6,900원</div>
-        <div style="font-size:12px;color:var(--txt);line-height:2.2;margin-bottom:16px">
-          공개 서재 · 광장<br>독서모임 (오프라인 + 채팅)<br>엑셀 내보내기
-        </div>
-        <button class="btn" style="width:100%;padding:12px;font-size:13px;margin-bottom:10px" onclick="startPremiumPayment()">구독하기</button>
-        ${!CU.trial_started_at?`<button class="btn2" style="width:100%;padding:10px;font-size:13px" onclick="showTrialPopup()">30일 무료체험 시작하기</button>`:'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">무료체험 종료됨</div>'}
-      </div>`;
-  }
-}
+function renderMembershipSection(){}
 
 async function startPremiumPayment(){
   const oid='PREM_'+ID();
@@ -3820,7 +3667,7 @@ function _goWithoutHistory(name){
  if(name==='forum')rForum();
  if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
- if(name==='points'){rPoints();renderMembershipSection();}
+ if(name==='points'){rPoints();}
 }
 window.onload=async()=>{
  loadCustomize();
