@@ -1281,7 +1281,8 @@ async function handleOAuth(session){
  else{
  const m=session.user.user_metadata||{};
  const un=m.full_name||m.name||session.user.email?.split('@')[0]||'user_'+ID().slice(0,6);
- const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null};
+ const premiumUntil=new Date();premiumUntil.setFullYear(premiumUntil.getFullYear()+99);
+ const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null,premium_until:premiumUntil.toISOString()};
  const{error}=await sb.from('agora_users').insert(nu);
  if(error){nt('계정 생성 오류: '+error.message,'err');load(false);return;}
  await ok({...nu,isAdmin:false});
@@ -1334,7 +1335,8 @@ async function handleNaver(){
  if(eu){if(eu.banned){nt('이용이 제한된 계정입니다.','err');nl.logout();return;}await ok({...eu,isAdmin:eu.is_admin});}
  else{
  const un=nu.getName()||nu.getEmail()?.split('@')[0]||'user_'+ID().slice(0,6);
- const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null};
+ const premUntil=new Date();premUntil.setFullYear(premUntil.getFullYear()+99);
+ const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null,premium_until:premUntil.toISOString()};
  const{error}=await sb.from('agora_users').insert(newU);
  if(error){nt('계정 생성 오류','err');return;}
  await ok({...newU,isAdmin:false});
