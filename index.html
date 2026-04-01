@@ -43,7 +43,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
-.nav-r{display:flex;align-items:center;gap:10px;}
+.nav-r{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;flex-shrink:0;}
 .nav-pts{font-size:13px;font-weight:600;color:var(--g);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--gb);}
 .btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;}
 .btn-sm:hover{background:var(--gl);color:var(--g);}
@@ -554,7 +554,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
    </div>
    <div id="notifList" style="overflow-y:auto;max-height:380px"></div>
  </div>
- <span id="navUser" onclick="go('points')" style="font-size:13px;font-weight:500;color:var(--txt);cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span><button class="btn-sm" onclick="logout()" style="margin-left:8px">로그아웃</button>
+ <span id="navUser" onclick="go('points')" style="font-size:13px;font-weight:500;color:var(--txt);cursor:pointer;padding:6px 6px;border-radius:6px;transition:background .15s;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span><button class="btn-sm" onclick="logout()" style="margin-left:6px;white-space:nowrap;flex-shrink:0;padding:4px 8px">로그아웃</button>
  </div>
  </nav>
  <div class="btab">
