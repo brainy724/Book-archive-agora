@@ -2393,6 +2393,9 @@ async function confirmGender(){
  localStorage.setItem('agora_sess',JSON.stringify(CU));
  document.getElementById('genderWrap').style.display='none';
  go('library');
+ loadNotifSettings();
+ checkUnreadNotifs();
+ initNotifRealtime();
 }
 async function rejectGender(){
  if(!CU) return;
