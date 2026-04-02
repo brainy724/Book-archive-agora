@@ -37,13 +37,13 @@ body.dark{
 body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;}
 .serif{font-family:var(--font-serif);}
 /* NAV */
-.nav{background:var(--gl);border-bottom:1px solid var(--border);padding:0 12px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-sizing:border-box;}
+.nav{background:var(--gl);border-bottom:1px solid var(--border);padding:0 12px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-sizing:border-box;}
 .logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--g);letter-spacing:4px;cursor:pointer;user-select:none;}
 .nav-links{display:flex;gap:2px;}
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
-.nav-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.nav-r{display:flex;align-items:center;gap:6px;position:absolute;right:10px;top:50%;transform:translateY(-50%);}
 .nav-pts{font-size:13px;font-weight:600;color:var(--g);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--gb);}
 .btn-sm{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;padding:5px 12px;font-size:12px;font-weight:500;white-space:nowrap;letter-spacing:0;}
 .btn-sm:hover{background:var(--gl);color:var(--g);}
@@ -1035,7 +1035,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
  <!-- 회원 목록 -->
  <div id="admUsersSection" style="display:none">
    <div style="background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px">
-     <div style="font-size:13px;color:var(--txt);line-height:1.6">얼리버드 회원에게 프리미엄을<br>일괄 부여할 수 있어요</div>
+     <div style="font-size:13px;color:var(--txt);white-space:nowrap">얼리버드 회원 전체 프리미엄 부여</div>
      <button class="btn" style="font-size:12px;padding:8px 14px;flex-shrink:0;white-space:nowrap" onclick="grantAllPremium()">전체 프리미엄 부여</button>
    </div>
    <div id="uList"></div>
