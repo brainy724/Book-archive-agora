@@ -1296,7 +1296,7 @@ function loginKakao(){
  client_id:KK_REST_KEY,
  redirect_uri:'https://agora-archive.com/',
  response_type:'code',
- scope:'profile_nickname,profile_image,gender,birthyear'
+ scope:'profile_nickname,profile_image'
  });
  location.href='https://kauth.kakao.com/oauth/authorize?'+params.toString();
 }
