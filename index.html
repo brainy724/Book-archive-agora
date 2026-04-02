@@ -1040,10 +1040,6 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
  </div>
  <!-- 회원 목록 -->
  <div id="admUsersSection" style="display:none">
-   <div style="background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px">
-     <div style="font-size:13px;color:var(--txt);white-space:nowrap">얼리버드 회원 전체 프리미엄 부여</div>
-     <button class="btn" style="font-size:12px;padding:8px 14px;flex-shrink:0;white-space:nowrap" onclick="grantAllPremium()">전체 프리미엄 부여</button>
-   </div>
    <div id="uList"></div>
  </div>
  </div></div>
@@ -2674,6 +2670,7 @@ async function delCmt(cid,cuid){
 
 
 
+function closeSubModal(){}
 async function paySubscription(){
  const amount=9900-selectedPts;
  if(amount<=0){
