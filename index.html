@@ -1410,8 +1410,11 @@ async function ok(u){
  updateNavTabs();
  // 무료체험 팝업: 관리자 제외, 이미 시작했거나 한 세션당 1번만
  // 전체 무료 오픈 - 팝업 비활성화
- // 성별 확인 (최초 1회, 관리자 제외)
- if(!u.isAdmin&&!localStorage.getItem('agora_gender')){showGender();}
+ // 성별 확인 (DB 기반, 최초 1회, 관리자 제외)
+ if(!u.isAdmin && !u.gender_confirmed){
+   showGender();
+   return; // 성별 확인 전까지 앱 진입 차단
+ }
  go('library');
  loadNotifSettings();
  checkUnreadNotifs();
@@ -2379,15 +2382,25 @@ async function rForum(){
 
 // ── 성별 확인 ──
 function showGender(){document.getElementById('genderWrap').style.display='flex';}
-function confirmGender(){
+async function confirmGender(){
  if(!document.getElementById('genderCheck').checked){alert('체크박스에 동의해주세요.');return;}
+ if(!CU) return;
+ load(true);
+ const{error}=await sb.from('agora_users').update({gender_confirmed:true}).eq('id',CU.id);
+ load(false);
+ if(error){nt('저장 오류가 발생했습니다. 다시 시도해주세요.','err');return;}
+ CU.gender_confirmed=true;
+ localStorage.setItem('agora_sess',JSON.stringify(CU));
  document.getElementById('genderWrap').style.display='none';
- localStorage.setItem('agora_gender','female');
+ go('library');
 }
-function rejectGender(){
+async function rejectGender(){
+ if(!CU) return;
+ await sb.from('agora_users').update({banned:true}).eq('id',CU.id);
+ localStorage.removeItem('agora_sess');
+ CU=null;
  document.getElementById('genderWrap').style.display='none';
- document.getElementById('lw').style.display='none';
- document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px"></div><div style="font-size:18px;font-weight:600;margin-bottom:8px">아고라는 여성 전용 공간입니다</div><div style="font-size:14px;color:#888">감사합니다.</div></div></div>';
+ document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">🚫</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">아고라는 여성 전용 공간입니다</div><div style="font-size:14px;color:#888;line-height:1.8">이용이 제한되었습니다.<br>감사합니다.</div></div></div>';
 }
 
 // ── 커스터마이즈 ──
