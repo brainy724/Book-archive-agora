@@ -43,11 +43,11 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .nl{color:var(--muted);font-size:14px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:500;}
 .nl:hover{color:var(--g);background:var(--gl);}
 .nl.on{color:var(--g);background:var(--gl);font-weight:600;}
-.nav-r{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0;}
+.nav-r{display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:nowrap;overflow:hidden;}
 .nav-pts{font-size:13px;font-weight:600;color:var(--g);background:var(--gl);padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--gb);}
-.btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;display:inline-block;width:auto;overflow:visible;}
+.btn-sm{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;display:block;padding:5px 10px;font-size:13px;font-weight:500;white-space:nowrap;word-break:normal;overflow-wrap:normal;flex-shrink:0;}
 .btn-sm:hover{background:var(--gl);color:var(--g);}
-.admbadge{background:var(--red);color:#fff;font-size:11px;padding:4px 10px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0;display:inline-block;width:auto;overflow:visible;}
+.admbadge{background:var(--red);color:#fff;font-size:11px;font-weight:600;border-radius:8px;display:block;padding:4px 8px;white-space:nowrap;word-break:normal;overflow-wrap:normal;flex-shrink:0;}
 /* 하단탭 */
 .btab{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:#fff;border-top:1px solid var(--border);z-index:200;flex-direction:row;}
 .ti{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;padding-bottom:4px;}
@@ -553,7 +553,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
    </div>
    <div id="notifList" style="overflow-y:auto;max-height:380px"></div>
  </div>
- <span id="navUser" onclick="go('points')" style="font-size:12px;font-weight:500;color:var(--txt);cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s;white-space:nowrap;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;max-width:80px;" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span>
+ <span id="navUser" onclick="go('points')" style="font-size:12px;font-weight:500;color:var(--txt);cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s;white-space:nowrap;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;max-width:70px;" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span>
  <button class="btn-sm" onclick="logout()">로그아웃</button>
  </div>
  </nav>
