@@ -3761,12 +3761,12 @@ window.onload=async()=>{
 };
 </script>
 <script>
+// 서비스워커 해제 + 캐시 삭제 (이전 버전 캐시 문제 해결)
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(r=>console.log('SW registered'))
-      .catch(e=>console.log('SW error',e));
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
   });
+  caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
 }
 </script>
 </body>
