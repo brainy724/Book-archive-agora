@@ -918,11 +918,17 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       </div>
     </div>
 
+    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
+
+    <div style="margin-bottom:32px;text-align:center">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">계정</div>
+      <button onclick="withdrawAccount()" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:var(--font-body)">회원탈퇴</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6">탈퇴 시 모든 데이터가 삭제되며<br>복구할 수 없습니다.</div>
+    </div>
+
 
 
   </div></div>
-
- <!-- 독서모임 목록 -->
  <div class="page" id="p-club"><div class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
     <div><div class="h1 serif">독서모임</div><div class="sub">지역별 오프라인 독서모임 · 닉네임으로 활동</div></div>
@@ -1420,6 +1426,24 @@ async function ok(u){
  initNotifRealtime();
 }
 function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('adminLoginWrap').style.display='none';document.getElementById('lw').style.display='flex';const ai=document.getElementById('aId');if(ai)ai.value='';const ap=document.getElementById('aPw');if(ap)ap.value='';}
+async function withdrawAccount(){
+ if(!CU) return;
+ const ok1=confirm('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.');
+ if(!ok1) return;
+ const ok2=confirm('마지막 확인입니다.\n회원탈퇴를 진행하시겠습니까?');
+ if(!ok2) return;
+ load(true);
+ try{
+  // 유저 데이터 삭제
+  await sb.from('agora_users').delete().eq('id',CU.id);
+  // 로그아웃 처리
+  localStorage.removeItem('agora_sess');
+  localStorage.removeItem('agora_gender');
+  CU=null;
+  load(false);
+  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">👋</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">탈퇴가 완료되었습니다</div><div style="font-size:14px;color:#888;line-height:1.8">그동안 아고라를 이용해주셔서 감사합니다.</div><div style="margin-top:24px"><a href="/" style="color:#B8956A;font-size:14px">홈으로 돌아가기</a></div></div></div>';
+ }catch(e){load(false);nt('탈퇴 처리 중 오류가 발생했습니다.','err');}
+}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('lw').style.display!=='none')doAuth();});
 
 // ══ 페이지 이동 ══
