@@ -1295,8 +1295,7 @@ function loginKakao(){
  const params=new URLSearchParams({
  client_id:KK_REST_KEY,
  redirect_uri:'https://agora-archive.com/',
- response_type:'code',
- scope:'profile_nickname,profile_image'
+ response_type:'code'
  });
  location.href='https://kauth.kakao.com/oauth/authorize?'+params.toString();
 }
