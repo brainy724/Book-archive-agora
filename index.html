@@ -1064,6 +1064,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
        <button class="btn" style="padding:10px 20px;font-size:13px" onclick="sendDm()">메시지 보내기</button>
      </div>
    </div>
+   <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">보낸 메시지 내역</div>
+   <div id="dmHistory"></div>
  </div>
  </div></div>
 </div>
@@ -2997,12 +2999,38 @@ async function loadDmTargets(){
 }
 async function sendDm(){
   const uid=document.getElementById('dmTarget').value;
+  const uname=document.getElementById('dmTarget').selectedOptions[0]?.textContent||'';
   const msg=document.getElementById('dmContent').value.trim();
   if(!uid){nt('받는 사람을 선택해주세요.','err');return;}
   if(!msg){nt('메시지를 입력해주세요.','err');return;}
   await sb.from('agora_notifications').insert({id:ID(),user_id:uid,type:'dm',message:msg,ref_id:null,is_read:false});
   document.getElementById('dmContent').value='';
   nt('메시지가 전송됐습니다!');
+  loadDmHistory();
+}
+async function loadDmHistory(){
+  const{data}=await sb.from('agora_notifications').select('*').eq('type','dm').order('created_at',{ascending:false}).limit(30);
+  const{data:users}=await sb.from('agora_users').select('id,username');
+  const userMap={};(users||[]).forEach(u=>userMap[u.id]=u.username);
+  const el=document.getElementById('dmHistory');
+  if(!el)return;
+  if(!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--muted)">보낸 메시지가 없습니다.</div>';return;}
+  el.innerHTML=data.map(d=>`<div class="card" style="padding:12px 16px;margin-bottom:8px;border-left:3px solid ${d.is_read?'var(--g)':'var(--muted)'}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:12px;font-weight:600;color:var(--txt)">To. ${esc(userMap[d.user_id]||'알 수 없음')}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--muted)">${ago(d.created_at)} · ${d.is_read?'읽음':'안읽음'}</span>
+        <button onclick="deleteDm('${d.id}')" style="background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:2px 4px">삭제</button>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7">${esc(d.message)}</div>
+  </div>`).join('');
+}
+async function deleteDm(dmId){
+  if(!confirm('이 메시지를 삭제할까요?'))return;
+  await sb.from('agora_notifications').delete().eq('id',dmId);
+  nt('메시지가 삭제됐습니다.');
+  loadDmHistory();
 }
 async function rAdmin(){
   load(true);
@@ -3109,7 +3137,7 @@ async function rAdmin(){
     </div>`;
   }).join('');
 
-  switchAdmTab('reports');loadDmTargets();
+  switchAdmTab('reports');loadDmTargets();loadDmHistory();
 }
 
 async function grantAllPremium(){
