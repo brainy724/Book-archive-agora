@@ -1029,6 +1029,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
    <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')">신고 접수</button>
    <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')">1:1 문의</button>
    <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')">회원 목록</button>
+   <button class="tab-btn" id="admTab-notice" onclick="switchAdmTab('notice')">공지</button>
+   <button class="tab-btn" id="admTab-dm" onclick="switchAdmTab('dm')">메시지</button>
  </div>
  <!-- 신고 목록 -->
  <div id="admReportsSection">
@@ -1041,6 +1043,27 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
  <!-- 회원 목록 -->
  <div id="admUsersSection" style="display:none">
    <div id="uList"></div>
+ </div>
+ <!-- 공지사항 -->
+ <div id="admNoticeSection" style="display:none">
+   <div class="card" style="padding:18px 20px;margin-bottom:16px">
+     <div class="fg"><label>공지 제목</label><input id="noticeTitle" placeholder="공지 제목"/></div>
+     <div class="fg"><textarea id="noticeContent" style="min-height:100px" placeholder="공지 내용을 입력하세요..."></textarea></div>
+     <div style="display:flex;justify-content:flex-end">
+       <button class="btn" style="padding:10px 20px;font-size:13px" onclick="sendNotice()">전체 공지 발송</button>
+     </div>
+   </div>
+   <div id="noticeHistory"></div>
+ </div>
+ <!-- 1:1 메시지 -->
+ <div id="admDmSection" style="display:none">
+   <div class="card" style="padding:18px 20px;margin-bottom:16px">
+     <div class="fg"><label>받는 사람</label><select id="dmTarget" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px"></select></div>
+     <div class="fg"><label>메시지</label><textarea id="dmContent" style="min-height:80px" placeholder="메시지를 입력하세요..."></textarea></div>
+     <div style="display:flex;justify-content:flex-end">
+       <button class="btn" style="padding:10px 20px;font-size:13px" onclick="sendDm()">메시지 보내기</button>
+     </div>
+   </div>
  </div>
  </div></div>
 </div>
@@ -1626,11 +1649,19 @@ function ctxDelete(){closeCtx();delBook(ctxBookId);}
 
 async function toggleBookHeart(bookId,bookUserId){
   try{
-    const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id).maybeSingle();
-    if(h){await sb.from('agora_hearts').delete().eq('id',h.id);}
-    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
+    const{data:arr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
+    if(arr&&arr.length>0){await sb.from('agora_hearts').delete().eq('id',arr[0].id);}
+    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
     openBook(bookId);
-  }catch(e){console.error('하트 오류:',e);}
+  }catch(e){console.error('하트 오류:',e);nt('하트 처리 중 오류','err');}
+}
+async function toggleCardHeart(bookId,bookUserId){
+  try{
+    const{data:arr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
+    if(arr&&arr.length>0){await sb.from('agora_hearts').delete().eq('id',arr[0].id);}
+    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
+    rPub();
+  }catch(e){console.error('카드 하트 오류:',e);}
 }
 async function openBook(id){
   const[{data:b},{data:imgd},{data:hd},{data:ud}]=await Promise.all([
@@ -2344,7 +2375,7 @@ async function rPub(){
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
         ${showName?`<div style="font-size:10px;color:var(--muted)">${esc(b.username)}</div>`:'<div></div>'}
-        <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else{await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif('${b.user_id}','heart','독서록에 하트를 받았어요','${b.id}');}rPub();})()" style="background:none;border:none;cursor:pointer;font-size:13px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px">${liked?'♥':'♡'} ${b.hearts.length}</button>
+        <button onclick="event.stopPropagation();toggleCardHeart('${b.id}','${b.user_id}')" style="background:none;border:none;cursor:pointer;font-size:13px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px">${liked?'♥':'♡'} ${b.hearts.length}</button>
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -2897,7 +2928,7 @@ async function submitReport(){
 
 // ══ 관리자 탭 전환 ══
 function switchAdmTab(tab){
-  ['reports','inquiries','users'].forEach(t=>{
+  ['reports','inquiries','users','notice','dm'].forEach(t=>{
     const btn=document.getElementById('admTab-'+t);
     const sec=document.getElementById('adm'+t.charAt(0).toUpperCase()+t.slice(1)+'Section');
     if(btn)btn.classList.toggle('on',t===tab);
@@ -2905,6 +2936,42 @@ function switchAdmTab(tab){
   });
 }
 
+
+// ══ 공지사항 ══
+async function sendNotice(){
+  const title=document.getElementById('noticeTitle').value.trim();
+  const content=document.getElementById('noticeContent').value.trim();
+  if(!title){nt('제목을 입력해주세요.','err');return;}
+  if(!content){nt('내용을 입력해주세요.','err');return;}
+  load(true);
+  const{data:users}=await sb.from('agora_users').select('id').eq('is_admin',false);
+  if(users&&users.length){
+    await Promise.all(users.map(u=>
+      sb.from('agora_notifications').insert({id:ID(),user_id:u.id,type:'notice',message:title+': '+content.slice(0,50),ref_id:null,is_read:false})
+    ));
+  }
+  load(false);
+  document.getElementById('noticeTitle').value='';
+  document.getElementById('noticeContent').value='';
+  nt(users.length+'명에게 공지가 발송됐습니다!');
+}
+
+// ══ 1:1 메시지 ══
+async function loadDmTargets(){
+  const{data:users}=await sb.from('agora_users').select('id,username').eq('is_admin',false).order('username');
+  const sel=document.getElementById('dmTarget');
+  if(!sel)return;
+  sel.innerHTML=(users||[]).map(u=>`<option value="${u.id}">${u.username}</option>`).join('');
+}
+async function sendDm(){
+  const uid=document.getElementById('dmTarget').value;
+  const msg=document.getElementById('dmContent').value.trim();
+  if(!uid){nt('받는 사람을 선택해주세요.','err');return;}
+  if(!msg){nt('메시지를 입력해주세요.','err');return;}
+  await sb.from('agora_notifications').insert({id:ID(),user_id:uid,type:'dm',message:msg,ref_id:null,is_read:false});
+  document.getElementById('dmContent').value='';
+  nt('메시지가 전송됐습니다!');
+}
 async function rAdmin(){
   load(true);
   const[usersRes,rptsRes,inqsRes]=await Promise.all([
@@ -3010,7 +3077,7 @@ async function rAdmin(){
     </div>`;
   }).join('');
 
-  switchAdmTab('reports');
+  switchAdmTab('reports');loadDmTargets();
 }
 
 async function grantAllPremium(){
@@ -3208,6 +3275,8 @@ function notifIcon(type){
   if(type==='chat') return '📣';
   if(type==='inquiry') return '📩';
   if(type==='report') return '🚨';
+  if(type==='notice') return '📢';
+  if(type==='dm') return '💌';
   return '🔔';
 }
 
