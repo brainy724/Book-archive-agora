@@ -1197,6 +1197,23 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
  </div>
 </div>
 
+<!-- 알림 팝업 -->
+<div id="notifPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeNotifPopup()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:360px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="notifPopupIcon" style="font-size:20px"></span>
+        <span id="notifPopupType" style="font-size:14px;font-weight:600;color:var(--txt)"></span>
+      </div>
+      <button onclick="closeNotifPopup()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0 4px;line-height:1">&times;</button>
+    </div>
+    <div id="notifPopupMsg" style="padding:20px;font-size:15px;line-height:1.8;color:var(--txt);max-height:300px;overflow-y:auto"></div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);text-align:right">
+      <button class="btn" style="padding:8px 20px;font-size:13px" onclick="closeNotifPopup()">확인</button>
+    </div>
+  </div>
+</div>
+
 <!-- 이미지 뷰어 -->
 <div class="vov" id="vov" onclick="vBgClick(event)">
  <button class="vcl" onclick="closeV()">✕</button>
@@ -1649,19 +1666,33 @@ function ctxDelete(){closeCtx();delBook(ctxBookId);}
 
 async function toggleBookHeart(bookId,bookUserId){
   try{
-    const{data:arr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
-    if(arr&&arr.length>0){await sb.from('agora_hearts').delete().eq('id',arr[0].id);}
-    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
+    const{data:arr,error:selErr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
+    if(selErr){nt('하트 조회 오류: '+selErr.message,'err');return;}
+    if(arr&&arr.length>0){
+      const{error:delErr}=await sb.from('agora_hearts').delete().eq('id',arr[0].id);
+      if(delErr){nt('하트 삭제 오류: '+delErr.message,'err');return;}
+    }else{
+      const{error:insErr}=await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});
+      if(insErr){nt('하트 추가 오류: '+insErr.message,'err');return;}
+      if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);
+    }
     openBook(bookId);
-  }catch(e){console.error('하트 오류:',e);nt('하트 처리 중 오류','err');}
+  }catch(e){nt('하트 오류: '+e.message,'err');}
 }
 async function toggleCardHeart(bookId,bookUserId){
   try{
-    const{data:arr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
-    if(arr&&arr.length>0){await sb.from('agora_hearts').delete().eq('id',arr[0].id);}
-    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
+    const{data:arr,error:selErr}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id);
+    if(selErr){nt('하트 조회 오류: '+selErr.message,'err');return;}
+    if(arr&&arr.length>0){
+      const{error:delErr}=await sb.from('agora_hearts').delete().eq('id',arr[0].id);
+      if(delErr){nt('하트 삭제 오류: '+delErr.message,'err');return;}
+    }else{
+      const{error:insErr}=await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});
+      if(insErr){nt('하트 추가 오류: '+insErr.message,'err');return;}
+      if(bookUserId&&bookUserId!==CU.id&&notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);
+    }
     rPub();
-  }catch(e){console.error('카드 하트 오류:',e);}
+  }catch(e){nt('카드 하트 오류: '+e.message,'err');}
 }
 async function openBook(id){
   const[{data:b},{data:imgd},{data:hd},{data:ud}]=await Promise.all([
@@ -3262,7 +3293,7 @@ async function loadNotifList(){
     return;
   }
   el.innerHTML=data.map(n=>`
-    <div onclick="handleNotifClick('${n.type}','${n.ref_id||''}')" style="padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read?'#fff':'var(--gl)'};transition:background .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='${n.is_read?'#fff':'var(--gl)'}'">
+    <div onclick="handleNotifClick('${n.type}','${n.ref_id||''}','${esc(n.message).replace(/'/g,"\\'")}')" style="padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.is_read?'#fff':'var(--gl)'};transition:background .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='${n.is_read?'#fff':'var(--gl)'}'">
       <div style="font-size:13px;color:var(--txt);line-height:1.6">${notifIcon(n.type)} ${esc(n.message)}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:3px">${ago(n.created_at)}</div>
     </div>`).join('');
@@ -3280,13 +3311,27 @@ function notifIcon(type){
   return '🔔';
 }
 
-function handleNotifClick(type,refId){
+
+// ══ 알림 팝업 ══
+function showNotifPopup(type,message){
+  const icons={notice:'📢',dm:'💌',comment:'💬',reply:'↩',heart:'♥',chat:'📣',inquiry:'📩',report:'🚨'};
+  const labels={notice:'공지사항',dm:'관리자 메시지',comment:'댓글 알림',reply:'대댓글 알림',heart:'하트 알림',chat:'채팅 알림',inquiry:'문의 답변',report:'신고 알림'};
+  document.getElementById('notifPopupIcon').textContent=icons[type]||'🔔';
+  document.getElementById('notifPopupType').textContent=labels[type]||'알림';
+  document.getElementById('notifPopupMsg').textContent=message;
+  document.getElementById('notifPopup').style.display='flex';
+}
+function closeNotifPopup(){
+  document.getElementById('notifPopup').style.display='none';
+}
+function handleNotifClick(type,refId,message){
   document.getElementById('notifPanel').style.display='none';
-  if(type==='comment'||type==='reply') openPost(refId);
+  if(type==='notice'||type==='dm') showNotifPopup(type,message);
+  else if(type==='comment'||type==='reply') openPost(refId);
   else if(type==='heart') go('library');
   else if(type==='chat') go('club');
-  else if(type==='inquiry') go('points'); // 마이페이지 1:1 문의로
-  else if(type==='report') go('admin');   // 관리자 패널로
+  else if(type==='inquiry') go('points');
+  else if(type==='report') go('admin');
 }
 
 async function markAllRead(){
@@ -3323,11 +3368,12 @@ function initNotifRealtime(){
         const n=payload.new;
         if(!notifSettings.all)return;
         // inquiry/report 타입은 항상 표시 (설정 무관)
-        const alwaysShow=n.type==='inquiry'||n.type==='report';
+        const alwaysShow=n.type==='inquiry'||n.type==='report'||n.type==='notice'||n.type==='dm';
         if(!alwaysShow&&!notifSettings[n.type])return;
         const badge=document.getElementById('bellBadge');
         if(badge)badge.style.display='block';
-        nt(`${notifIcon(n.type)} ${n.message}`);
+        if(n.type==='notice'||n.type==='dm') showNotifPopup(n.type,n.message);
+        else nt(`${notifIcon(n.type)} ${n.message}`);
       }
     )
     .subscribe();
