@@ -1624,6 +1624,14 @@ function ctxDelete(){closeCtx();delBook(ctxBookId);}
 
 // ── 책 상세 모달 ──
 
+async function toggleBookHeart(bookId,bookUserId){
+  try{
+    const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id).maybeSingle();
+    if(h){await sb.from('agora_hearts').delete().eq('id',h.id);}
+    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요','bookId');}
+    openBook(bookId);
+  }catch(e){console.error('하트 오류:',e);}
+}
 async function openBook(id){
   const[{data:b},{data:imgd},{data:hd},{data:ud}]=await Promise.all([
     sb.from('agora_books').select('*').eq('id',id).single(),
@@ -1679,7 +1687,7 @@ async function openBook(id){
       <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
-      <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else{await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif('${b.user_id}','heart','독서록에 하트를 받았어요 ♥','${b.id}');}openBook('${b.id}');})()"
+      <button onclick="event.stopPropagation();toggleBookHeart('${b.id}','${b.user_id}')"
         style="background:none;border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'}">
         ${liked?'♥':'♡'} ${(hd||[]).length}
       </button>
@@ -2334,7 +2342,10 @@ async function rPub(){
       <div class="book-card4-author">${esc(b.author||'')}</div>
       ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
-      ${showName?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${esc(b.username)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        ${showName?`<div style="font-size:10px;color:var(--muted)">${esc(b.username)}</div>`:'<div></div>'}
+        <button onclick="event.stopPropagation();(async()=>{const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id','${b.id}').eq('user_id',CU.id).maybeSingle();if(h)await sb.from('agora_hearts').delete().eq('id',h.id);else{await sb.from('agora_hearts').insert({id:ID(),book_id:'${b.id}',user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif('${b.user_id}','heart','독서록에 하트를 받았어요','${b.id}');}rPub();})()" style="background:none;border:none;cursor:pointer;font-size:13px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px">${liked?'♥':'♡'} ${b.hearts.length}</button>
+      </div>
     </div>`;
   }).join('')}</div>`;
 }
