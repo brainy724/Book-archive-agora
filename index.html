@@ -1421,7 +1421,7 @@ async function ok(u){
  checkUnreadNotifs();
  initNotifRealtime();
 }
-function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;document.getElementById('app').style.display='none';document.getElementById('adminLoginWrap').style.display='none';document.getElementById('lw').style.display='flex';const ai=document.getElementById('aId');if(ai)ai.value='';const ap=document.getElementById('aPw');if(ap)ap.value='';}
+function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;window.close();if(!window.closed){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-family:serif;font-size:28px;color:#B8956A;letter-spacing:4px;margin-bottom:16px">AGORA</div><div style="font-size:15px;color:#888;line-height:1.8">로그아웃 되었습니다.<br>앱을 종료해주세요.</div></div></div>';}}
 async function withdrawAccount(){
  if(!CU) return;
  const ok1=confirm('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.');
@@ -1628,7 +1628,7 @@ async function toggleBookHeart(bookId,bookUserId){
   try{
     const{data:h}=await sb.from('agora_hearts').select('*').eq('book_id',bookId).eq('user_id',CU.id).maybeSingle();
     if(h){await sb.from('agora_hearts').delete().eq('id',h.id);}
-    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요','bookId');}
+    else{await sb.from('agora_hearts').insert({id:ID(),book_id:bookId,user_id:CU.id});if(notifSettings.all&&notifSettings.heart)await createNotif(bookUserId,'heart','독서록에 하트를 받았어요',bookId);}
     openBook(bookId);
   }catch(e){console.error('하트 오류:',e);}
 }
