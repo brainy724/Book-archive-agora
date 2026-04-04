@@ -364,14 +364,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 <!-- 로그인 -->
 <div class="lw active" id="lw">
   <div class="lcard">
-    <div style="text-align:center;margin-bottom:0">
-      <svg viewBox="0 0 380 100" width="320" style="display:block;margin:0 auto">
+    <!-- 배경 장식 원 -->
+    <div style="position:fixed;top:-120px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(156,123,92,.06) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="position:fixed;bottom:-100px;left:-60px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(156,123,92,.05) 0%,transparent 70%);pointer-events:none"></div>
+
+    <!-- 로고 -->
+    <div style="text-align:center;margin-bottom:8px">
+      <svg viewBox="0 0 380 100" width="280" style="display:block;margin:0 auto">
         <defs>
           <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#7A5000"/>
-            <stop offset="40%" style="stop-color:#A0720A"/>
-            <stop offset="70%" style="stop-color:#7A5500"/>
-            <stop offset="100%" style="stop-color:#4A3000"/>
+            <stop offset="0%" style="stop-color:#8A6B4A"/>
+            <stop offset="50%" style="stop-color:#A0824E"/>
+            <stop offset="100%" style="stop-color:#6B5030"/>
           </linearGradient>
         </defs>
         <g fill="url(#goldGrad)">
@@ -408,20 +412,38 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <text x="190" y="68" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="44" font-weight="600" fill="url(#goldGrad)" letter-spacing="10">AGORA</text>
       </svg>
     </div>
-    <div style="height:44px"></div>
-    <div style="font-size:14px;color:var(--muted);text-align:center;line-height:2.1;letter-spacing:.3px">
-      AGORA는 고대 그리스의 토론 광장입니다.<br>
-      책을 읽고, 생각을 나누고, 연결되는 곳—<br>
-      현대의 아고라에 오신 것을 환영합니다.
+
+    <!-- 구분선 -->
+    <div style="width:40px;height:1px;background:var(--gb);margin:24px auto"></div>
+
+    <!-- 소개 문구 -->
+    <div style="font-size:14px;color:var(--muted);text-align:center;line-height:2.2;letter-spacing:.3px;margin-bottom:12px">
+      고대 그리스, 사람들이 모여<br>
+      생각을 나누던 광장 <span style="color:var(--g);font-weight:600">아고라</span>.<br>
+      그 광장이 책을 사랑하는<br>
+      여성들의 공간으로 다시 열립니다.
     </div>
-    <div style="height:32px"></div>
-    <button class="bk-btn" onclick="loginKakao()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
-      카카오로 계속하기
-    </button>
-    <div style="height:10px"></div>
-    <div style="font-size:12px;color:var(--muted);text-align:center;letter-spacing:.2px">카카오 계정으로 간편하게 시작하세요</div>
-    <div style="text-align:center;margin-top:36px"><span onclick="goAdminLogin()" style="font-size:11px;color:#FFFFFF;cursor:pointer;letter-spacing:1px">·</span></div>
+
+    <!-- 여성 전용 뱃지 -->
+    <div style="display:inline-flex;align-items:center;gap:6px;background:var(--gl);border:1px solid var(--gb);border-radius:20px;padding:6px 16px;margin-bottom:36px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/></svg>
+      <span style="font-size:11px;color:var(--g);font-weight:600;letter-spacing:1px">WOMEN ONLY</span>
+    </div>
+
+    <!-- 로그인 카드 -->
+    <div style="width:100%;max-width:360px;background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:0 4px 24px rgba(156,123,92,.08)">
+      <button class="bk-btn" onclick="loginKakao()" style="border-radius:12px;padding:15px 16px;font-size:15px;margin-bottom:0;margin-top:0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
+        카카오로 시작하기
+      </button>
+      <div style="height:14px"></div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7">
+        카카오 계정 하나로 간편하게<br>
+        나만의 독서 공간을 만들어보세요
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:28px"><span onclick="goAdminLogin()" style="font-size:11px;color:var(--bg-page);cursor:pointer;letter-spacing:1px">·</span></div>
   </div>
 </div>
 
@@ -515,10 +537,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <!-- 웹 사이드바 -->
   <div class="sidebar" id="mainSidebar">
     <div class="sb-item on" id="sb-library" onclick="go('library')">내 서재</div>
-    <div class="sb-item" id="sb-stats" onclick="go('stats')">독서 수첩</div>
-    <div class="sb-item" id="sb-public" onclick="go('public')">공개 서재</div>
     <div class="sb-item" id="sb-forum" onclick="go('forum')">광장</div>
-    <div class="sb-item" id="sb-club" onclick="go('club')">독서모임</div>
     <div class="sb-item" id="sb-libmap" onclick="go('libmap')">도서관 찾기</div>
     <div class="sb-item" id="sb-match" onclick="go('match')">추천</div>
     <div class="sb-item" id="sb-admin" onclick="go('admin')" style="display:none">관리자</div>
@@ -530,10 +549,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="logo" onclick="go('library')">AGORA</div>
  <div class="nav-links">
  <span class="nl" id="n-library" onclick="go('library')">내 서재</span>
- <span class="nl" id="n-stats" onclick="go('stats')">독서 수첩</span>
- <span class="nl" id="n-public" onclick="go('public')">공개 서재</span>
  <span class="nl" id="n-forum" onclick="go('forum')">광장</span>
- <span class="nl" id="n-club" onclick="go('club')">독서모임</span>
  <span class="nl" id="n-libmap" onclick="go('libmap')">도서관</span>
  <span class="nl" id="n-match" onclick="go('match')">추천</span>
  <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
@@ -561,10 +577,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </nav>
  <div class="btab">
  <div class="ti on" id="t-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>내 서재</div>
- <div class="ti" id="t-stats" onclick="go('stats')"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>독서 수첩</div>
- <div class="ti" id="t-public" onclick="go('public')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>공개 서재</div>
- <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>광장</div>
- <div class="ti" id="t-club" onclick="go('club')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>독서모임</div>
+ <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>광장</div>
  <div class="ti" id="t-libmap" onclick="go('libmap')"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>도서관</div>
  <div class="ti" id="t-match" onclick="go('match')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>추천</div>
  <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>설정</div>
@@ -572,8 +585,19 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
 
  <div class="page" id="p-library"><div class="pg">
- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
-      <div><div class="h1 serif">내 서재</div><div class="sub" id="libSub" style="margin-bottom:0">나의 독서 기록</div></div>
+ <div class="h1 serif">내 서재</div>
+ <div class="sub" id="libSub" style="margin-bottom:0">나의 독서 공간</div>
+
+ <!-- 서브탭: 내 책 / 독서 수첩 -->
+ <div class="tab-bar" style="margin:18px 0 16px">
+   <button class="tab-btn on" id="libSubTab-books" onclick="switchLibSubTab('books')">내 책</button>
+   <button class="tab-btn" id="libSubTab-note" onclick="switchLibSubTab('note')">독서 수첩</button>
+ </div>
+
+ <!-- 내 책 섹션 -->
+ <div id="libBooksSection">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div></div>
       <div class="sort-dropdown">
         <button class="btn2" style="padding:7px 14px;font-size:13px" onclick="toggleSortMenu()">정렬 ▾</button>
         <div class="sort-dropdown-menu" id="sortMenu">
@@ -598,6 +622,59 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div style="margin-bottom:16px"><input id="libSearch" placeholder="제목, 저자 검색..." oninput="rLib()" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box"/></div>
     <div id="libFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
     <div id="bookList"></div>
+  </div><!-- /libBooksSection -->
+
+  <!-- 독서 수첩 섹션 (내 서재 안) -->
+  <div id="libNoteSection" style="display:none">
+   <!-- 독서 타이머 -->
+   <div class="card" style="text-align:center;padding:28px 22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:1px">독서 타이머</div>
+     <div id="timerDisplay" style="font-family:var(--font-serif);font-size:52px;color:var(--g);margin-bottom:20px;letter-spacing:3px">00:00:00</div>
+     <div style="display:flex;gap:8px;justify-content:center">
+       <button id="timerStartBtn" onclick="toggleTimer()" class="btn" style="padding:10px 28px;font-size:13px">시작</button>
+       <button onclick="resetTimer()" class="btn2" style="padding:10px 20px;font-size:13px">초기화</button>
+       <button onclick="saveTimerRecord()" class="btn2" style="padding:10px 20px;font-size:13px">기록 저장</button>
+     </div>
+     <div style="margin-top:14px">
+       <select id="timerBook" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)">
+         <option value="">읽고 있는 책 선택</option>
+       </select>
+     </div>
+   </div>
+
+   <!-- 독서 캘린더 -->
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">독서 캘린더</div>
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+       <button onclick="changeCalMonth(-1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:6px 10px;border-radius:8px;transition:background .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''">&lt;</button>
+       <div id="calMonthLabel" style="font-size:15px;font-weight:600;color:var(--txt)"></div>
+       <button onclick="changeCalMonth(1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:6px 10px;border-radius:8px;transition:background .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''">&gt;</button>
+     </div>
+     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px">
+       <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+     </div>
+     <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+   </div>
+
+   <!-- 통계 -->
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">독서 요약</div>
+     <div id="statsSummary"></div>
+   </div>
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">카테고리별 독서량</div>
+     <div id="statsCatChart"></div>
+   </div>
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">월별 독서량</div>
+     <div id="statsMonthChart"></div>
+   </div>
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">타이머 기록</div>
+     <div id="timerHistory"></div>
+   </div>
+  </div><!-- /libNoteSection -->
+
   </div></div>
 
   <div class="page" id="p-addBook"><div class="pg-sm">
@@ -727,7 +804,17 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="page" id="p-forum"><div class="pg">
  <div style="display:flex;gap:20px;align-items:flex-start">
  <div style="flex:1;min-width:0">
- <div><div class="h1 serif">광장</div><div class="sub">책에 관한 이야기를 나눠보세요 · 익명으로 이루어집니다</div></div>
+ <div><div class="h1 serif">광장</div><div class="sub">함께 읽고, 함께 나누는 공간</div></div>
+
+ <!-- 메인 서브탭: 자유글 / 공개 서재 / 독서모임 -->
+ <div class="tab-bar" style="margin-bottom:16px">
+   <button class="tab-btn on" id="plazaTab-posts" onclick="switchPlazaTab('posts')">자유글</button>
+   <button class="tab-btn" id="plazaTab-public" onclick="switchPlazaTab('public')">공개 서재</button>
+   <button class="tab-btn" id="plazaTab-club" onclick="switchPlazaTab('club')">독서모임</button>
+ </div>
+
+ <!-- 자유글 섹션 -->
+ <div id="plazaPosts">
  <!-- 내 활동 탭 -->
  <div class="tab-bar" style="margin-bottom:14px">
    <button class="tab-btn on" id="forumTab-all" onclick="switchForumTab('all')">전체 글</button>
@@ -747,6 +834,28 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div id="forumMineSection" style="display:none">
    <div id="myForumActivity"></div>
  </div>
+ </div><!-- /plazaPosts -->
+
+ <!-- 공개 서재 섹션 (광장 안) -->
+ <div id="plazaPublic" style="display:none">
+   <div id="pubUserFilter" style="display:none;background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between">
+     <span style="font-size:13px;font-weight:600;color:var(--g)" id="pubFilterLabel"></span>
+     <button onclick="clearPubUserFilter()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px">&times;</button>
+   </div>
+   <div class="search-center" style="margin-bottom:14px">
+     <input id="pubSearch" placeholder="책 제목, 저자 검색..." oninput="rPub()" />
+   </div>
+   <div id="pubBookList"></div>
+ </div>
+
+ <!-- 독서모임 섹션 (광장 안) -->
+ <div id="plazaClub" style="display:none">
+   <div class="search-bar" style="margin-bottom:14px">
+     <input id="clubSearch" placeholder="모임 이름, 지역 검색..." oninput="rClub()"/>
+   </div>
+   <div id="clubList"></div>
+ </div>
+
  </div>
  <!-- 광고 사이드바 (데스크탑) -->
  <div id="adSidebar" style="width:220px;flex-shrink:0;position:sticky;top:72px">
@@ -1058,60 +1167,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    <div id="libmapList"></div>
  </div></div>
 
- <!-- 독서 수첩 -->
- <div class="page" id="p-stats"><div class="pg" style="padding-bottom:80px">
-   <div class="h1 serif">독서 수첩</div>
-   <div class="sub">나의 독서 습관을 한눈에 확인하세요</div>
-   
-   <!-- 독서 타이머 -->
-   <div class="card" style="text-align:center;padding:24px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600">독서 타이머</div>
-     <div id="timerDisplay" style="font-family:var(--font-serif);font-size:48px;color:var(--g);margin-bottom:16px;letter-spacing:2px">00:00:00</div>
-     <div style="display:flex;gap:8px;justify-content:center">
-       <button id="timerStartBtn" onclick="toggleTimer()" class="btn" style="padding:10px 24px;font-size:13px">시작</button>
-       <button onclick="resetTimer()" class="btn2" style="padding:10px 24px;font-size:13px">초기화</button>
-       <button onclick="saveTimerRecord()" class="btn2" style="padding:10px 24px;font-size:13px">기록 저장</button>
-     </div>
-     <div id="timerBookSelect" style="margin-top:12px">
-       <select id="timerBook" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--txt)">
-         <option value="">읽고 있는 책 선택</option>
-       </select>
-     </div>
-   </div>
-
-   <!-- 독서 캘린더 -->
-   <div class="card" style="padding:20px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">독서 캘린더</div>
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-       <button onclick="changeCalMonth(-1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px">&lt;</button>
-       <div id="calMonthLabel" style="font-size:15px;font-weight:600;color:var(--txt)"></div>
-       <button onclick="changeCalMonth(1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px">&gt;</button>
-     </div>
-     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;color:var(--muted);margin-bottom:6px">
-       <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-     </div>
-     <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
-   </div>
-
-   <!-- 독서 수첩 차트 -->
-   <div class="card" style="padding:20px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">카테고리별 독서량</div>
-     <div id="statsCatChart"></div>
-   </div>
-   <div class="card" style="padding:20px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">월별 독서량</div>
-     <div id="statsMonthChart"></div>
-   </div>
-   <div class="card" style="padding:20px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">독서 기록 요약</div>
-     <div id="statsSummary"></div>
-   </div>
-   <div class="card" style="padding:20px">
-     <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600">독서 타이머 기록</div>
-     <div id="timerHistory"></div>
-   </div>
- </div></div>
-
  <!-- 추천 -->
  <div class="page" id="p-match"><div class="pg" style="padding-bottom:80px">
    <div class="h1 serif">추천</div>
@@ -1406,7 +1461,7 @@ function closePremGate(){}
 
 // 탭 표시 업데이트
 function updateNavTabs(){
-  ['sb-public','sb-forum','sb-club','n-public','n-forum','n-club','t-public','t-forum','t-club','t-points','t-library','t-stats','t-match','sb-stats','sb-match','n-stats','n-match'].forEach(id=>{
+  ['sb-forum','sb-libmap','sb-match','n-forum','n-libmap','n-match','t-forum','t-libmap','t-match','t-points','t-library'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.style.opacity='1';el.title='';}
   });
@@ -1587,7 +1642,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementB
 // ══ 페이지 이동 ══
 // 현재 탭 추적 (뒤로가기용)
 let _currentTab='library';
-const _tabPages=['library','public','forum','club','libmap','stats','match','points','admin'];
+const _tabPages=['library','forum','libmap','match','points','admin'];
 
 function go(name){
  // 접근 제어
@@ -1618,16 +1673,12 @@ function go(name){
   if(_fab){
     if(window.innerWidth<=600&&name==='library'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
     else if(window.innerWidth<=600&&name==='forum'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
-    else if(window.innerWidth<=600&&name==='club'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addClub');};}
     else{_fab.style.cssText='display:none!important';}
   }
-  if(name==='library')rLib();
- if(name==='public')rPub();
- if(name==='forum')rForum();
- if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
+  if(name==='library'){rLib();rStats();}
+ if(name==='forum'){rForum();rPub();rClub();}
  if(name==='admin')rAdmin();
  if(name==='points'){rPoints();}
- if(name==='stats')rStats();
  if(name==='match')rMatch();
  if(typeof showGuide==='function') showGuide(name);
  if(name==='addBook'){
@@ -4026,16 +4077,12 @@ function _goWithoutHistory(name){
  if(_fab){
    if(window.innerWidth<=600&&name==='library'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
    else if(window.innerWidth<=600&&name==='forum'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
-   else if(window.innerWidth<=600&&name==='club'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addClub');};}
    else{_fab.style.cssText='display:none!important';}
  }
- if(name==='library')rLib();
- if(name==='public')rPub();
- if(name==='forum')rForum();
- if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
+ if(name==='library'){rLib();rStats();}
+ if(name==='forum'){rForum();rPub();rClub();}
  if(name==='admin')rAdmin();
  if(name==='points'){rPoints();}
- if(name==='stats')rStats();
  if(name==='match')rMatch();
 }
 window.onload=async()=>{
@@ -4679,6 +4726,40 @@ async function searchByISBN(isbn){
 if(typeof _guideTexts!=='undefined'){
   _guideTexts.stats={title:'독서 수첩',body:'독서 타이머로 읽은 시간을 측정하고, 캘린더에서 독서 기록을 한눈에 확인할 수 있어요. 카테고리별, 월별 통계도 제공됩니다.'};
   _guideTexts.match={title:'추천',body:'나와 비슷한 독서 취향의 회원이 읽은 책을 추천받을 수 있어요. 교보문고, YES24에서 바로 구매도 가능합니다.'};
+}
+
+// ========== 서브탭 전환 ==========
+function switchLibSubTab(tab){
+  document.getElementById('libSubTab-books').classList.toggle('on',tab==='books');
+  document.getElementById('libSubTab-note').classList.toggle('on',tab==='note');
+  document.getElementById('libBooksSection').style.display=tab==='books'?'block':'none';
+  document.getElementById('libNoteSection').style.display=tab==='note'?'block':'none';
+  if(tab==='note') rStats();
+  // FAB: 내 책 탭일 때만 표시
+  const _fab=document.getElementById('fabAdd');
+  if(_fab&&window.innerWidth<=600){
+    if(tab==='books'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
+    else{_fab.style.cssText='display:none!important';}
+  }
+}
+
+function switchPlazaTab(tab){
+  document.getElementById('plazaTab-posts').classList.toggle('on',tab==='posts');
+  document.getElementById('plazaTab-public').classList.toggle('on',tab==='public');
+  document.getElementById('plazaTab-club').classList.toggle('on',tab==='club');
+  document.getElementById('plazaPosts').style.display=tab==='posts'?'block':'none';
+  document.getElementById('plazaPublic').style.display=tab==='public'?'block':'none';
+  document.getElementById('plazaClub').style.display=tab==='club'?'block':'none';
+  if(tab==='public') rPub();
+  if(tab==='club') rClub();
+  if(tab==='posts') rForum();
+  // FAB: 자유글 탭일 때만 글쓰기, 독서모임 탭일 때 모임만들기
+  const _fab=document.getElementById('fabAdd');
+  if(_fab&&window.innerWidth<=600){
+    if(tab==='posts'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
+    else if(tab==='club'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addClub');};}
+    else{_fab.style.cssText='display:none!important';}
+  }
 }
 
 function closeGuide(){
