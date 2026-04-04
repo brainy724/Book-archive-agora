@@ -615,9 +615,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
        <button onclick="saveTimerRecord()" class="btn2" style="padding:10px 20px;font-size:13px">기록 저장</button>
      </div>
      <div style="margin-top:14px">
-       <select id="timerBook" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)">
+       <select id="timerBook" onchange="document.getElementById('timerBookCustom').style.display=this.value==='__custom__'?'block':'none'" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)">
          <option value="">읽고 있는 책 선택</option>
        </select>
+       <div id="timerBookCustom" style="display:none;margin-top:8px">
+         <input id="timerBookTitle" placeholder="책 제목을 입력하세요" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt)"/>
+       </div>
      </div>
    </div>
 
@@ -4399,14 +4402,23 @@ function fmtTime(s){
 async function saveTimerRecord(){
   if(!CU){nt('로그인이 필요합니다.','err');return;}
   if(_timerSeconds<10){nt('10초 이상 읽어야 기록할 수 있어요.','err');return;}
-  const bookId=document.getElementById('timerBook').value;
-  const bookTitle=document.getElementById('timerBook').selectedOptions[0]?.textContent||'';
+  const selVal=document.getElementById('timerBook').value;
+  let bookId=null, bookTitle='직접 독서';
+  if(selVal==='__custom__'){
+    const customTitle=(document.getElementById('timerBookTitle')||{}).value?.trim();
+    if(!customTitle){nt('책 제목을 입력해주세요.','err');return;}
+    bookTitle=customTitle;
+  }else if(selVal){
+    bookId=selVal;
+    bookTitle=document.getElementById('timerBook').selectedOptions[0]?.textContent||'';
+  }
   const{error}=await sb.from('timer_records').insert({
-    user_id:CU.id, book_id:bookId||null, book_title:bookTitle||'직접 독서',
+    user_id:CU.id, book_id:bookId, book_title:bookTitle,
     seconds:_timerSeconds, recorded_at:new Date().toISOString()
   });
   if(error){nt('기록 저장 실패: '+error.message,'err');return;}
   nt('독서 기록이 저장되었습니다!');
+  document.getElementById('timerBookTitle').value='';
   resetTimer(); rStats();
 }
 
@@ -4460,7 +4472,8 @@ async function rStats(){
   // 타이머에 내 책 목록 로드
   const{data:myBooks}=await sb.from('books').select('id,title').eq('user_id',CU.id).order('created_at',{ascending:false});
   const sel=document.getElementById('timerBook');
-  sel.innerHTML='<option value="">읽고 있는 책 선택</option>'+(myBooks||[]).map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('');
+  sel.innerHTML='<option value="">읽고 있는 책 선택</option>'+(myBooks||[]).map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('')+'<option value="__custom__">+ 직접 입력</option>';
+  document.getElementById('timerBookCustom').style.display='none';
 
   // 카테고리별 독서량
   const{data:allBooks}=await sb.from('books').select('category').eq('user_id',CU.id);
@@ -4746,64 +4759,77 @@ function switchRecTab(tab){
   if(tab==='match') rMatch();
 }
 
+// ========== 알라딘 JSONP 헬퍼 ==========
+function aladinJSONP(queryType, callback){
+  const cbName='_aladin_'+queryType+'_'+Date.now();
+  window[cbName]=function(data){
+    callback(data);
+    delete window[cbName];
+    const s=document.getElementById(cbName);if(s)s.remove();
+  };
+  const s=document.createElement('script');
+  s.id=cbName;
+  s.src=`https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=ttbkjwoo07080347001&QueryType=${queryType}&MaxResults=10&start=1&SearchTarget=Book&output=js&Version=20131101&Cover=Big&callback=${cbName}`;
+  s.onerror=function(){
+    callback(null);
+    delete window[cbName];
+    s.remove();
+  };
+  document.head.appendChild(s);
+}
+
 // ========== 알라딘 베스트셀러 ==========
 let _bestLoaded=false;
-async function loadBest(){
+function loadBest(){
   if(_bestLoaded) return;
-  try{
-    const res=await fetch('https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=ttbkjwoo07080347001&QueryType=Bestseller&MaxResults=10&start=1&SearchTarget=Book&output=js&Version=20131101&Cover=Big');
-    const text=await res.text();
-    const data=JSON.parse(text.replace(/;$/,''));
-    if(data.item&&data.item.length){
-      document.getElementById('bestList').innerHTML=data.item.map((b,i)=>`
-        <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
-          <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer">
-            <div style="font-family:var(--font-serif);font-size:20px;color:var(--g);font-weight:700;width:28px;text-align:center;flex-shrink:0">${i+1}</div>
-            ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`:''}
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title}</div>
-              <div style="font-size:12px;color:var(--muted)">${b.author}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">${b.publisher}</div>
-            </div>
-          </div>
-        </a>
-      `).join('');
-      _bestLoaded=true;
+  aladinJSONP('Bestseller', function(data){
+    document.getElementById('bestLoading').style.display='none';
+    if(!data||!data.item||!data.item.length){
+      document.getElementById('bestList').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">베스트셀러를 불러오지 못했어요.</div>';
+      return;
     }
-  }catch(e){
-    document.getElementById('bestList').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">베스트셀러를 불러오지 못했어요.</div>';
-  }
-  document.getElementById('bestLoading').style.display='none';
+    document.getElementById('bestList').innerHTML=data.item.map((b,i)=>`
+      <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
+        <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer">
+          <div style="font-family:var(--font-serif);font-size:20px;color:var(--g);font-weight:700;width:28px;text-align:center;flex-shrink:0">${i+1}</div>
+          ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`:''}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title}</div>
+            <div style="font-size:12px;color:var(--muted)">${b.author}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${b.publisher}</div>
+          </div>
+        </div>
+      </a>
+    `).join('');
+    _bestLoaded=true;
+  });
 }
 
 // ========== 알라딘 이달의 신간 ==========
 let _newLoaded=false;
-async function loadNew(){
+function loadNew(){
   if(_newLoaded) return;
-  try{
-    const res=await fetch('https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=ttbkjwoo07080347001&QueryType=ItemNewSpecial&MaxResults=10&start=1&SearchTarget=Book&output=js&Version=20131101&Cover=Big');
-    const text=await res.text();
-    const data=JSON.parse(text.replace(/;$/,''));
-    if(data.item&&data.item.length){
-      document.getElementById('newList').innerHTML=data.item.map(b=>`
-        <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
-          <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer">
-            ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`:''}
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title}</div>
-              <div style="font-size:12px;color:var(--muted)">${b.author}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">${b.publisher}</div>
-              ${b.description?`<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${b.description}</div>`:''}
-            </div>
-          </div>
-        </a>
-      `).join('');
-      _newLoaded=true;
+  aladinJSONP('ItemNewSpecial', function(data){
+    document.getElementById('newLoading').style.display='none';
+    if(!data||!data.item||!data.item.length){
+      document.getElementById('newList').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">신간을 불러오지 못했어요.</div>';
+      return;
     }
-  }catch(e){
-    document.getElementById('newList').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">신간을 불러오지 못했어요.</div>';
-  }
-  document.getElementById('newLoading').style.display='none';
+    document.getElementById('newList').innerHTML=data.item.map(b=>`
+      <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
+        <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer">
+          ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`:''}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title}</div>
+            <div style="font-size:12px;color:var(--muted)">${b.author}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${b.publisher}</div>
+            ${b.description?`<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${b.description}</div>`:''}
+          </div>
+        </div>
+      </a>
+    `).join('');
+    _newLoaded=true;
+  });
 }
 
 function closeGuide(){
