@@ -517,8 +517,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div class="sidebar" id="mainSidebar">
     <div class="sb-item on" id="sb-library" onclick="go('library')">내 서재</div>
     <div class="sb-item" id="sb-forum" onclick="go('forum')">광장</div>
-    <div class="sb-item" id="sb-libmap" onclick="go('libmap')">도서관 찾기</div>
     <div class="sb-item" id="sb-match" onclick="go('match')">추천</div>
+    <div class="sb-item" id="sb-libmap" onclick="go('libmap')">도서관 찾기</div>
     <div class="sb-item" id="sb-admin" onclick="go('admin')" style="display:none">관리자</div>
     <button class="sb-theme-btn" onclick="openCustom()">테마 변경</button>
   </div>
@@ -529,8 +529,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="nav-links">
  <span class="nl" id="n-library" onclick="go('library')">내 서재</span>
  <span class="nl" id="n-forum" onclick="go('forum')">광장</span>
- <span class="nl" id="n-libmap" onclick="go('libmap')">도서관</span>
  <span class="nl" id="n-match" onclick="go('match')">추천</span>
+ <span class="nl" id="n-libmap" onclick="go('libmap')">도서관</span>
  <span class="nl" id="n-admin" onclick="go('admin')" style="display:none">관리</span>
  </div>
  <div class="nav-r">
@@ -557,8 +557,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="btab">
  <div class="ti on" id="t-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>내 서재</div>
  <div class="ti" id="t-forum" onclick="go('forum')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>광장</div>
- <div class="ti" id="t-libmap" onclick="go('libmap')"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>도서관</div>
  <div class="ti" id="t-match" onclick="go('match')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>추천</div>
+ <div class="ti" id="t-libmap" onclick="go('libmap')"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>도서관</div>
  <div class="ti" id="t-points" onclick="go('points')"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>설정</div>
  <div class="ti" id="t-admin" onclick="go('admin')" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>관리</div>
  </div>
@@ -1632,7 +1632,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementB
 // ══ 페이지 이동 ══
 // 현재 탭 추적 (뒤로가기용)
 let _currentTab='library';
-const _tabPages=['library','forum','libmap','match','points','admin'];
+const _tabPages=['library','forum','match','libmap','points','admin'];
 
 function go(name){
  // 접근 제어
