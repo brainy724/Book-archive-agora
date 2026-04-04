@@ -4104,8 +4104,8 @@ function displayLibResults(data){
 
     const markerImg=new kakao.maps.MarkerImage(
       d.type==='smart'
-        ?'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'
-        :'https://t1.daumcdn.net/localimg/localimages/07/2018/pc/img/marker_spot.png',
+        ?'https://t1.daumcdn.net/localimg/localimages/07/2018/pc/img/marker_spot.png'
+        :'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
       new kakao.maps.Size(24,35)
     );
 
@@ -4165,9 +4165,15 @@ function searchNearbyLib(){
     libMap.setLevel(5);
 
     // 현재 위치 마커
+    const myMarkerImg=new kakao.maps.MarkerImage(
+      'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
+      new kakao.maps.Size(29,42)
+    );
     const myMarker=new kakao.maps.Marker({
       position:new kakao.maps.LatLng(lat,lng),
-      map:libMap
+      map:libMap,
+      image:myMarkerImg,
+      zIndex:10
     });
 
     // 카카오 키워드 검색으로 주변 도서관 찾기
