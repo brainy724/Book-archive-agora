@@ -58,7 +58,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 /* 하단탭 */
 .btab{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);z-index:200;flex-direction:row;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .btab::-webkit-scrollbar{display:none;}
-.ti{flex:0 0 auto;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;padding:6px 12px;white-space:nowrap;transition:color .2s;position:relative;}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;padding:6px 4px;white-space:nowrap;transition:color .2s;position:relative;}
 .ti svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:all .2s;}
 .ti.on{color:var(--g);}
 .ti.on svg{stroke:var(--g);}
@@ -1905,10 +1905,20 @@ async function openBook(id){
         ${(hd||[]).length}
       </button>
     </div>
+    <!-- 댓글 섹션 -->
+    <div style="padding:16px 24px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">댓글</div>
+      <div id="bookComments_${b.id}" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="commentInput_${b.id}" placeholder="댓글을 남겨보세요" style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--txt)" onkeydown="if(event.key==='Enter')addBookComment('${b.id}')"/>
+        <button onclick="addBookComment('${b.id}')" class="btn" style="padding:9px 14px;font-size:12px;white-space:nowrap">등록</button>
+      </div>
+    </div>
   `;
   document.getElementById('bookModalOv').classList.add('open');
   document.body.style.overflow='hidden';
   history.pushState({modal:'book',tab:_currentTab},'',location.href);
+  loadBookComments('${b.id}');
 }
 
 async function openBookModal(id){
@@ -1974,6 +1984,53 @@ async function openBookModal(id){
   document.body.style.overflow='hidden';
   history.pushState({modal:'book',tab:_currentTab},'',location.href);
 }
+// ========== 공개서재 댓글 ==========
+async function loadBookComments(bookId){
+  const el=document.getElementById('bookComments_'+bookId);
+  if(!el)return;
+  const{data:comments}=await sb.from('book_comments').select('*').eq('book_id',bookId).order('created_at',{ascending:true});
+  if(!comments||!comments.length){
+    el.innerHTML='<div style="text-align:center;padding:10px;color:var(--muted);font-size:12px">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>';
+    return;
+  }
+  // 유저 닉네임 조회
+  const uids=[...new Set(comments.map(c=>c.user_id))];
+  const{data:users}=await sb.from('agora_users').select('id,username').in('id',uids);
+  const umap={};(users||[]).forEach(u=>umap[u.id]=u.username);
+  el.innerHTML=comments.map(c=>`
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="font-size:12px;font-weight:600;color:var(--g)">${esc(umap[c.user_id]||'탈퇴한 회원')}</span>
+          <span style="font-size:10px;color:var(--muted)">${new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
+        </div>
+        <div style="font-size:13px;color:var(--txt);line-height:1.6">${esc(c.content)}</div>
+      </div>
+      ${CU&&c.user_id===CU.id?`<button onclick="deleteBookComment('${c.id}','${bookId}')" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;flex-shrink:0;padding:2px">&times;</button>`:''}
+    </div>
+  `).join('');
+}
+async function addBookComment(bookId){
+  if(!CU){nt('로그인이 필요합니다.','err');return;}
+  const input=document.getElementById('commentInput_'+bookId);
+  const content=input.value.trim();
+  if(!content){nt('댓글을 입력해주세요.','err');return;}
+  if(content.length>300){nt('댓글은 300자까지 가능해요.','err');return;}
+  const{error}=await sb.from('book_comments').insert({
+    book_id:bookId, user_id:CU.id, content:content
+  });
+  if(error){nt('댓글 등록 실패: '+error.message,'err');return;}
+  input.value='';
+  nt('댓글이 등록되었습니다!');
+  loadBookComments(bookId);
+}
+async function deleteBookComment(commentId,bookId){
+  if(!confirm('댓글을 삭제할까요?'))return;
+  await sb.from('book_comments').delete().eq('id',commentId);
+  nt('삭제되었습니다.');
+  loadBookComments(bookId);
+}
+
 function closeBookModal(e){
   if(e&&e.target!==document.getElementById('bookModalOv'))return;
   document.getElementById('bookModalOv').classList.remove('open');
@@ -2222,6 +2279,7 @@ function applyMainColor(){
   const rs=document.documentElement.style;
   rs.setProperty('--g',hex);rs.setProperty('--g2',g2);rs.setProperty('--gl',gl);rs.setProperty('--gb',gb2);
   rs.setProperty('--gold',hex);rs.setProperty('--gold2',g2);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',hex);
   localStorage.setItem('agora_color',JSON.stringify({g:hex,g2,gl,gb:gb2}));
   nt('테마 색상이 적용됐습니다.');
 }
@@ -2710,6 +2768,7 @@ function closeCustom(){document.getElementById('customWrap').style.display='none
 function setColor(g,g2,gl,gb){
  const r=document.documentElement.style;
  r.setProperty('--g',g);r.setProperty('--g2',g2);r.setProperty('--gl',gl);r.setProperty('--gb',gb);
+ document.querySelector('meta[name="theme-color"]').setAttribute('content',g);
  document.querySelectorAll('.c-swatch').forEach(s=>s.classList.remove('on'));
  event.target.classList.add('on');
  localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
@@ -2725,7 +2784,7 @@ function setTheme(t){
 }
 function loadCustomize(){
  const color=localStorage.getItem('agora_color');
- if(color){const c=JSON.parse(color);const r=document.documentElement.style;r.setProperty('--g',c.g);r.setProperty('--g2',c.g2);r.setProperty('--gl',c.gl);r.setProperty('--gb',c.gb);}
+ if(color){const c=JSON.parse(color);const r=document.documentElement.style;r.setProperty('--g',c.g);r.setProperty('--g2',c.g2);r.setProperty('--gl',c.gl);r.setProperty('--gb',c.gb);document.querySelector('meta[name="theme-color"]').setAttribute('content',c.g);}
  const font=localStorage.getItem('agora_font');
  if(font){const fonts={notoserif:"'Noto Serif KR',serif",myeongjo:"'Nanum Myeongjo',serif",pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif"};document.documentElement.style.setProperty('--font-body',fonts[font]);}
  const theme=localStorage.getItem('agora_theme');
@@ -4747,68 +4806,7 @@ async function rMatch(){
   document.getElementById('matchResults').innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--muted)">추천할 새로운 책이 아직 없어요.</div>';
 }
 
-// ========== ISBN 입력 ==========
-function toggleIsbnInput(){
-  document.getElementById('barcodeCam').style.display='none';stopBarcodeCam();
-  const el=document.getElementById('barcodeScanner');
-  el.style.display=el.style.display==='none'?'block':'none';
-  if(el.style.display==='block') document.getElementById('isbnInput').focus();
-}
-function stopBarcode(){
-  document.getElementById('barcodeScanner').style.display='none';
-  document.getElementById('isbnInput').value='';
-}
-async function submitISBN(){
-  const isbn=document.getElementById('isbnInput').value.trim().replace(/[-\s]/g,'');
-  if(!isbn){nt('ISBN 번호를 입력해주세요.','err');return;}
-  if(isbn.length!==13&&isbn.length!==10){nt('ISBN은 10자리 또는 13자리 숫자예요.','err');return;}
-  nt('검색 중...');
-  await searchByISBN(isbn);
-  stopBarcode();
-}
-
-// ========== 바코드 카메라 스캔 ==========
-let _barcodeStream=null;
-async function startBarcodeScan(){
-  document.getElementById('barcodeScanner').style.display='none';stopBarcode();
-  const container=document.getElementById('barcodeCam');
-  const video=document.getElementById('barcodeVideo');
-  container.style.display='block';
-  try{
-    _barcodeStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    video.srcObject=_barcodeStream;
-    video.play();
-    if('BarcodeDetector' in window){
-      const detector=new BarcodeDetector({formats:['ean_13','ean_8']});
-      const scanLoop=async()=>{
-        if(!_barcodeStream)return;
-        try{
-          const barcodes=await detector.detect(video);
-          if(barcodes.length>0){
-            const isbn=barcodes[0].rawValue;
-            stopBarcodeCam();
-            nt('ISBN 감지: '+isbn);
-            await searchByISBN(isbn);
-            return;
-          }
-        }catch(e){}
-        if(_barcodeStream)requestAnimationFrame(scanLoop);
-      };
-      requestAnimationFrame(scanLoop);
-    }else{
-      nt('이 브라우저는 바코드 스캔을 지원하지 않아요. ISBN 버튼으로 직접 입력해주세요.','err');
-      stopBarcodeCam();
-    }
-  }catch(e){
-    nt('카메라 접근이 거부되었어요.','err');
-    container.style.display='none';
-  }
-}
-function stopBarcodeCam(){
-  if(_barcodeStream){_barcodeStream.getTracks().forEach(t=>t.stop());_barcodeStream=null;}
-  const cam=document.getElementById('barcodeCam');if(cam)cam.style.display='none';
-  const vid=document.getElementById('barcodeVideo');if(vid)vid.srcObject=null;
-}
+// ========== ISBN 검색 (내부용) ==========
 async function searchByISBN(isbn){
   try{
     const res=await fetch(`https://dapi.kakao.com/v3/search/book?query=${isbn}&target=isbn`,{
