@@ -19,7 +19,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -27,7 +27,7 @@
  --br:#2C1A2E;--brl:#F7F3F8;--brb:#D9C9DF;
  --card:#FFFFFF;--border:#F0EAE4;--txt:#2D2420;--muted:#9A8E86;--red:#C0392B;
  --bg-page:#FDFBF9;--nav-h:56px;--tab-h:62px;
- --font-body:'Noto Serif KR','Apple SD Gothic Neo',serif;
+ --font-body:'Gowun Batang','Apple SD Gothic Neo',serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
  --gold:#9C7B5C;--gold2:#7A5D3E;
  --shadow-sm:0 1px 3px rgba(44,26,32,.06);
@@ -472,49 +472,28 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <button onclick="closeCustom()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
     </div>
 
-    <!-- 파스텔/핑크 -->
-    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">파스텔</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
-      <div onclick="setColor('#F4A4C0','#D4608A','#FEF0F5','#F9D0E4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#F4A4C0;margin-bottom:5px"></div>
+    <!-- 추천 색상 -->
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">추천 색상</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
+      <div onclick="setColor('#9C7B5C','#7A5D3E','#FAF6F1','#E8D8C8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#9C7B5C;margin-bottom:6px;box-shadow:0 2px 8px rgba(156,123,92,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">웜골드</div>
       </div>
-      <div onclick="setColor('#E8A0BF','#C4608A','#FEF0F6','#F9D0E4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#E8A0BF;margin-bottom:5px"></div>
+      <div onclick="setColor('#8B6F5E','#6B5244','#F8F4F1','#E0D2C8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#8B6F5E;margin-bottom:6px;box-shadow:0 2px 8px rgba(139,111,94,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">모카</div>
       </div>
-      <div onclick="setColor('#FFB3C6','#E0607A','#FFF0F3','#FFD6DF');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFB3C6;margin-bottom:5px"></div>
+      <div onclick="setColor('#7D8471','#5E6454','#F4F6F2','#D4DCC8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#7D8471;margin-bottom:6px;box-shadow:0 2px 8px rgba(125,132,113,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">세이지</div>
       </div>
-      <div onclick="setColor('#C9A0DC','#9060B0','#F8F0FF','#E8D0F4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#C9A0DC;margin-bottom:5px"></div>
+      <div onclick="setColor('#957B8D','#745E6C','#F6F2F5','#DCD0D8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#957B8D;margin-bottom:6px;box-shadow:0 2px 8px rgba(149,123,141,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">더스티로즈</div>
       </div>
-      <div onclick="setColor('#A8D8EA','#5090B0','#EEF8FC','#C8E8F4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#A8D8EA;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#B5EAD7','#5BAD8A','#F0FBF6','#D0F0E4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#B5EAD7;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#FFDAC1','#E09060','#FFF5EE','#FFE0C8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFDAC1;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#FFD700','#B8960A','#FFFAE8','#FFE878');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#FFD700;margin-bottom:5px"></div>
-      </div>
-    </div>
-
-    <!-- 클래식 -->
-    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">클래식</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px">
-      <div onclick="setColor('#B8956A','#8C6A3E','#FBF5EE','#E8D5BC');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#B8956A;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#8B4A6B','#6E3555','#F9F0F4','#EECFDC');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#8B4A6B;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#4A7A6A','#35604F','#EEF6F2','#BCDDD2');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#4A7A6A;margin-bottom:5px"></div>
-      </div>
-      <div onclick="setColor('#2C3E50','#1A2535','#EEF0F2','#B8C0C8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:10px;background:#2C3E50;margin-bottom:5px"></div>
+      <div onclick="setColor('#6B7B8D','#4E5E6E','#F1F4F6','#C8D4DC');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#6B7B8D;margin-bottom:6px;box-shadow:0 2px 8px rgba(107,123,141,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">슬레이트</div>
       </div>
     </div>
 
@@ -760,44 +739,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  </div>
  </div></div>
 
- <div class="page" id="p-public"><div class="pg">
- <div class="h1 serif">공개 서재</div>
- <div class="sub">아고라 회원들의 독서 감상평 · 하트로 공감을 전해보세요</div>
-<div class="cat-bar" id="pubCatBar">
-      <button class="cat-btn on" onclick="setPubCat('')">전체</button>
-      <button class="cat-btn" onclick="setPubCat('소설')">소설</button>
-      <button class="cat-btn" onclick="setPubCat('에세이')">에세이</button>
-      <button class="cat-btn" onclick="setPubCat('자기계발')">자기계발</button>
-      <button class="cat-btn" onclick="setPubCat('인문')">인문</button>
-      <button class="cat-btn" onclick="setPubCat('경제경영')">경제경영</button>
-      <button class="cat-btn" onclick="setPubCat('역사')">역사</button>
-      <button class="cat-btn" onclick="setPubCat('과학')">과학</button>
-      <button class="cat-btn" onclick="setPubCat('시')">시</button>
-      <button class="cat-btn" onclick="setPubCat('기타')">기타</button>
-    </div>
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
-      <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;"/>
-      <div style="position:relative">
-        <button onclick="togglePubSort()" style="padding:9px 14px;border:1px solid var(--border);border-radius:20px;background:#fff;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:var(--font-body);display:flex;align-items:center;gap:4px">
-          <span id="pubSortLabel">최신순</span> ▾
-        </button>
-        <div id="pubSortMenu" style="display:none;position:absolute;right:0;top:40px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);z-index:300;min-width:120px;overflow:hidden">
-          <div onclick="setPubSort('newest')" id="psopt-newest" class="sort-opt on">최신순</div>
-          <div onclick="setPubSort('oldest')" id="psopt-oldest" class="sort-opt">오래된순</div>
-          <div onclick="setPubSort('hearts')" id="psopt-hearts" class="sort-opt">하트 많은순</div>
-          <div onclick="setPubSort('rating')" id="psopt-rating" class="sort-opt">평점 높은순</div>
-          <div onclick="setPubSort('title')" id="psopt-title" class="sort-opt">제목순</div>
-        </div>
-      </div>
-    </div>
-    <div id="pubFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
-    <div id="pubUserFilter" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--gl);border:1px solid var(--gb);border-radius:10px;margin-bottom:14px"></div>
-    <div id="rdInfoB" class="info" style="display:none"></div>
-    <div id="pubList"></div>
-  </div></div>
-
  <div class="page" id="p-bookDetail"><div class="pg-sm" style="max-width:680px">
- <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('public')">← 공개 서재로</button>
+ <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('forum')">← 광장으로</button>
  <div id="bdContent"></div>
  </div></div>
 
@@ -838,20 +781,58 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
  <!-- 공개 서재 섹션 (광장 안) -->
  <div id="plazaPublic" style="display:none">
-   <div id="pubUserFilter" style="display:none;background:var(--gl);border:1px solid var(--gb);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between">
-     <span style="font-size:13px;font-weight:600;color:var(--g)" id="pubFilterLabel"></span>
-     <button onclick="clearPubUserFilter()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px">&times;</button>
+   <div class="cat-bar" id="pubCatBar">
+     <button class="cat-btn on" onclick="setPubCat('')">전체</button>
+     <button class="cat-btn" onclick="setPubCat('소설')">소설</button>
+     <button class="cat-btn" onclick="setPubCat('에세이')">에세이</button>
+     <button class="cat-btn" onclick="setPubCat('자기계발')">자기계발</button>
+     <button class="cat-btn" onclick="setPubCat('인문')">인문</button>
+     <button class="cat-btn" onclick="setPubCat('경제경영')">경제경영</button>
+     <button class="cat-btn" onclick="setPubCat('역사')">역사</button>
+     <button class="cat-btn" onclick="setPubCat('과학')">과학</button>
+     <button class="cat-btn" onclick="setPubCat('시')">시</button>
+     <button class="cat-btn" onclick="setPubCat('기타')">기타</button>
    </div>
-   <div class="search-center" style="margin-bottom:14px">
-     <input id="pubSearch" placeholder="책 제목, 저자 검색..." oninput="rPub()" />
+   <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+     <input id="pubSearch" placeholder="제목 · 저자 검색" oninput="rPub()" style="flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;outline:none;"/>
+     <div style="position:relative">
+       <button onclick="togglePubSort()" style="padding:9px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card);font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:var(--font-body);display:flex;align-items:center;gap:4px">
+         <span id="pubSortLabel">최신순</span> ▾
+       </button>
+       <div id="pubSortMenu" style="display:none;position:absolute;right:0;top:40px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:300;min-width:120px;overflow:hidden">
+         <div onclick="setPubSort('newest')" id="psopt-newest" class="sort-opt on">최신순</div>
+         <div onclick="setPubSort('oldest')" id="psopt-oldest" class="sort-opt">오래된순</div>
+         <div onclick="setPubSort('hearts')" id="psopt-hearts" class="sort-opt">하트 많은순</div>
+         <div onclick="setPubSort('rating')" id="psopt-rating" class="sort-opt">평점 높은순</div>
+         <div onclick="setPubSort('title')" id="psopt-title" class="sort-opt">제목순</div>
+       </div>
+     </div>
    </div>
-   <div id="pubBookList"></div>
+   <div id="pubFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+   <div id="pubUserFilter" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--gl);border:1px solid var(--gb);border-radius:10px;margin-bottom:14px"></div>
+   <div id="rdInfoB" class="info" style="display:none"></div>
+   <div id="pubList"></div>
  </div>
 
  <!-- 독서모임 섹션 (광장 안) -->
  <div id="plazaClub" style="display:none">
-   <div class="search-bar" style="margin-bottom:14px">
-     <input id="clubSearch" placeholder="모임 이름, 지역 검색..." oninput="rClub()"/>
+   <div class="cat-bar" id="clubRegionBar" style="margin-bottom:12px">
+     <button class="cat-btn on" onclick="setClubRegion('')">전체</button>
+     <button class="cat-btn" onclick="setClubRegion('서울')">서울</button>
+     <button class="cat-btn" onclick="setClubRegion('경기')">경기</button>
+     <button class="cat-btn" onclick="setClubRegion('인천')">인천</button>
+     <button class="cat-btn" onclick="setClubRegion('강원')">강원</button>
+     <button class="cat-btn" onclick="setClubRegion('충북')">충북</button>
+     <button class="cat-btn" onclick="setClubRegion('충남')">충남</button>
+     <button class="cat-btn" onclick="setClubRegion('대전')">대전</button>
+     <button class="cat-btn" onclick="setClubRegion('대구')">대구</button>
+     <button class="cat-btn" onclick="setClubRegion('부산')">부산</button>
+     <button class="cat-btn" onclick="setClubRegion('경북')">경북</button>
+     <button class="cat-btn" onclick="setClubRegion('경남')">경남</button>
+     <button class="cat-btn" onclick="setClubRegion('전북')">전북</button>
+     <button class="cat-btn" onclick="setClubRegion('전남')">전남</button>
+     <button class="cat-btn" onclick="setClubRegion('광주')">광주</button>
+     <button class="cat-btn" onclick="setClubRegion('제주')">제주</button>
    </div>
    <div id="clubList"></div>
  </div>
@@ -991,15 +972,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         </div>
         <!-- 자주 쓰는 색상 -->
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">추천 색상</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div onclick="quickColor('#F4A4C0')" style="width:32px;height:32px;border-radius:50%;background:#F4A4C0;cursor:pointer;border:2px solid transparent" title="로즈핑크" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#E8A0BF')" style="width:32px;height:32px;border-radius:50%;background:#E8A0BF;cursor:pointer;border:2px solid transparent" title="베이비핑크" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#C9A0DC')" style="width:32px;height:32px;border-radius:50%;background:#C9A0DC;cursor:pointer;border:2px solid transparent" title="파스텔보라" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#A8D8EA')" style="width:32px;height:32px;border-radius:50%;background:#A8D8EA;cursor:pointer;border:2px solid transparent" title="스카이블루" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#B5EAD7')" style="width:32px;height:32px;border-radius:50%;background:#B5EAD7;cursor:pointer;border:2px solid transparent" title="민트" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#B8956A')" style="width:32px;height:32px;border-radius:50%;background:#B8956A;cursor:pointer;border:2px solid transparent" title="골드" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#8B4A6B')" style="width:32px;height:32px;border-radius:50%;background:#8B4A6B;cursor:pointer;border:2px solid transparent" title="딥로즈" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
-          <div onclick="quickColor('#4A7A6A')" style="width:32px;height:32px;border-radius:50%;background:#4A7A6A;cursor:pointer;border:2px solid transparent" title="세이지" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div onclick="quickColor('#9C7B5C')" style="width:36px;height:36px;border-radius:50%;background:#9C7B5C;cursor:pointer;border:2px solid transparent;transition:all .2s" title="웜골드 (기본)" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#8B6F5E')" style="width:36px;height:36px;border-radius:50%;background:#8B6F5E;cursor:pointer;border:2px solid transparent;transition:all .2s" title="모카브라운" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#7D8471')" style="width:36px;height:36px;border-radius:50%;background:#7D8471;cursor:pointer;border:2px solid transparent;transition:all .2s" title="세이지그린" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#957B8D')" style="width:36px;height:36px;border-radius:50%;background:#957B8D;cursor:pointer;border:2px solid transparent;transition:all .2s" title="더스티로즈" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#6B7B8D')" style="width:36px;height:36px;border-radius:50%;background:#6B7B8D;cursor:pointer;border:2px solid transparent;transition:all .2s" title="슬레이트블루" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
         </div>
       </div>
 
@@ -1049,35 +1027,9 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
 
   </div></div>
- <div class="page" id="p-club"><div class="pg">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-    <div><div class="h1 serif">독서모임</div><div class="sub">지역별 오프라인 독서모임 · 닉네임으로 활동</div></div>
-  </div>
-  <!-- 지역 필터 -->
-  <div class="cat-bar" id="clubRegionBar" style="margin-bottom:12px">
-    <button class="cat-btn on" onclick="setClubRegion('')">전체</button>
-    <button class="cat-btn" onclick="setClubRegion('서울')">서울</button>
-    <button class="cat-btn" onclick="setClubRegion('경기')">경기</button>
-    <button class="cat-btn" onclick="setClubRegion('인천')">인천</button>
-    <button class="cat-btn" onclick="setClubRegion('강원')">강원</button>
-    <button class="cat-btn" onclick="setClubRegion('충북')">충북</button>
-    <button class="cat-btn" onclick="setClubRegion('충남')">충남</button>
-    <button class="cat-btn" onclick="setClubRegion('대전')">대전</button>
-    <button class="cat-btn" onclick="setClubRegion('대구')">대구</button>
-    <button class="cat-btn" onclick="setClubRegion('부산')">부산</button>
-    <button class="cat-btn" onclick="setClubRegion('경북')">경북</button>
-    <button class="cat-btn" onclick="setClubRegion('경남')">경남</button>
-    <button class="cat-btn" onclick="setClubRegion('전북')">전북</button>
-    <button class="cat-btn" onclick="setClubRegion('전남')">전남</button>
-    <button class="cat-btn" onclick="setClubRegion('광주')">광주</button>
-    <button class="cat-btn" onclick="setClubRegion('제주')">제주</button>
-  </div>
-  <div id="clubList"></div>
- </div></div>
-
  <!-- 모임 상세 -->
  <div class="page" id="p-clubDetail"><div class="pg-sm" style="max-width:680px">
-  <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('club')">← 독서모임으로</button>
+  <button class="btn2" style="margin-bottom:16px;font-size:13px;padding:7px 14px" onclick="go('forum')">← 광장으로</button>
   <div id="clubDetailContent"></div>
   <!-- 채팅 섹션 (멤버만) -->
   <div id="clubChatSection" style="display:none;margin-top:24px">
@@ -1134,7 +1086,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       📌 모임 운영의 책임은 방장에게 있습니다.<br>AGORA는 모임 장소를 제공하지 않으며, 만남의 기회만 연결합니다.
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn2" onclick="go('club')">취소</button>
+      <button class="btn2" onclick="go('forum')">취소</button>
       <button class="btn" onclick="saveClub()">모임 만들기</button>
     </div>
   </div>
@@ -1875,7 +1827,7 @@ async function openBook(id){
       }
       <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:6px">${esc(b.title)}</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
-      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':`by <span onclick="closeBookModal();filterByUser('${b.user_id}','${esc(uname).replace(/'/g,"\\\\'")}');go('public')" style="color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(uname)}</span>`}</div>`:''}
+      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':`by <span onclick="closeBookModal();filterByUser('${b.user_id}','${esc(uname).replace(/'/g,"\\\\'")}');go('forum')" style="color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(uname)}</span>`}</div>`:''}
       ${stars?`<div style="font-size:20px;color:#E8A020;letter-spacing:3px;margin-bottom:4px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
     </div>
@@ -3550,7 +3502,7 @@ function handleNotifClick(type,refId,message){
   if(type==='notice'||type==='dm') showNotifPopup(type,message);
   else if(type==='comment'||type==='reply') openPost(refId);
   else if(type==='heart') go('library');
-  else if(type==='chat') go('club');
+  else if(type==='chat') go('forum');
   else if(type==='inquiry') go('points');
   else if(type==='report') go('admin');
 }
@@ -3914,7 +3866,7 @@ async function leaveClub(clubId){
   const{data:c}=await sb.from('agora_clubs').select('member_count').eq('id',clubId).single();
   await sb.from('agora_clubs').update({member_count:Math.max(0,(c?.member_count||1)-1)}).eq('id',clubId);
   nt('모임을 탈퇴했습니다.');
-  go('club');
+  go('forum');
 }
 
 async function editClub(clubId){
@@ -3938,7 +3890,7 @@ async function deleteClub(clubId){
     sb.from('agora_clubs').delete().eq('id',clubId)
   ]);
   nt('모임이 삭제됐습니다.');
-  go('club');
+  go('forum');
 }
 
 async function saveClub(){
@@ -3966,7 +3918,7 @@ async function saveClub(){
   load(false);
   nt('모임이 만들어졌습니다! 🎉');
   ['clubName','clubDesc','clubMax','clubSchedule','clubPlace','clubAgeLimit','clubHostMsg'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
-  go('club');
+  go('forum');
 }
 
 // ══ 슬라이더 (독서록 모달 사진) ══
