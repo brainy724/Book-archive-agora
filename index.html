@@ -605,11 +605,11 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
    <label>책 제목 *</label>
    <div style="display:flex;gap:8px">
      <input id="bTitle" placeholder="책 제목을 입력하세요" style="flex:1"/>
-     <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="searchBookCover()">표지 검색</button>
+     <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="searchBookInfo()">책 검색</button>
    </div>
    <div id="coverSearchResult" style="display:none;margin-top:10px">
-     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">표지 선택</div>
-     <div id="coverList" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">검색 결과를 선택하면 저자·출판사·표지가 자동 입력됩니다</div>
+     <div id="coverList" style="display:flex;gap:10px;flex-wrap:wrap"></div>
    </div>
    <div id="selectedCover" style="display:none;margin-top:10px;align-items:center;gap:10px">
      <img id="selectedCoverImg" src="" style="width:55px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"/>
@@ -704,6 +704,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       </div>
     </div>
     <div id="pubFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
+    <div id="pubUserFilter" style="display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--gl);border:1px solid var(--gb);border-radius:10px;margin-bottom:14px"></div>
     <div id="rdInfoB" class="info" style="display:none"></div>
     <div id="pubList"></div>
   </div></div>
@@ -1718,7 +1719,7 @@ async function openBook(id){
       }
       <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:6px">${esc(b.title)}</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
-      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':'by '+esc(uname)}</div>`:''}
+      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':`by <span onclick="closeBookModal();filterByUser('${b.user_id}','${esc(uname).replace(/'/g,"\\\\'")}');go('public')" style="color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(uname)}</span>`}</div>`:''}
       ${stars?`<div style="font-size:20px;color:#E8A020;letter-spacing:3px;margin-bottom:4px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
     </div>
@@ -1845,7 +1846,7 @@ function _oldSetSort(){
 }
 
 // ── 책 표지 검색 (Open Library) ──
-async function searchBookCover(){
+async function searchBookInfo(){
   const title=document.getElementById('bTitle').value.trim();
   if(!title){nt('책 제목을 먼저 입력해주세요.','err');return;}
   const resEl=document.getElementById('coverSearchResult');
@@ -1853,24 +1854,21 @@ async function searchBookCover(){
   listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 중...</div>';
   resEl.style.display='block';
   try{
-    // 카카오 + Open Library 동시 검색
     const [kakaoRes, olRes] = await Promise.allSettled([
       fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(title)}&size=6`,
         {headers:{Authorization:`KakaoAK ${KK_REST_KEY}`}}),
-      fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=6&fields=title,author_name,cover_i`)
+      fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=6&fields=title,author_name,cover_i,publisher`)
     ]);
 
     let books=[];
 
-    // 카카오 결과
     if(kakaoRes.status==='fulfilled'){
       const kd=await kakaoRes.value.json();
-      (kd.documents||[]).filter(b=>b.thumbnail).forEach(b=>{
-        books.push({url:b.thumbnail,title:b.title,author:(b.authors||[]).join(', '),source:'카카오',category:b.category_name||''});
+      (kd.documents||[]).forEach(b=>{
+        books.push({url:b.thumbnail||'',title:b.title,author:(b.authors||[]).join(', '),publisher:b.publisher||'',source:'카카오'});
       });
     }
 
-    // Open Library 결과
     if(olRes.status==='fulfilled'){
       const od=await olRes.value.json();
       (od.docs||[]).filter(b=>b.cover_i).slice(0,6).forEach(b=>{
@@ -1878,35 +1876,53 @@ async function searchBookCover(){
           url:`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`,
           title:b.title,
           author:(b.author_name||[]).join(', '),
+          publisher:(b.publisher||[]).slice(0,1).join(', '),
           source:'OL'
         });
       });
     }
 
     if(!books.length){
-      listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">표지를 찾지 못했어요.<br>직접 사진을 업로드해주세요.</div>';
+      listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">검색 결과가 없어요. 직접 입력해주세요.</div>';
       return;
     }
 
-    listEl.innerHTML=books.map(b=>`
-      <div onclick="selectCover('${b.url}')" style="cursor:pointer;flex-shrink:0" title="${esc(b.title)}">
-        <img src="${b.url}" style="width:60px;height:85px;object-fit:cover;border-radius:6px;border:2px solid transparent;display:block;transition:border .15s"
-          onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='transparent'"
-          loading="lazy" onerror="this.parentElement.style.display='none'"/>
-        <div style="font-size:9px;color:var(--muted);margin-top:1px;width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.author)}</div>
+    window._searchedBooks=books;
+    listEl.innerHTML=books.map((b,i)=>`
+      <div onclick="selectBookInfo(${i})" style="cursor:pointer;flex-shrink:0;width:80px;text-align:center;padding:6px;border-radius:8px;border:1px solid var(--border);transition:all .2s"
+        onmouseover="this.style.borderColor='var(--g)';this.style.background='var(--gl)'" onmouseout="this.style.borderColor='var(--border)';this.style.background=''" title="${esc(b.title)} · ${esc(b.author)}">
+        ${b.url?`<img src="${b.url}" style="width:60px;height:85px;object-fit:cover;border-radius:6px;display:block;margin:0 auto" loading="lazy" onerror="this.style.display='none'"/>`:
+        `<div style="width:60px;height:85px;background:var(--gl);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);margin:0 auto;padding:4px">${esc(b.title.slice(0,10))}</div>`}
+        <div style="font-size:10px;font-weight:600;color:var(--txt);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title.replace(/<[^>]*>/g,'').slice(0,12))}</div>
+        <div style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.author)}</div>
       </div>`).join('');
   }catch(e){
     console.error('책검색오류:',e);
     listEl.innerHTML='<div style="font-size:13px;color:var(--muted)">오류가 발생했습니다.</div>';
   }
 }
+function searchBookCover(){ searchBookInfo(); }
 
-function selectCover(url, title){
+function selectBookInfo(idx){
+  const b=window._searchedBooks&&window._searchedBooks[idx];
+  if(!b)return;
+  if(b.url){
+    document.getElementById('bCoverUrl').value=b.url;
+    document.getElementById('selectedCoverImg').src=b.url;
+    document.getElementById('selectedCover').style.display='flex';
+  }
+  document.getElementById('bTitle').value=b.title.replace(/<[^>]*>/g,'');
+  if(b.author) document.getElementById('bAuthor').value=b.author;
+  if(b.publisher) document.getElementById('bPub').value=b.publisher;
+  document.getElementById('coverSearchResult').style.display='none';
+  nt('책 정보가 자동 입력되었습니다!');
+}
+
+function selectCover(url){
   document.getElementById('bCoverUrl').value=url;
   document.getElementById('selectedCoverImg').src=url;
   document.getElementById('selectedCover').style.display='flex';
   document.getElementById('coverSearchResult').style.display='none';
-  // 제목/저자 자동 입력 (비어있을 때만)
   nt('표지가 선택됐습니다.');
 }
 function clearCover(){
@@ -2145,7 +2161,7 @@ function switchPubTab(tab){
 
 // ══ 폴더 시스템 ══
 
-let pubCat='', forumCat='', libFolder='all', libCat='', pubSortMode='newest';
+let pubCat='', forumCat='', libFolder='all', libCat='', pubSortMode='newest', pubFilterUserId='', pubFilterUserName='';
 
 function setLibCat(cat){
   libCat=cat;
@@ -2178,6 +2194,19 @@ function setStar(v){
     s.style.color=parseInt(s.dataset.v)<=v?'#E8A020':'#ccc';
   });
 }
+
+function filterByUser(userId,userName){
+  pubFilterUserId=userId;
+  pubFilterUserName=userName;
+  rPub();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function clearPubUserFilter(){
+  pubFilterUserId='';
+  pubFilterUserName='';
+  rPub();
+}
+
 function setPubCat(cat){
   pubCat=cat;
   document.querySelectorAll('#pubCatBar .cat-btn').forEach(b=>{
@@ -2380,6 +2409,14 @@ async function rPub(){
   else if(pubFolder!=='all'){const fi=window._pubFolderItems&&window._pubFolderItems[pubFolder];books=books.filter(b=>fi&&fi.has(b.id));}
   if(pubQ) books=books.filter(b=>(b.title||'').toLowerCase().includes(pubQ)||(b.author||'').toLowerCase().includes(pubQ));
   if(pubCat) books=books.filter(b=>b.category&&b.category===pubCat);
+  if(pubFilterUserId) books=books.filter(b=>b.user_id===pubFilterUserId);
+  const pubUB=document.getElementById('pubUserFilter');
+  if(pubUB){
+    if(pubFilterUserId){
+      pubUB.style.display='flex';
+      pubUB.innerHTML=`<span style="font-size:13px;font-weight:600;color:var(--g)">${esc(pubFilterUserName)}</span><span style="font-size:12px;color:var(--muted)">님의 서재</span><button onclick="clearPubUserFilter()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 보기</button>`;
+    } else { pubUB.style.display='none'; }
+  }
   // 정렬
   if(pubSortMode==='oldest') books=[...books].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   else if(pubSortMode==='hearts') books=[...books].sort((a,b)=>b.hearts.length-a.hearts.length);
@@ -2388,7 +2425,7 @@ async function rPub(){
   else books=[...books].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)); // newest
   const el=document.getElementById('pubList');
   if(!books.length){
-    el.innerHTML='<div class="empty"><div class="et">'+(pubFolder==='fav'?'즐겨찾기한 독후감이 없습니다':pubQ?'검색 결과가 없습니다':'아직 공개된 감상평이 없습니다')+'</div></div>';
+    el.innerHTML='<div class="empty"><div class="et">'+(pubFilterUserId?esc(pubFilterUserName)+'님의 공개 기록이 없습니다':pubFolder==='fav'?'즐겨찾기한 독후감이 없습니다':pubQ?'검색 결과가 없습니다':'아직 공개된 감상평이 없습니다')+'</div></div>';
     return;
   }
   // 4열 그리드
@@ -2398,7 +2435,6 @@ async function rPub(){
       ?`<img class="book-card4-cover" src="${img}" loading="lazy" onerror="this.style.background='var(--gl)';this.src=''"/>`
       :`<div class="book-card4-cover" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:10px;color:var(--muted);text-align:center;padding:6px">${esc(b.title.slice(0,12))}</div>`;
     const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
-    // 닉네임: 익명 설정 시 표시 안함
     const showName=!b.is_anonymous&&b.username;
     const liked=b.hearts.includes(CU.id);
     return`<div class="book-card4" onclick="openBook('${b.id}')">
@@ -2408,7 +2444,7 @@ async function rPub(){
       ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        ${showName?`<div style="font-size:10px;color:var(--muted)">${esc(b.username)}</div>`:'<div></div>'}
+        ${showName?`<div onclick="event.stopPropagation();filterByUser('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(b.username)}</div>`:'<div></div>'}
         <button onclick="event.stopPropagation();toggleCardHeart('${b.id}','${b.user_id}')" style="background:none;border:none;cursor:pointer;font-size:12px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px;display:flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="${liked?'#C0392B':'none'}" stroke="${liked?'#C0392B':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${b.hearts.length}</button>
       </div>
     </div>`;
