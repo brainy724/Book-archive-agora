@@ -23,16 +23,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
- --g:#9C7B5C;--g2:#7A5D3E;--gl:#FAF6F1;--gb:#E8D8C8;
- --br:#2C1A2E;--brl:#F7F3F8;--brb:#D9C9DF;
- --card:#FFFFFF;--border:#F0EAE4;--txt:#2D2420;--muted:#9A8E86;--red:#C0392B;
- --bg-page:#FDFBF9;--nav-h:56px;--tab-h:62px;
+ --g:#B8956A;--g2:#9C7B52;--gl:#FFF9F2;--gb:#F0DFC8;
+ --br:#2C1A2E;--brl:#F9F5FA;--brb:#E4D4EA;
+ --card:#FFFFFF;--border:#F2ECE6;--txt:#3D3530;--muted:#A89E96;--red:#C0392B;
+ --bg-page:#FFFCF9;--nav-h:56px;--tab-h:62px;
  --font-body:'Gowun Batang','Apple SD Gothic Neo',serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
- --gold:#9C7B5C;--gold2:#7A5D3E;
- --shadow-sm:0 1px 3px rgba(44,26,32,.06);
- --shadow-md:0 4px 16px rgba(44,26,32,.08);
- --shadow-lg:0 8px 32px rgba(44,26,32,.12);
+ --gold:#B8956A;--gold2:#9C7B52;
+ --shadow-sm:0 1px 4px rgba(184,149,106,.06);
+ --shadow-md:0 4px 16px rgba(184,149,106,.1);
+ --shadow-lg:0 8px 32px rgba(184,149,106,.14);
  --radius:14px;--radius-sm:10px;--radius-lg:20px;
 }
 body.dark{
@@ -475,25 +475,25 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <!-- 추천 색상 -->
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">추천 색상</div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
-      <div onclick="setColor('#9C7B5C','#7A5D3E','#FAF6F1','#E8D8C8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#9C7B5C;margin-bottom:6px;box-shadow:0 2px 8px rgba(156,123,92,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">웜골드</div>
+      <div onclick="setColor('#B8956A','#9C7B52','#FFF9F2','#F0DFC8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#B8956A;margin-bottom:6px;box-shadow:0 2px 8px rgba(184,149,106,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">허니골드</div>
       </div>
-      <div onclick="setColor('#8B6F5E','#6B5244','#F8F4F1','#E0D2C8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#8B6F5E;margin-bottom:6px;box-shadow:0 2px 8px rgba(139,111,94,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">모카</div>
+      <div onclick="setColor('#C4956B','#A87A52','#FFF7F0','#F2DCC4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#C4956B;margin-bottom:6px;box-shadow:0 2px 8px rgba(196,149,107,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">카라멜</div>
       </div>
-      <div onclick="setColor('#7D8471','#5E6454','#F4F6F2','#D4DCC8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#7D8471;margin-bottom:6px;box-shadow:0 2px 8px rgba(125,132,113,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">세이지</div>
+      <div onclick="setColor('#9AAF8E','#7A9070','#F5F9F2','#D8E8CE');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#9AAF8E;margin-bottom:6px;box-shadow:0 2px 8px rgba(154,175,142,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">민트세이지</div>
       </div>
-      <div onclick="setColor('#957B8D','#745E6C','#F6F2F5','#DCD0D8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#957B8D;margin-bottom:6px;box-shadow:0 2px 8px rgba(149,123,141,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">더스티로즈</div>
+      <div onclick="setColor('#B89AAE','#967A90','#FAF4F8','#E8D4E0');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#B89AAE;margin-bottom:6px;box-shadow:0 2px 8px rgba(184,154,174,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">라벤더</div>
       </div>
-      <div onclick="setColor('#6B7B8D','#4E5E6E','#F1F4F6','#C8D4DC');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#6B7B8D;margin-bottom:6px;box-shadow:0 2px 8px rgba(107,123,141,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">슬레이트</div>
+      <div onclick="setColor('#8DA5B8','#6E8698','#F2F6FA','#D0DEE8');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#8DA5B8;margin-bottom:6px;box-shadow:0 2px 8px rgba(141,165,184,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">스카이</div>
       </div>
     </div>
 
@@ -973,11 +973,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <!-- 자주 쓰는 색상 -->
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">추천 색상</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <div onclick="quickColor('#9C7B5C')" style="width:36px;height:36px;border-radius:50%;background:#9C7B5C;cursor:pointer;border:2px solid transparent;transition:all .2s" title="웜골드 (기본)" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#8B6F5E')" style="width:36px;height:36px;border-radius:50%;background:#8B6F5E;cursor:pointer;border:2px solid transparent;transition:all .2s" title="모카브라운" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#7D8471')" style="width:36px;height:36px;border-radius:50%;background:#7D8471;cursor:pointer;border:2px solid transparent;transition:all .2s" title="세이지그린" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#957B8D')" style="width:36px;height:36px;border-radius:50%;background:#957B8D;cursor:pointer;border:2px solid transparent;transition:all .2s" title="더스티로즈" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#6B7B8D')" style="width:36px;height:36px;border-radius:50%;background:#6B7B8D;cursor:pointer;border:2px solid transparent;transition:all .2s" title="슬레이트블루" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#B8956A')" style="width:36px;height:36px;border-radius:50%;background:#B8956A;cursor:pointer;border:2px solid transparent;transition:all .2s" title="허니골드 (기본)" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#C4956B')" style="width:36px;height:36px;border-radius:50%;background:#C4956B;cursor:pointer;border:2px solid transparent;transition:all .2s" title="카라멜" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#9AAF8E')" style="width:36px;height:36px;border-radius:50%;background:#9AAF8E;cursor:pointer;border:2px solid transparent;transition:all .2s" title="민트세이지" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#B89AAE')" style="width:36px;height:36px;border-radius:50%;background:#B89AAE;cursor:pointer;border:2px solid transparent;transition:all .2s" title="라벤더" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#8DA5B8')" style="width:36px;height:36px;border-radius:50%;background:#8DA5B8;cursor:pointer;border:2px solid transparent;transition:all .2s" title="스카이" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
         </div>
       </div>
 
