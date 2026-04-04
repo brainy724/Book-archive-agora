@@ -1559,6 +1559,7 @@ function go(name){
  if(name==='club'){rClub();if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}}
  if(name==='admin')rAdmin();
  if(name==='points'){rPoints();}
+ if(typeof showGuide==='function') showGuide(name);
  if(name==='addBook'){
  document.getElementById('abTitle').textContent='독서 기록 추가';
  document.getElementById('abSub').textContent='새로운 독서 기록을 남겨보세요';
@@ -4223,6 +4224,56 @@ if('serviceWorker' in navigator){
     regs.forEach(r=>r.unregister());
   });
   caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+}
+</script>
+
+<!-- 기능 안내 팝업 -->
+<div id="guideOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:24px">
+  <div id="guideBox" style="background:#fff;border-radius:16px;max-width:340px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);position:relative">
+    <div id="guideTitle" style="font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--txt);margin-bottom:14px"></div>
+    <div id="guideBody" style="font-size:14px;color:var(--muted);line-height:1.9;text-align:left;margin-bottom:20px"></div>
+    <button onclick="closeGuide()" style="width:100%;padding:12px;background:var(--g);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body)">확인</button>
+  </div>
+</div>
+
+<script>
+const _guideTexts={
+  library:{
+    title:'내 서재',
+    body:'읽은 책을 기록하고 관리하는 공간입니다.<br><br>· 책 제목을 검색하면 저자, 출판사, 표지가 자동으로 입력됩니다.<br>· 평점, 감상평, 사진을 함께 남길 수 있습니다.<br>· 공개 설정을 켜면 다른 회원에게도 보여집니다.'
+  },
+  public:{
+    title:'공개 서재',
+    body:'다른 회원들의 독서 기록을 둘러보는 공간입니다.<br><br>· 하트를 눌러 공감을 전할 수 있습니다.<br>· 닉네임을 탭하면 해당 회원의 기록만 모아볼 수 있습니다.<br>· 카테고리별, 평점순 등 다양한 정렬이 가능합니다.'
+  },
+  forum:{
+    title:'광장',
+    body:'책에 대한 이야기를 자유롭게 나누는 익명 게시판입니다.<br><br>· 모든 글과 답변은 익명으로 작성됩니다.<br>· 책 제목과 함께 질문이나 의견을 남겨보세요.<br>· 하트와 답변으로 소통할 수 있습니다.'
+  },
+  club:{
+    title:'독서모임',
+    body:'지역별 오프라인 독서모임을 만들고 참여하는 공간입니다.<br><br>· 모임을 직접 개설하거나 기존 모임에 참여할 수 있습니다.<br>· 모임별 실시간 채팅으로 일정과 책을 논의해보세요.<br>· 닉네임으로 활동합니다.'
+  },
+  libmap:{
+    title:'도서관 찾기',
+    body:'전국 도서관과 스마트도서관 위치를 검색하는 공간입니다.<br><br>· 지역을 선택하고 검색하면 지도에 위치가 표시됩니다.<br>· 내 주변 도서관 찾기로 가까운 도서관을 바로 확인할 수 있습니다.<br>· 일반 도서관과 스마트도서관을 필터링할 수 있습니다.'
+  }
+};
+
+function showGuide(tab){
+  const seen=JSON.parse(localStorage.getItem('agora_guide_seen')||'{}');
+  if(seen[tab])return;
+  const info=_guideTexts[tab];
+  if(!info)return;
+  document.getElementById('guideTitle').textContent=info.title;
+  document.getElementById('guideBody').innerHTML=info.body;
+  document.getElementById('guideOverlay').style.display='flex';
+  seen[tab]=true;
+  localStorage.setItem('agora_guide_seen',JSON.stringify(seen));
+}
+
+function closeGuide(){
+  document.getElementById('guideOverlay').style.display='none';
 }
 </script>
 </body>
