@@ -605,6 +605,21 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
   <!-- 독서 수첩 섹션 (내 서재 안) -->
   <div id="libNoteSection" style="display:none">
+
+   <!-- 지금 읽고 있는 책 -->
+   <div class="card" style="padding:22px">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">지금 읽고 있는 책</div>
+     <div id="readingBookList" style="margin-bottom:14px"></div>
+     <!-- 책 추가 -->
+     <div style="border:1px dashed var(--gb);border-radius:10px;padding:14px;background:var(--gl)">
+       <div style="display:flex;gap:8px;margin-bottom:8px">
+         <input id="readingSearchInput" placeholder="읽고 있는 책 제목 검색" style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)" onkeydown="if(event.key==='Enter')searchReadingBook()"/>
+         <button onclick="searchReadingBook()" class="btn2" style="padding:9px 14px;font-size:12px;white-space:nowrap">검색</button>
+       </div>
+       <div id="readingSearchResults" style="display:none;max-height:200px;overflow-y:auto"></div>
+     </div>
+   </div>
+
    <!-- 독서 타이머 -->
    <div class="card" style="text-align:center;padding:28px 22px">
      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:1px">독서 타이머</div>
@@ -615,12 +630,9 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
        <button onclick="saveTimerRecord()" class="btn2" style="padding:10px 20px;font-size:13px">기록 저장</button>
      </div>
      <div style="margin-top:14px">
-       <select id="timerBook" onchange="document.getElementById('timerBookCustom').style.display=this.value==='__custom__'?'block':'none'" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)">
-         <option value="">읽고 있는 책 선택</option>
+       <select id="timerBook" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card)">
+         <option value="">기록할 책 선택</option>
        </select>
-       <div id="timerBookCustom" style="display:none;margin-top:8px">
-         <input id="timerBookTitle" placeholder="책 제목을 입력하세요" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt)"/>
-       </div>
      </div>
    </div>
 
@@ -670,11 +682,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    <div style="display:flex;gap:8px">
      <input id="bTitle" placeholder="책 제목을 입력하세요" style="flex:1"/>
      <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="searchBookInfo()">책 검색</button>
-     <button type="button" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap" onclick="scanBarcode()">바코드</button>
-   </div>
-   <div id="barcodeScanner" style="display:none;margin-top:10px">
-     <video id="barcodeVideo" style="width:100%;border-radius:8px;border:1px solid var(--border)" playsinline></video>
-     <button onclick="stopBarcode()" class="btn2" style="width:100%;margin-top:8px;font-size:12px">스캔 취소</button>
    </div>
    <div id="coverSearchResult" style="display:none;margin-top:10px">
      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">검색 결과를 선택하면 저자·출판사·표지가 자동 입력됩니다</div>
@@ -2002,7 +2009,7 @@ async function searchBookInfo(){
     if(kakaoRes.status==='fulfilled'){
       const kd=await kakaoRes.value.json();
       (kd.documents||[]).forEach(b=>{
-        books.push({url:b.thumbnail||'',title:b.title,author:(b.authors||[]).join(', '),publisher:b.publisher||'',source:'카카오'});
+        books.push({url:b.thumbnail||'',title:b.title,author:(b.authors||[]).join(', '),publisher:b.publisher||'',source:'카카오',category:b.category||''});
       });
     }
 
@@ -2051,8 +2058,28 @@ function selectBookInfo(idx){
   document.getElementById('bTitle').value=b.title.replace(/<[^>]*>/g,'');
   if(b.author) document.getElementById('bAuthor').value=b.author;
   if(b.publisher) document.getElementById('bPub').value=b.publisher;
+  // 카테고리 자동 매핑
+  if(b.category){
+    const catEl=document.getElementById('bCategory');
+    if(catEl){
+      const mapped=mapCategory(b.category);
+      catEl.value=mapped;
+    }
+  }
   document.getElementById('coverSearchResult').style.display='none';
   nt('책 정보가 자동 입력되었습니다!');
+}
+function mapCategory(raw){
+  const r=raw.toLowerCase();
+  if(r.includes('소설')||r.includes('fiction'))return'소설';
+  if(r.includes('에세이')||r.includes('essay'))return'에세이';
+  if(r.includes('자기계발')||r.includes('자기 계발')||r.includes('self'))return'자기계발';
+  if(r.includes('인문')||r.includes('철학')||r.includes('심리'))return'인문';
+  if(r.includes('경제')||r.includes('경영')||r.includes('비즈니스')||r.includes('finance'))return'경제경영';
+  if(r.includes('역사')||r.includes('history'))return'역사';
+  if(r.includes('과학')||r.includes('science')||r.includes('컴퓨터')||r.includes('기술'))return'과학';
+  if(r.includes('시')||r.includes('poetry'))return'시';
+  return'기타';
 }
 
 function selectCover(url){
@@ -4403,23 +4430,104 @@ async function saveTimerRecord(){
   if(!CU){nt('로그인이 필요합니다.','err');return;}
   if(_timerSeconds<10){nt('10초 이상 읽어야 기록할 수 있어요.','err');return;}
   const selVal=document.getElementById('timerBook').value;
-  let bookId=null, bookTitle='직접 독서';
-  if(selVal==='__custom__'){
-    const customTitle=(document.getElementById('timerBookTitle')||{}).value?.trim();
-    if(!customTitle){nt('책 제목을 입력해주세요.','err');return;}
-    bookTitle=customTitle;
-  }else if(selVal){
-    bookId=selVal;
-    bookTitle=document.getElementById('timerBook').selectedOptions[0]?.textContent||'';
-  }
+  if(!selVal){nt('기록할 책을 선택해주세요.','err');return;}
+  const bookTitle=document.getElementById('timerBook').selectedOptions[0]?.textContent||'직접 독서';
   const{error}=await sb.from('timer_records').insert({
-    user_id:CU.id, book_id:bookId, book_title:bookTitle,
+    user_id:CU.id, book_id:null, book_title:bookTitle,
     seconds:_timerSeconds, recorded_at:new Date().toISOString()
   });
   if(error){nt('기록 저장 실패: '+error.message,'err');return;}
   nt('독서 기록이 저장되었습니다!');
-  document.getElementById('timerBookTitle').value='';
   resetTimer(); rStats();
+}
+
+// ========== 읽고 있는 책 관리 ==========
+function getReadingBooks(){
+  try{return JSON.parse(localStorage.getItem('agora_reading_'+CU.id)||'[]');}catch{return[];}
+}
+function saveReadingBooks(list){
+  localStorage.setItem('agora_reading_'+CU.id, JSON.stringify(list));
+}
+function renderReadingBooks(){
+  const list=getReadingBooks();
+  const el=document.getElementById('readingBookList');
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">아직 등록된 책이 없어요. 아래에서 검색해서 추가해보세요!</div>';
+  }else{
+    el.innerHTML=list.map((b,i)=>`
+      <div style="display:flex;gap:12px;padding:12px;background:var(--bg-page);border-radius:10px;margin-bottom:8px;align-items:center">
+        ${b.cover?`<img src="${b.cover}" style="width:40px;height:58px;border-radius:6px;object-fit:cover;flex-shrink:0"/>`
+        :`<div style="width:40px;height:58px;border-radius:6px;background:var(--gl);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)">표지</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(b.author||'')}${b.publisher?' · '+esc(b.publisher):''}</div>
+          ${b.category?`<div style="display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;background:var(--gl);color:var(--g);margin-top:4px">${esc(b.category)}</div>`:''}
+        </div>
+        <button onclick="removeReadingBook(${i})" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&times;</button>
+      </div>
+    `).join('');
+  }
+  // 타이머 select도 업데이트
+  const sel=document.getElementById('timerBook');
+  const myBooks=list;
+  sel.innerHTML='<option value="">기록할 책 선택</option>'+myBooks.map((b,i)=>`<option value="reading_${i}">${esc(b.title)}</option>`).join('');
+}
+function addReadingBook(book){
+  const list=getReadingBooks();
+  if(list.some(b=>b.title===book.title)){nt('이미 등록된 책이에요.');return;}
+  list.push(book);
+  saveReadingBooks(list);
+  renderReadingBooks();
+  nt(book.title+' 추가됨!');
+  document.getElementById('readingSearchResults').style.display='none';
+  document.getElementById('readingSearchInput').value='';
+}
+function removeReadingBook(idx){
+  const list=getReadingBooks();
+  list.splice(idx,1);
+  saveReadingBooks(list);
+  renderReadingBooks();
+}
+async function searchReadingBook(){
+  const q=document.getElementById('readingSearchInput').value.trim();
+  if(!q){nt('책 제목을 입력해주세요.','err');return;}
+  const resEl=document.getElementById('readingSearchResults');
+  resEl.style.display='block';
+  resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">검색 중...</div>';
+  try{
+    const res=await fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(q)}&size=5`,{
+      headers:{'Authorization':'KakaoAK 1f06943777edd84ae71d06070a64a0ca'}
+    });
+    const data=await res.json();
+    if(!data.documents||!data.documents.length){
+      resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">검색 결과가 없어요.</div>';
+      return;
+    }
+    window._readingSearchResults=data.documents;
+    resEl.innerHTML=data.documents.map((b,i)=>`
+      <div onclick="pickReadingBook(${i})" style="display:flex;gap:10px;padding:10px;cursor:pointer;border-bottom:1px solid var(--border);align-items:center;transition:background .15s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''">
+        ${b.thumbnail?`<img src="${b.thumbnail}" style="width:36px;height:52px;border-radius:4px;object-fit:cover;flex-shrink:0"/>`:''}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title)}</div>
+          <div style="font-size:11px;color:var(--muted)">${esc((b.authors||[]).join(', '))} · ${esc(b.publisher||'')}</div>
+          ${b.category?`<div style="font-size:10px;color:var(--g);margin-top:2px">${esc(mapCategory(b.category))}</div>`:''}
+        </div>
+      </div>
+    `).join('');
+  }catch(e){
+    resEl.innerHTML='<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">검색 실패</div>';
+  }
+}
+function pickReadingBook(idx){
+  const b=window._readingSearchResults&&window._readingSearchResults[idx];
+  if(!b)return;
+  addReadingBook({
+    title:b.title,
+    author:(b.authors||[]).join(', '),
+    publisher:b.publisher||'',
+    cover:b.thumbnail||'',
+    category:b.category?mapCategory(b.category):''
+  });
 }
 
 // ========== 독서 캘린더 ==========
@@ -4469,11 +4577,8 @@ async function rStats(){
   if(!_calYear){_calYear=now.getFullYear();_calMonth=now.getMonth();}
   renderCal();
 
-  // 타이머에 내 책 목록 로드
-  const{data:myBooks}=await sb.from('books').select('id,title').eq('user_id',CU.id).order('created_at',{ascending:false});
-  const sel=document.getElementById('timerBook');
-  sel.innerHTML='<option value="">읽고 있는 책 선택</option>'+(myBooks||[]).map(b=>`<option value="${b.id}">${esc(b.title)}</option>`).join('')+'<option value="__custom__">+ 직접 입력</option>';
-  document.getElementById('timerBookCustom').style.display='none';
+  // 읽고 있는 책 목록 렌더링
+  renderReadingBooks();
 
   // 카테고리별 독서량
   const{data:allBooks}=await sb.from('books').select('category').eq('user_id',CU.id);
@@ -4639,19 +4744,37 @@ async function rMatch(){
   document.getElementById('matchResults').innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--muted)">추천할 새로운 책이 아직 없어요.</div>';
 }
 
-// ========== 바코드 스캔 ==========
+// ========== ISBN 입력 ==========
+function toggleIsbnInput(){
+  document.getElementById('barcodeCam').style.display='none';stopBarcodeCam();
+  const el=document.getElementById('barcodeScanner');
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='block') document.getElementById('isbnInput').focus();
+}
+function stopBarcode(){
+  document.getElementById('barcodeScanner').style.display='none';
+  document.getElementById('isbnInput').value='';
+}
+async function submitISBN(){
+  const isbn=document.getElementById('isbnInput').value.trim().replace(/[-\s]/g,'');
+  if(!isbn){nt('ISBN 번호를 입력해주세요.','err');return;}
+  if(isbn.length!==13&&isbn.length!==10){nt('ISBN은 10자리 또는 13자리 숫자예요.','err');return;}
+  nt('검색 중...');
+  await searchByISBN(isbn);
+  stopBarcode();
+}
+
+// ========== 바코드 카메라 스캔 ==========
 let _barcodeStream=null;
-async function scanBarcode(){
-  const container=document.getElementById('barcodeScanner');
+async function startBarcodeScan(){
+  document.getElementById('barcodeScanner').style.display='none';stopBarcode();
+  const container=document.getElementById('barcodeCam');
   const video=document.getElementById('barcodeVideo');
   container.style.display='block';
-
   try{
     _barcodeStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
     video.srcObject=_barcodeStream;
     video.play();
-
-    // BarcodeDetector API 사용 (Chrome, Edge, Samsung 등 지원)
     if('BarcodeDetector' in window){
       const detector=new BarcodeDetector({formats:['ean_13','ean_8']});
       const scanLoop=async()=>{
@@ -4660,7 +4783,7 @@ async function scanBarcode(){
           const barcodes=await detector.detect(video);
           if(barcodes.length>0){
             const isbn=barcodes[0].rawValue;
-            stopBarcode();
+            stopBarcodeCam();
             nt('ISBN 감지: '+isbn);
             await searchByISBN(isbn);
             return;
@@ -4670,18 +4793,18 @@ async function scanBarcode(){
       };
       requestAnimationFrame(scanLoop);
     }else{
-      nt('이 브라우저는 바코드 스캔을 지원하지 않아요. ISBN을 직접 입력해주세요.','err');
-      stopBarcode();
+      nt('이 브라우저는 바코드 스캔을 지원하지 않아요. ISBN 버튼으로 직접 입력해주세요.','err');
+      stopBarcodeCam();
     }
   }catch(e){
     nt('카메라 접근이 거부되었어요.','err');
     container.style.display='none';
   }
 }
-function stopBarcode(){
+function stopBarcodeCam(){
   if(_barcodeStream){_barcodeStream.getTracks().forEach(t=>t.stop());_barcodeStream=null;}
-  document.getElementById('barcodeScanner').style.display='none';
-  document.getElementById('barcodeVideo').srcObject=null;
+  const cam=document.getElementById('barcodeCam');if(cam)cam.style.display='none';
+  const vid=document.getElementById('barcodeVideo');if(vid)vid.srcObject=null;
 }
 async function searchByISBN(isbn){
   try{
@@ -4693,11 +4816,16 @@ async function searchByISBN(isbn){
       const book=data.documents[0];
       document.getElementById('bTitle').value=book.title||'';
       document.getElementById('bAuthor').value=(book.authors||[]).join(', ')||'';
-      document.getElementById('bPublisher').value=book.publisher||'';
+      document.getElementById('bPub').value=book.publisher||'';
       if(book.thumbnail){
-        document.getElementById('bCover').value=book.thumbnail;
-        const prev=document.getElementById('coverPreview');
-        if(prev){prev.src=book.thumbnail;prev.style.display='block';}
+        document.getElementById('bCoverUrl').value=book.thumbnail;
+        const selCover=document.getElementById('selectedCover');
+        const selImg=document.getElementById('selectedCoverImg');
+        if(selCover&&selImg){selImg.src=book.thumbnail;selCover.style.display='flex';}
+      }
+      if(book.category){
+        const catEl=document.getElementById('bCategory');
+        if(catEl) catEl.value=mapCategory(book.category);
       }
       nt('책 정보가 자동입력되었어요!');
     }else{
