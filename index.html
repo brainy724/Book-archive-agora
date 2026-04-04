@@ -912,7 +912,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div style="font-size:13px;color:var(--muted);margin-bottom:10px">현재: <strong id="currentNickname" style="color:var(--txt)"></strong></div>
       <div style="display:flex;gap:8px">
         <input id="nicknameInput" placeholder="한글·영문·숫자 2~12자" maxlength="12"
-          oninput="this.value=this.value.replace(/[^가-힣a-zA-Z0-9]/g,'')" style="flex:1"/>
+          onchange="this.value=this.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/g,'')" style="flex:1"/>
         <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="saveNickname()">변경</button>
       </div>
       <div id="nicknameMsg" style="font-size:12px;margin-top:6px;display:none"></div>
@@ -2178,7 +2178,7 @@ async function saveNickname(){
   const msgEl=document.getElementById('nicknameMsg');
   msgEl.style.display='block';
   if(val.length<2||val.length>12){msgEl.textContent='2~12자로 입력해주세요.';msgEl.style.color='var(--red)';return;}
-  if(!/^[가-힣a-zA-Z0-9]+$/.test(val)){msgEl.textContent='한글, 영문, 숫자만 사용 가능합니다.';msgEl.style.color='var(--red)';return;}
+  if(!/^[가-힣a-zA-Z0-9]+$/.test(val)){msgEl.textContent='완성된 한글, 영문, 숫자만 사용 가능합니다.';msgEl.style.color='var(--red)';return;}
   if(val===CU.username){msgEl.textContent='현재 닉네임과 동일합니다.';msgEl.style.color='var(--muted)';return;}
   const{data:dup}=await sb.from('agora_users').select('id').eq('username',val).neq('id',CU.id).maybeSingle();
   if(dup){msgEl.textContent='이미 사용 중인 닉네임입니다.';msgEl.style.color='var(--red)';return;}
