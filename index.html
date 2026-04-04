@@ -1046,7 +1046,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
      <button class="sort-btn" id="lmType-lib" onclick="setLibMapType('lib')">일반 도서관</button>
      <button class="sort-btn" id="lmType-smart" onclick="setLibMapType('smart')">스마트도서관</button>
    </div>
-   <button class="btn2" style="width:100%;margin-bottom:12px;font-size:13px;padding:9px" onclick="searchNearbyLib()">📍 내 주변 도서관 찾기</button>
+   <button class="btn2" style="width:100%;margin-bottom:12px;font-size:13px;padding:9px" onclick="searchNearbyLib()">내 주변 도서관 찾기</button>
    <div id="libmapContainer" style="width:100%;height:350px;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;background:var(--gl);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">지역을 선택하고 검색하세요</div>
    <div id="libmapCount" style="font-size:12px;color:var(--muted);margin-bottom:10px"></div>
    <div id="libmapList"></div>
@@ -4170,7 +4170,7 @@ function searchNearbyLib(){
       map:libMap
     });
     const myInfo=new kakao.maps.InfoWindow({
-      content:'<div style="padding:6px 12px;font-size:12px;font-weight:600;color:var(--g)">📍 내 위치</div>'
+      content:'<div style="position:relative;background:#fff;border:2px solid var(--g);border-radius:16px 16px 16px 4px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--g);box-shadow:0 2px 8px rgba(0,0,0,.15)">내 위치</div>'
     });
     myInfo.open(libMap,myMarker);
 
