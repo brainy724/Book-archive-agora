@@ -4169,10 +4169,6 @@ function searchNearbyLib(){
       position:new kakao.maps.LatLng(lat,lng),
       map:libMap
     });
-    const myInfo=new kakao.maps.InfoWindow({
-      content:'<div style="position:relative;background:#fff;border:2px solid var(--g);border-radius:16px 16px 16px 4px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--g);box-shadow:0 2px 8px rgba(0,0,0,.15)">내 위치</div>'
-    });
-    myInfo.open(libMap,myMarker);
 
     // 카카오 키워드 검색으로 주변 도서관 찾기
     load(true);
