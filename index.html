@@ -19,7 +19,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -27,7 +27,7 @@
  --br:#2C1A2E;--brl:#F9F5FA;--brb:#E4D4EA;
  --card:#FFFFFF;--border:#F2ECE6;--txt:#3D3530;--muted:#A89E96;--red:#C0392B;
  --bg-page:#FFFCF9;--nav-h:56px;--tab-h:62px;
- --font-body:'Gowun Batang','Apple SD Gothic Neo',serif;
+ --font-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
  --gold:#B8956A;--gold2:#9C7B52;
  --shadow-sm:0 1px 4px rgba(184,149,106,.06);
@@ -40,7 +40,7 @@ body.dark{
  --gl:#2A1A24;--gb:#3E2535;--brl:#1E1420;--brb:#3A2535;
  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow-md:0 4px 16px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);
 }
-body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;line-height:1.6;}
 .serif{font-family:var(--font-serif);}
 /* NAV */
 .nav{background:rgba(253,251,249,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-sizing:border-box;}
@@ -766,6 +766,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    <button class="tab-btn on" id="plazaTab-public" onclick="switchPlazaTab('public')">공개 서재</button>
    <button class="tab-btn" id="plazaTab-posts" onclick="switchPlazaTab('posts')">자유글</button>
    <button class="tab-btn" id="plazaTab-club" onclick="switchPlazaTab('club')">독서모임</button>
+   <button class="tab-btn" id="plazaTab-pilsa" onclick="switchPlazaTab('pilsa')">필사</button>
  </div>
 
  <!-- 자유글 섹션 -->
@@ -847,6 +848,40 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <button class="cat-btn" onclick="setClubRegion('제주')">제주</button>
    </div>
    <div id="clubList"></div>
+ </div>
+
+ <!-- 필사 섹션 -->
+ <div id="plazaPilsa" style="display:none">
+   <!-- 오늘의 필사 문장 -->
+   <div class="card" style="padding:28px 22px;text-align:center;margin-bottom:16px">
+     <div style="font-size:11px;color:var(--g);letter-spacing:2px;margin-bottom:14px;font-weight:600">오늘의 필사</div>
+     <div id="pilsaQuote" style="font-family:var(--font-serif);font-size:18px;color:var(--txt);line-height:1.8;margin-bottom:12px;font-style:italic"></div>
+     <div id="pilsaAuthor" style="font-size:12px;color:var(--muted)"></div>
+   </div>
+
+   <!-- 내 필사 업로드 -->
+   <div class="card" style="padding:20px;margin-bottom:16px">
+     <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:12px">나의 필사 올리기</div>
+     <div style="margin-bottom:10px">
+       <input id="pilsaBookTitle" placeholder="어떤 책의 문장인가요? (선택)" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--txt);margin-bottom:8px"/>
+       <textarea id="pilsaText" placeholder="필사한 문장을 적어주세요" style="width:100%;min-height:60px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--txt);resize:vertical"></textarea>
+     </div>
+     <div style="margin-bottom:10px">
+       <div onclick="document.getElementById('pilsaImgIn').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='var(--border)'">
+         <input type="file" id="pilsaImgIn" accept="image/*" onchange="previewPilsaImg(event)" style="display:none"/>
+         <div style="font-size:22px;margin-bottom:4px">✍️</div>
+         <div style="font-size:12px;color:var(--muted)">손글씨 사진을 올려주세요</div>
+       </div>
+       <div id="pilsaImgPreview" style="display:none;margin-top:10px;text-align:center">
+         <img id="pilsaPreviewImg" src="" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)"/>
+         <button onclick="clearPilsaImg()" style="display:block;margin:6px auto 0;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">사진 제거</button>
+       </div>
+     </div>
+     <button onclick="submitPilsa()" class="btn" style="width:100%;padding:11px;font-size:13px">필사 공유하기</button>
+   </div>
+
+   <!-- 필사 피드 -->
+   <div id="pilsaFeed"></div>
  </div>
 
  </div>
@@ -1896,7 +1931,7 @@ async function openBook(id){
     ${b.review?`
     <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
-      <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
+      <div style="font-size:15px;line-height:1.65;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
       <button onclick="event.stopPropagation();toggleBookHeart('${b.id}','${b.user_id}')"
@@ -1971,7 +2006,7 @@ async function openBookModal(id){
     ${b.review?`
     <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
       <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:12px">독후감</div>
-      <div style="font-size:15px;line-height:2;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
+      <div style="font-size:15px;line-height:1.65;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn2" style="font-size:13px;padding:9px 16px" onclick="openAddToFolder('${b.id}','mybook')">폴더</button>
@@ -2774,8 +2809,8 @@ function setColor(g,g2,gl,gb){
  localStorage.setItem('agora_color',JSON.stringify({g,g2,gl,gb}));
 }
 function setFont(f){
- const fonts={notoserif:"'Noto Serif KR',serif",myeongjo:"'Nanum Myeongjo',serif",pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif"};
- document.documentElement.style.setProperty('--font-body',fonts[f]);
+ const fonts={notosans:"'Noto Sans KR','Apple SD Gothic Neo',sans-serif",notoserif:"'Noto Serif KR',serif",gowun:"'Gowun Batang',serif"};
+ document.documentElement.style.setProperty('--font-body',fonts[f]||fonts.notosans);
  localStorage.setItem('agora_font',f);
 }
 function setTheme(t){
@@ -2786,7 +2821,7 @@ function loadCustomize(){
  const color=localStorage.getItem('agora_color');
  if(color){const c=JSON.parse(color);const r=document.documentElement.style;r.setProperty('--g',c.g);r.setProperty('--g2',c.g2);r.setProperty('--gl',c.gl);r.setProperty('--gb',c.gb);document.querySelector('meta[name="theme-color"]').setAttribute('content',c.g);}
  const font=localStorage.getItem('agora_font');
- if(font){const fonts={notoserif:"'Noto Serif KR',serif",myeongjo:"'Nanum Myeongjo',serif",pretendard:"'Pretendard','Apple SD Gothic Neo',sans-serif"};document.documentElement.style.setProperty('--font-body',fonts[font]);}
+ if(font){const fonts={notosans:"'Noto Sans KR','Apple SD Gothic Neo',sans-serif",notoserif:"'Noto Serif KR',serif",gowun:"'Gowun Batang',serif"};document.documentElement.style.setProperty('--font-body',fonts[font]||fonts.notosans);}
  const theme=localStorage.getItem('agora_theme');
  if(theme==='dark')document.body.classList.add('dark');
 }
@@ -4440,7 +4475,7 @@ const _guideTexts={
   },
   forum:{
     title:'광장',
-    body:'함께 읽고, 함께 나누는 공간입니다.<br><br>· <b>공개 서재</b> — 다른 회원들의 독서 기록을 둘러보고 하트로 공감을 전해보세요.<br>· <b>자유글</b> — 책에 대한 이야기를 익명으로 자유롭게 나눌 수 있어요.<br>· <b>독서모임</b> — 지역별 오프라인 독서모임을 만들고 참여해보세요.'
+    body:'함께 읽고, 함께 나누는 공간입니다.<br><br>· <b>공개 서재</b> — 다른 회원들의 독서 기록을 둘러보고 하트로 공감을 전해보세요.<br>· <b>자유글</b> — 책에 대한 이야기를 익명으로 자유롭게 나눌 수 있어요.<br>· <b>독서모임</b> — 지역별 오프라인 독서모임을 만들고 참여해보세요.<br>· <b>필사</b> — 매일 새로운 문장을 만나고, 손글씨로 기록해 공유해보세요.'
   },
   libmap:{
     title:'도서관 찾기',
@@ -4893,13 +4928,15 @@ function switchPlazaTab(tab){
   document.getElementById('plazaTab-posts').classList.toggle('on',tab==='posts');
   document.getElementById('plazaTab-public').classList.toggle('on',tab==='public');
   document.getElementById('plazaTab-club').classList.toggle('on',tab==='club');
+  document.getElementById('plazaTab-pilsa').classList.toggle('on',tab==='pilsa');
   document.getElementById('plazaPosts').style.display=tab==='posts'?'block':'none';
   document.getElementById('plazaPublic').style.display=tab==='public'?'block':'none';
   document.getElementById('plazaClub').style.display=tab==='club'?'block':'none';
+  document.getElementById('plazaPilsa').style.display=tab==='pilsa'?'block':'none';
   if(tab==='public') rPub();
   if(tab==='club') rClub();
   if(tab==='posts') rForum();
-  // FAB: 자유글 탭일 때만 글쓰기, 독서모임 탭일 때 모임만들기
+  if(tab==='pilsa') loadPilsa();
   const _fab=document.getElementById('fabAdd');
   if(_fab&&window.innerWidth<=600){
     if(tab==='posts'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addPost');};}
@@ -4992,6 +5029,112 @@ function loadNew(){
     `).join('');
     _newLoaded=true;
   });
+}
+
+// ========== 필사 ==========
+const _pilsaQuotes=[
+  {text:"우리는 인생을 리셋할 능력이 있습니다.",author:"정재승",book:"열두 발자국"},
+  {text:"모든 불행은 인간관계에서 비롯된다.",author:"기시미 이치로",book:"미움받을 용기"},
+  {text:"빨리 부자가 되는 유일한 방법은 빨리 부자가 되지 않으려는 마음을 갖는 것이다.",author:"김승호",book:"돈의 속성"},
+  {text:"기록하지 않으면 기억하지 못한다.",author:"유시민",book:"글쓰기 특강"},
+  {text:"삶이 있는 한 희망은 있다.",author:"키케로",book:""},
+  {text:"당신이 할 수 있다고 믿든, 할 수 없다고 믿든, 당신 말이 맞다.",author:"헨리 포드",book:""},
+  {text:"나 자신에게 솔직해지는 것이 가장 어려운 용기다.",author:"앙드레 지드",book:"좁은 문"},
+  {text:"읽는다는 것은 다른 사람의 눈으로 세상을 보는 것이다.",author:"헤르만 헤세",book:""},
+  {text:"변화하지 않으면 성장할 수 없고, 성장하지 않으면 진정으로 사는 것이 아니다.",author:"게일 시히",book:"뉴 패시지"},
+  {text:"오늘 할 수 있는 일에 전력을 다하라. 그러면 내일에는 한 걸음 더 진보한다.",author:"뉴턴",book:""},
+  {text:"세상에서 가장 용감한 행동은 스스로 생각하는 것이다.",author:"코코 샤넬",book:""},
+  {text:"책은 도끼다. 우리 안의 얼어붙은 바다를 깨뜨리는.",author:"프란츠 카프카",book:""},
+  {text:"한 권의 책을 읽음으로써 자신의 인생에서 새 시대를 본 사람이 너무나 많다.",author:"헨리 데이비드 소로",book:"월든"},
+  {text:"지혜는 경험의 딸이다.",author:"레오나르도 다 빈치",book:""},
+  {text:"매일 조금씩, 그것이 큰 변화를 만든다.",author:"로빈 샤르마",book:"새벽 5시 클럽"},
+  {text:"사람은 누구나 자기가 보고 싶은 것만 본다.",author:"율리우스 카이사르",book:""},
+  {text:"살아 있는 동안은 빛나야 한다.",author:"니코스 카잔차키스",book:"그리스인 조르바"},
+  {text:"삶이란 매일 새로 쓰는 한 편의 이야기다.",author:"파울로 코엘료",book:"연금술사"},
+  {text:"나는 나비가 되었다. 꽃들 사이를 날아다니는.",author:"장자",book:"장자"},
+  {text:"겨울이 오면 봄이 멀지 않으리.",author:"셸리",book:"서풍의 노래"},
+  {text:"진정한 발견이란 새로운 땅을 찾는 것이 아니라 새로운 눈으로 보는 것이다.",author:"마르셀 프루스트",book:"잃어버린 시간을 찾아서"},
+  {text:"오래 바라보아야 예쁘다. 너도 그렇다.",author:"나태주",book:"풀꽃"},
+  {text:"가장 어두운 밤도 끝나고 해는 떠오른다.",author:"빅토르 위고",book:"레미제라블"},
+  {text:"행복은 습관이다. 그것을 몸에 지니라.",author:"허버드",book:""},
+  {text:"시작이 반이다.",author:"아리스토텔레스",book:""},
+  {text:"인생에서 가장 큰 영광은 넘어지지 않는 것이 아니라, 넘어질 때마다 일어서는 것이다.",author:"넬슨 만델라",book:""},
+  {text:"생각을 바꾸면 세상이 바뀐다.",author:"노먼 빈센트 필",book:"긍정적 사고의 힘"},
+  {text:"오늘이라는 선물을 소중히 여겨라.",author:"엘리너 루스벨트",book:""},
+  {text:"독서는 마음의 양식이다.",author:"데카르트",book:"방법서설"},
+  {text:"우리가 두려워해야 할 것은 두려움 그 자체뿐이다.",author:"프랭클린 루스벨트",book:""}
+];
+function loadPilsa(){
+  // 오늘의 문장
+  const today=new Date();
+  const dayIdx=(today.getFullYear()*1000+today.getMonth()*31+today.getDate())%_pilsaQuotes.length;
+  const q=_pilsaQuotes[dayIdx];
+  document.getElementById('pilsaQuote').textContent='"'+q.text+'"';
+  document.getElementById('pilsaAuthor').textContent='— '+q.author+(q.book?' 《'+q.book+'》':'');
+  // 피드 로드
+  loadPilsaFeed();
+}
+let _pilsaImgData=null;
+function previewPilsaImg(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    _pilsaImgData=ev.target.result;
+    document.getElementById('pilsaPreviewImg').src=_pilsaImgData;
+    document.getElementById('pilsaImgPreview').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+function clearPilsaImg(){
+  _pilsaImgData=null;
+  document.getElementById('pilsaImgPreview').style.display='none';
+  document.getElementById('pilsaImgIn').value='';
+}
+async function submitPilsa(){
+  if(!CU){nt('로그인이 필요합니다.','err');return;}
+  const text=document.getElementById('pilsaText').value.trim();
+  const bookTitle=document.getElementById('pilsaBookTitle').value.trim();
+  if(!text&&!_pilsaImgData){nt('문장 또는 손글씨 사진을 올려주세요.','err');return;}
+  const payload={user_id:CU.id,content:text||'',book_title:bookTitle||null,image_url:_pilsaImgData||null,created_at:new Date().toISOString()};
+  const{error}=await sb.from('pilsa').insert(payload);
+  if(error){nt('업로드 실패: '+error.message,'err');return;}
+  nt('필사가 공유되었습니다!');
+  document.getElementById('pilsaText').value='';
+  document.getElementById('pilsaBookTitle').value='';
+  clearPilsaImg();
+  loadPilsaFeed();
+}
+async function loadPilsaFeed(){
+  const el=document.getElementById('pilsaFeed');
+  const{data}=await sb.from('pilsa').select('*').order('created_at',{ascending:false}).limit(30);
+  if(!data||!data.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">아직 필사가 없어요. 첫 번째 필사를 공유해보세요!</div>';
+    return;
+  }
+  const uids=[...new Set(data.map(p=>p.user_id))];
+  const{data:users}=await sb.from('agora_users').select('id,username').in('id',uids);
+  const umap={};(users||[]).forEach(u=>umap[u.id]=u.username);
+  el.innerHTML=data.map(p=>`
+    <div class="card" style="padding:18px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <span style="font-size:13px;font-weight:600;color:var(--g)">${esc(umap[p.user_id]||'탈퇴한 회원')}</span>
+          ${p.book_title?`<span style="font-size:11px;color:var(--muted);margin-left:6px">📖 ${esc(p.book_title)}</span>`:''}
+        </div>
+        <span style="font-size:10px;color:var(--muted)">${new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
+      </div>
+      ${p.content?`<div style="font-size:14px;color:var(--txt);line-height:1.7;margin-bottom:10px;font-style:italic">"${esc(p.content)}"</div>`:''}
+      ${p.image_url?`<img src="${p.image_url}" style="width:100%;border-radius:10px;border:1px solid var(--border);cursor:pointer" onclick="openV(['${p.image_url}'],0)"/>`:''}
+      ${CU&&p.user_id===CU.id?`<div style="text-align:right;margin-top:8px"><button onclick="deletePilsa('${p.id}')" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer">삭제</button></div>`:''}
+    </div>
+  `).join('');
+}
+async function deletePilsa(id){
+  if(!confirm('필사를 삭제할까요?'))return;
+  await sb.from('pilsa').delete().eq('id',id);
+  nt('삭제되었습니다.');
+  loadPilsaFeed();
 }
 
 function closeGuide(){
