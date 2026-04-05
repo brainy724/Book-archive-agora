@@ -4678,7 +4678,7 @@ async function renderCal(){
   if(CU){
     const from=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-01`;
     const to=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
-    const{data}=await sb.from('books').select('created_at').eq('user_id',CU.id).gte('created_at',from+'T00:00:00').lte('created_at',to+'T23:59:59');
+    const{data}=await sb.from('agora_books').select('created_at').eq('user_id',CU.id).gte('created_at',from+'T00:00:00').lte('created_at',to+'T23:59:59');
     if(data)data.forEach(b=>{const day=new Date(b.created_at).getDate();readDays[day]=(readDays[day]||0)+1;});
     // 타이머 기록도 반영
     const{data:td}=await sb.from('timer_records').select('recorded_at').eq('user_id',CU.id).gte('recorded_at',from+'T00:00:00').lte('recorded_at',to+'T23:59:59');
@@ -4709,7 +4709,7 @@ async function rStats(){
   renderReadingBooks();
 
   // 카테고리별 독서량
-  const{data:allBooks}=await sb.from('books').select('category').eq('user_id',CU.id);
+  const{data:allBooks}=await sb.from('agora_books').select('category').eq('user_id',CU.id);
   const cats={};
   (allBooks||[]).forEach(b=>{const c=b.category||'미분류';cats[c]=(cats[c]||0)+1;});
   const catEntries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
@@ -4726,7 +4726,7 @@ async function rStats(){
   `).join(''):'<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">아직 독서 기록이 없어요</div>';
 
   // 월별 독서량
-  const{data:allB2}=await sb.from('books').select('created_at').eq('user_id',CU.id);
+  const{data:allB2}=await sb.from('agora_books').select('created_at').eq('user_id',CU.id);
   const months={};
   (allB2||[]).forEach(b=>{const d=new Date(b.created_at);const k=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`;months[k]=(months[k]||0)+1;});
   const mEntries=Object.entries(months).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
@@ -4782,7 +4782,7 @@ async function rMatch(){
   document.getElementById('matchResults').innerHTML='';
 
   // 1. 내 책 목록 가져오기
-  const{data:myBooks}=await sb.from('books').select('title,author,category').eq('user_id',CU.id);
+  const{data:myBooks}=await sb.from('agora_books').select('title,author,category').eq('user_id',CU.id);
   if(!myBooks||!myBooks.length){
     document.getElementById('matchLoading').style.display='none';
     document.getElementById('matchResults').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">먼저 내 서재에 책을 등록해보세요!</div>';
@@ -4794,7 +4794,7 @@ async function rMatch(){
   const myAuthors=myBooks.map(b=>b.author).filter(Boolean);
 
   // 2. 다른 사용자들의 책 가져오기
-  const{data:otherBooks}=await sb.from('books').select('user_id,title,author,category,cover_url,created_at').neq('user_id',CU.id).eq('is_public',true);
+  const{data:otherBooks}=await sb.from('agora_books').select('user_id,title,author,category,cover_url,created_at').neq('user_id',CU.id).eq('is_public',true);
   if(!otherBooks||!otherBooks.length){
     document.getElementById('matchLoading').style.display='none';
     document.getElementById('matchResults').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">아직 다른 회원의 공개 서재가 없어요.</div>';
@@ -5035,7 +5035,7 @@ async function loadEditorPick(){
   if(_editorLoaded) return;
   if(!CU){document.getElementById('editorPickLoading').style.display='none';return;}
 
-  const{data:myBooks}=await sb.from('books').select('title,author,category').eq('user_id',CU.id);
+  const{data:myBooks}=await sb.from('agora_books').select('title,author,category').eq('user_id',CU.id);
   if(!myBooks||!myBooks.length){
     document.getElementById('editorPickLoading').style.display='none';
     document.getElementById('editorPickList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">내 서재에 책을 등록하면 맞춤 추천을 받을 수 있어요!</div>';
