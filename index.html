@@ -5109,7 +5109,7 @@ async function loadPilsaFeed(){
   const el=document.getElementById('pilsaFeed');
   const{data}=await sb.from('pilsa').select('*').order('created_at',{ascending:false}).limit(30);
   if(!data||!data.length){
-    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">아직 필사가 없어요. 첫 번째 필사를 공유해보세요!</div>';
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">아직 필사가 없어요.<br>첫 번째 필사를 공유해보세요!</div>';
     return;
   }
   const uids=[...new Set(data.map(p=>p.user_id))];
