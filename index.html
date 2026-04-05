@@ -1197,6 +1197,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    <div id="recMatchSection" style="display:none">
      <div id="matchLoading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px">취향을 분석 중...</div>
      <div id="matchResults"></div>
+     <!-- 알라딘 추천 도서 -->
+     <div style="margin-top:24px">
+       <div style="font-size:13px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-bottom:12px">내 서재 기반 맞춤 추천</div>
+       <div id="editorPickLoading" style="text-align:center;padding:20px;color:var(--muted);font-size:12px">추천 도서를 불러오는 중...</div>
+       <div id="editorPickList"></div>
+     </div>
    </div>
  </div></div>
 
@@ -4947,7 +4953,7 @@ function switchRecTab(tab){
   document.getElementById('recMatchSection').style.display=tab==='match'?'block':'none';
   if(tab==='best') loadBest();
   if(tab==='new') loadNew();
-  if(tab==='match') rMatch();
+  if(tab==='match'){rMatch();loadEditorPick();}
 }
 
 // ========== 알라딘 JSONP 헬퍼 ==========
@@ -5021,6 +5027,119 @@ function loadNew(){
     `).join('');
     _newLoaded=true;
   });
+}
+
+// ========== 내 서재 기반 맞춤 추천 ==========
+let _editorLoaded=false;
+async function loadEditorPick(){
+  if(_editorLoaded) return;
+  if(!CU){document.getElementById('editorPickLoading').style.display='none';return;}
+
+  const{data:myBooks}=await sb.from('books').select('title,author,category').eq('user_id',CU.id);
+  if(!myBooks||!myBooks.length){
+    document.getElementById('editorPickLoading').style.display='none';
+    document.getElementById('editorPickList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">내 서재에 책을 등록하면 맞춤 추천을 받을 수 있어요!</div>';
+    return;
+  }
+
+  const myTitles=new Set(myBooks.map(b=>(b.title||'').replace(/<[^>]*>/g,'')));
+
+  // 1. 저자 빈도 분석 → 가장 많이 읽은 저자 TOP 2
+  const authorCount={};
+  myBooks.forEach(b=>{
+    if(b.author){
+      const a=b.author.split(',')[0].trim();
+      if(a) authorCount[a]=(authorCount[a]||0)+1;
+    }
+  });
+  const topAuthors=Object.entries(authorCount).sort((a,b)=>b[1]-a[1]).slice(0,2).map(a=>a[0]);
+
+  // 2. 카테고리 빈도 분석 → TOP 1
+  const catCount={};
+  myBooks.forEach(b=>{const c=b.category||'기타';catCount[c]=(catCount[c]||0)+1;});
+  const topCat=Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0]?.[0]||'';
+  const catIdMap={'소설':1,'에세이':55889,'자기계발':336,'인문':656,'경제경영':170,'역사':74,'과학':987,'시':51267,'기타':0};
+
+  // 3. 제목 키워드 추출 → 랜덤 2권
+  const titleSamples=[...myBooks].sort(()=>Math.random()-0.5).slice(0,2);
+
+  let results=[];
+  let totalCalls=(topAuthors.length?1:0)+(topCat?1:0)+(titleSamples.length?1:0)||1;
+  let loaded=0;
+
+  function renderResults(){
+    loaded++;
+    if(loaded<totalCalls) return;
+    document.getElementById('editorPickLoading').style.display='none';
+
+    const seen=new Set();
+    const unique=results.filter(b=>{
+      const t=(b.title||'').replace(/<[^>]*>/g,'');
+      if(seen.has(t)||myTitles.has(t))return false;
+      seen.add(t);return true;
+    }).slice(0,10);
+
+    if(!unique.length){
+      document.getElementById('editorPickList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">맞춤 추천 도서를 찾지 못했어요.</div>';
+      return;
+    }
+
+    let reason=`내 서재 ${myBooks.length}권을 분석했어요. `;
+    if(topCat) reason+=`${topCat} 장르를 선호하시네요! `;
+    if(topAuthors.length) reason+=`${topAuthors.join(', ')} 작가의 다른 책도 추천해요.`;
+
+    document.getElementById('editorPickList').innerHTML=
+      `<div style="font-size:12px;color:var(--g);margin-bottom:12px;line-height:1.6">📚 ${esc(reason)}</div>`+
+      unique.map(b=>`
+      <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
+        <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer;margin-bottom:8px">
+          ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`:''}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(b.title||'').replace(/<[^>]*>/g,'')}</div>
+            <div style="font-size:12px;color:var(--muted)">${b.author||''}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${b.publisher||''}</div>
+          </div>
+        </div>
+      </a>
+    `).join('');
+    _editorLoaded=true;
+  }
+
+  // 호출 1: 저자 기반 (TOP 저자들 합쳐서 1번 호출)
+  if(topAuthors.length){
+    const q=topAuthors.join(' ');
+    const cb='_ar_'+Date.now();
+    window[cb]=function(d){if(d&&d.item)results=results.concat(d.item);delete window[cb];renderResults();};
+    const s=document.createElement('script');
+    s.src=`https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=ttbkjwoo07080347001&Query=${encodeURIComponent(q)}&QueryType=Author&MaxResults=6&start=1&SearchTarget=Book&output=js&Version=20131101&Cover=Big&callback=${cb}`;
+    s.onerror=function(){delete window[cb];renderResults();};
+    document.head.appendChild(s);
+  }
+
+  // 호출 2: 카테고리 베스트셀러
+  if(topCat&&catIdMap[topCat]){
+    const cb2='_cr_'+Date.now();
+    window[cb2]=function(d){if(d&&d.item)results=results.concat(d.item);delete window[cb2];renderResults();};
+    const s2=document.createElement('script');
+    s2.src=`https://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=ttbkjwoo07080347001&QueryType=Bestseller&MaxResults=6&start=1&SearchTarget=Book&CategoryId=${catIdMap[topCat]}&output=js&Version=20131101&Cover=Big&callback=${cb2}`;
+    s2.onerror=function(){delete window[cb2];renderResults();};
+    document.head.appendChild(s2);
+  }
+
+  // 호출 3: 제목 키워드 기반
+  if(titleSamples.length){
+    const q=titleSamples.map(b=>b.title.replace(/<[^>]*>/g,'').slice(0,10)).join(' ');
+    const cb3='_tr_'+Date.now();
+    window[cb3]=function(d){if(d&&d.item)results=results.concat(d.item);delete window[cb3];renderResults();};
+    const s3=document.createElement('script');
+    s3.src=`https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?ttbkey=ttbkjwoo07080347001&Query=${encodeURIComponent(q)}&MaxResults=6&start=1&SearchTarget=Book&output=js&Version=20131101&Cover=Big&callback=${cb3}`;
+    s3.onerror=function(){delete window[cb3];renderResults();};
+    document.head.appendChild(s3);
+  }
+
+  if(!topAuthors.length&&!topCat&&!titleSamples.length){
+    aladinJSONP('Bestseller',function(d){if(d&&d.item)results=results.concat(d.item);renderResults();});
+  }
 }
 
 // ========== 필사 ==========
