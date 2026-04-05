@@ -17,6 +17,7 @@
 <link rel="icon" type="image/png" href="/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="/pilsa-quotes.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
@@ -575,17 +576,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
  <!-- 내 책 섹션 -->
  <div id="libBooksSection">
- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div></div>
-      <div class="sort-dropdown">
-        <button class="btn2" style="padding:7px 14px;font-size:13px" onclick="toggleSortMenu()">정렬 ▾</button>
-        <div class="sort-dropdown-menu" id="sortMenu">
-          <div class="sort-opt on" id="sopt-date_desc" onclick="setSort('date_desc')">최신순</div>
-          <div class="sort-opt" id="sopt-date_asc" onclick="setSort('date_asc')">오래된순</div>
-          <div class="sort-opt" id="sopt-title" onclick="setSort('title')">제목순</div>
-        </div>
-      </div>
-    </div>
  <div class="cat-bar" id="libCatBar" style="margin-bottom:14px">
    <button class="cat-btn on" onclick="setLibCat('')">전체</button>
    <button class="cat-btn" onclick="setLibCat('소설')">소설</button>
@@ -598,7 +588,17 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    <button class="cat-btn" onclick="setLibCat('시')">시</button>
    <button class="cat-btn" onclick="setLibCat('기타')">기타</button>
  </div>
- <div style="margin-bottom:16px"><input id="libSearch" placeholder="제목, 저자 검색..." oninput="rLib()" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box"/></div>
+ <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+   <input id="libSearch" placeholder="제목 · 저자 검색" oninput="rLib()" style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none"/>
+   <div class="sort-dropdown">
+     <button class="btn2" style="padding:9px 14px;font-size:13px;white-space:nowrap" onclick="toggleSortMenu()">정렬 ▾</button>
+     <div class="sort-dropdown-menu" id="sortMenu">
+       <div class="sort-opt on" id="sopt-date_desc" onclick="setSort('date_desc')">최신순</div>
+       <div class="sort-opt" id="sopt-date_asc" onclick="setSort('date_asc')">오래된순</div>
+       <div class="sort-opt" id="sopt-title" onclick="setSort('title')">제목순</div>
+     </div>
+   </div>
+ </div>
     <div id="libFolders" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
     <div id="bookList"></div>
   </div><!-- /libBooksSection -->
@@ -2074,14 +2074,6 @@ function closeBookModal(e){
 function closeBookModalBtn(){
   document.getElementById('bookModalOv').classList.remove('open');
   document.body.style.overflow='';
-}
-
-// ── (기존 setSort 제거됨) ──
-function _oldSetSort(){
-  sortMode=mode;
-  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
-  const el=document.getElementById('sort-'+mode);if(el)el.classList.add('on');
-  rLib();
 }
 
 // ── 책 표지 검색 (Open Library) ──
@@ -5032,38 +5024,7 @@ function loadNew(){
 }
 
 // ========== 필사 ==========
-const _pilsaQuotes=[
-  {text:"우리는 인생을 리셋할 능력이 있습니다.",author:"정재승",book:"열두 발자국"},
-  {text:"모든 불행은 인간관계에서 비롯된다.",author:"기시미 이치로",book:"미움받을 용기"},
-  {text:"빨리 부자가 되는 유일한 방법은 빨리 부자가 되지 않으려는 마음을 갖는 것이다.",author:"김승호",book:"돈의 속성"},
-  {text:"기록하지 않으면 기억하지 못한다.",author:"유시민",book:"글쓰기 특강"},
-  {text:"삶이 있는 한 희망은 있다.",author:"키케로",book:""},
-  {text:"당신이 할 수 있다고 믿든, 할 수 없다고 믿든, 당신 말이 맞다.",author:"헨리 포드",book:""},
-  {text:"나 자신에게 솔직해지는 것이 가장 어려운 용기다.",author:"앙드레 지드",book:"좁은 문"},
-  {text:"읽는다는 것은 다른 사람의 눈으로 세상을 보는 것이다.",author:"헤르만 헤세",book:""},
-  {text:"변화하지 않으면 성장할 수 없고, 성장하지 않으면 진정으로 사는 것이 아니다.",author:"게일 시히",book:"뉴 패시지"},
-  {text:"오늘 할 수 있는 일에 전력을 다하라. 그러면 내일에는 한 걸음 더 진보한다.",author:"뉴턴",book:""},
-  {text:"세상에서 가장 용감한 행동은 스스로 생각하는 것이다.",author:"코코 샤넬",book:""},
-  {text:"책은 도끼다. 우리 안의 얼어붙은 바다를 깨뜨리는.",author:"프란츠 카프카",book:""},
-  {text:"한 권의 책을 읽음으로써 자신의 인생에서 새 시대를 본 사람이 너무나 많다.",author:"헨리 데이비드 소로",book:"월든"},
-  {text:"지혜는 경험의 딸이다.",author:"레오나르도 다 빈치",book:""},
-  {text:"매일 조금씩, 그것이 큰 변화를 만든다.",author:"로빈 샤르마",book:"새벽 5시 클럽"},
-  {text:"사람은 누구나 자기가 보고 싶은 것만 본다.",author:"율리우스 카이사르",book:""},
-  {text:"살아 있는 동안은 빛나야 한다.",author:"니코스 카잔차키스",book:"그리스인 조르바"},
-  {text:"삶이란 매일 새로 쓰는 한 편의 이야기다.",author:"파울로 코엘료",book:"연금술사"},
-  {text:"나는 나비가 되었다. 꽃들 사이를 날아다니는.",author:"장자",book:"장자"},
-  {text:"겨울이 오면 봄이 멀지 않으리.",author:"셸리",book:"서풍의 노래"},
-  {text:"진정한 발견이란 새로운 땅을 찾는 것이 아니라 새로운 눈으로 보는 것이다.",author:"마르셀 프루스트",book:"잃어버린 시간을 찾아서"},
-  {text:"오래 바라보아야 예쁘다. 너도 그렇다.",author:"나태주",book:"풀꽃"},
-  {text:"가장 어두운 밤도 끝나고 해는 떠오른다.",author:"빅토르 위고",book:"레미제라블"},
-  {text:"행복은 습관이다. 그것을 몸에 지니라.",author:"허버드",book:""},
-  {text:"시작이 반이다.",author:"아리스토텔레스",book:""},
-  {text:"인생에서 가장 큰 영광은 넘어지지 않는 것이 아니라, 넘어질 때마다 일어서는 것이다.",author:"넬슨 만델라",book:""},
-  {text:"생각을 바꾸면 세상이 바뀐다.",author:"노먼 빈센트 필",book:"긍정적 사고의 힘"},
-  {text:"오늘이라는 선물을 소중히 여겨라.",author:"엘리너 루스벨트",book:""},
-  {text:"독서는 마음의 양식이다.",author:"데카르트",book:"방법서설"},
-  {text:"우리가 두려워해야 할 것은 두려움 그 자체뿐이다.",author:"프랭클린 루스벨트",book:""}
-];
+// _pilsaQuotes는 pilsa-quotes.js에서 로드
 function loadPilsa(){
   // 오늘의 문장
   const today=new Date();
