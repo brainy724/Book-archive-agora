@@ -5217,12 +5217,17 @@ async function deletePilsa(id){
   loadPilsaFeed();
 }
 
-// ========== 스와이프 탭 이동 ==========
+// ========== 서브탭 스와이프 이동 ==========
 (function(){
-  let touchStartX=0, touchStartY=0, touchEndX=0, touchEndY=0;
+  let touchStartX=0, touchStartY=0;
   const minSwipe=80;
-  // 로그인 후 보이는 메인 탭만 (admin 제외)
-  const swipeTabs=['library','forum','match','libmap','points'];
+
+  // 서브탭 정의: {탭ID: [서브탭 목록, 현재 서브탭 가져오는 함수, 전환 함수]}
+  const subTabMap={
+    forum:{ tabs:['public','posts','club','pilsa'], get:()=>document.querySelector('#plazaTab-public.on')?'public':document.querySelector('#plazaTab-posts.on')?'posts':document.querySelector('#plazaTab-club.on')?'club':'pilsa', go:switchPlazaTab },
+    library:{ tabs:['books','note'], get:()=>document.querySelector('#libSubTab-books.on')?'books':'note', go:switchLibSubTab },
+    match:{ tabs:['best','new','match'], get:()=>document.querySelector('#recTab-best.on')?'best':document.querySelector('#recTab-new.on')?'new':'match', go:switchRecTab }
+  };
 
   document.addEventListener('touchstart',function(e){
     touchStartX=e.changedTouches[0].screenX;
@@ -5230,25 +5235,22 @@ async function deletePilsa(id){
   },{passive:true});
 
   document.addEventListener('touchend',function(e){
-    touchEndX=e.changedTouches[0].screenX;
-    touchEndY=e.changedTouches[0].screenY;
-    const dx=touchEndX-touchStartX;
-    const dy=touchEndY-touchStartY;
-    // 가로 스와이프가 세로보다 클 때만 (대각선 방지)
+    const dx=e.changedTouches[0].screenX-touchStartX;
+    const dy=e.changedTouches[0].screenY-touchStartY;
     if(Math.abs(dx)<minSwipe||Math.abs(dy)>Math.abs(dx))return;
-    // 모달이 열려있으면 무시
     if(document.getElementById('bookModalOv')?.classList.contains('open'))return;
-    if(document.getElementById('guideOverlay')?.style.display==='flex')return;
 
-    const curIdx=swipeTabs.indexOf(_currentTab);
+    const config=subTabMap[_currentTab];
+    if(!config)return;
+
+    const curSub=config.get();
+    const curIdx=config.tabs.indexOf(curSub);
     if(curIdx===-1)return;
 
-    if(dx<0&&curIdx<swipeTabs.length-1){
-      // 왼쪽 스와이프 → 다음 탭
-      go(swipeTabs[curIdx+1]);
+    if(dx<0&&curIdx<config.tabs.length-1){
+      config.go(config.tabs[curIdx+1]);
     }else if(dx>0&&curIdx>0){
-      // 오른쪽 스와이프 → 이전 탭
-      go(swipeTabs[curIdx-1]);
+      config.go(config.tabs[curIdx-1]);
     }
   },{passive:true});
 })();
