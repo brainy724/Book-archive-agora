@@ -292,7 +292,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .info{border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-size:14px;}
 /* 로그인 */
 .lw{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg-page);}
-.lcard{background:transparent;border:none;border-radius:0;padding:32px 40px;width:100%;max-width:480px;box-shadow:none;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.lcard{background:transparent;border:none;border-radius:0;padding:32px 40px;padding-top:48px;width:100%;max-width:480px;box-shadow:none;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .ltitle{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:var(--g);text-align:center;letter-spacing:8px;margin-bottom:16px;}
 .lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:32px;letter-spacing:2px;line-height:1.6;}
 .atog{text-align:center;margin-top:16px;color:var(--muted);font-size:14px;}
@@ -357,7 +357,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div style="width:100%;max-width:380px;padding:48px 40px;text-align:center">
     <div style="font-family:var(--font-serif);font-size:28px;color:var(--g);letter-spacing:4px;margin-bottom:6px">AGORA</div>
     <div style="font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:48px">ADMIN</div>
-    <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="admin"/></div>
+    <div class="fg" style="text-align:left"><label>아이디</label><input id="aId" placeholder="아이디를 입력하세요"/></div>
     <div class="fg" style="text-align:left"><label>비밀번호</label><input id="aPw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doAuth()"/></div>
     <div id="aErr" class="err-msg" style="display:none;margin-bottom:12px;text-align:left"></div>
     <button class="btn" style="width:100%;margin-top:8px" onclick="doAuth()">로그인</button>
@@ -1579,7 +1579,7 @@ async function doAuth(){
  load(true);
  const{data,error}=await sb.from('agora_users').select('*').eq('username',id).eq('password',pw).single();
  load(false);
- if(error||!data){shErr('아이디 또는 비밀번호를 확인해주세요.');return;}
+ if(error||!data){shErr('에러: '+(error?error.message+' / '+error.code:'데이터 없음'));return;}
  if(data.banned){shErr('이용이 제한된 계정입니다.');return;}
  await ok({...data,isAdmin:data.is_admin});
 }
