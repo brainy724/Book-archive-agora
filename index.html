@@ -5053,7 +5053,7 @@ async function loadEditorPick(){
     if(topAuthors.length) reason+=`${topAuthors.join(', ')} 작가의 다른 책도 추천해요.`;
 
     document.getElementById('editorPickList').innerHTML=
-      `<div style="font-size:12px;color:var(--g);margin-bottom:12px;line-height:1.6">📚 ${esc(reason)}</div>`+
+      `<div style="font-size:12px;color:var(--g);margin-bottom:12px;line-height:1.6">${esc(reason)}</div>`+
       unique.map(b=>`
       <a href="${b.link}" target="_blank" style="text-decoration:none;color:inherit">
         <div class="card" style="display:flex;gap:14px;padding:16px 18px;align-items:center;cursor:pointer;margin-bottom:8px">
@@ -5224,4 +5224,4 @@ function closeGuide(){
 }
 </script>
 </body>
-</html>
+</html>html>
