@@ -4941,6 +4941,63 @@ function fetchAladinPageCount(isbn, cb){
   s.onerror=function(){cb(0);try{delete window[cbName];}catch(e){}};
   document.body.appendChild(s);
 }
+function autoFixReadingBookPages(){
+  const list=getReadingBooks();
+  const needFix=list.filter(b=>!b.totalPages||b.totalPages<=0);
+  if(!needFix.length)return;
+  let fixIdx=0;
+  function fixNext(){
+    if(fixIdx>=needFix.length)return;
+    const book=needFix[fixIdx];
+    fixIdx++;
+    // ISBN이 이미 있으면 바로 알라딘 조회
+    if(book.isbn13){
+      const isbn=book.isbn13.replace(/-/g,'').trim();
+      if(isbn.length>=10){
+        fetchAladinPageCount(isbn, function(pages){
+          if(pages>0){
+            const cur=getReadingBooks();
+            const target=cur.find(b=>b.title===book.title);
+            if(target&&(!target.totalPages||target.totalPages<=0)){
+              target.totalPages=pages;
+              if(!target.isbn13) target.isbn13=book.isbn13;
+              saveReadingBooks(cur);
+              renderReadingBooks();
+            }
+          }
+          setTimeout(fixNext,300);
+        });
+        return;
+      }
+    }
+    // ISBN 없으면 Kakao로 검색해서 ISBN 획득 후 알라딘 조회
+    fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(book.title)}&size=1`,{
+      headers:{'Authorization':'KakaoAK 1f06943777edd84ae71d06070a64a0ca'}
+    }).then(r=>r.json()).then(data=>{
+      if(data.documents&&data.documents[0]&&data.documents[0].isbn){
+        const isbn=data.documents[0].isbn.replace(/-/g,'').trim().split(' ').pop();
+        if(isbn&&isbn.length>=10){
+          fetchAladinPageCount(isbn, function(pages){
+            if(pages>0){
+              const cur=getReadingBooks();
+              const target=cur.find(b=>b.title===book.title);
+              if(target&&(!target.totalPages||target.totalPages<=0)){
+                target.totalPages=pages;
+                target.isbn13=isbn;
+                saveReadingBooks(cur);
+                renderReadingBooks();
+              }
+            }
+            setTimeout(fixNext,300);
+          });
+          return;
+        }
+      }
+      setTimeout(fixNext,300);
+    }).catch(()=>setTimeout(fixNext,300));
+  }
+  fixNext();
+}
 
 // ========== 독서 캘린더 ==========
 let _calYear, _calMonth;
@@ -4991,6 +5048,7 @@ async function rStats(){
 
   // 읽고 있는 책 목록 렌더링
   renderReadingBooks();
+  autoFixReadingBookPages();
 
   // 카테고리별 독서량
   const{data:allBooks}=await sb.from('agora_books').select('category').eq('user_id',CU.id);
