@@ -1009,8 +1009,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <!-- 독서 기록 내보내기 -->
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">독서 기록 내보내기</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">내 독서 기록을 엑셀 파일로 저장할 수 있어요.<br>책 이름, 저자, 읽은 날짜, 평점, 독후감이 포함됩니다.</div>
-      <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="exportToExcel()">엑셀로 저장하기</button>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">내 독서 기록을 엑셀 또는 PDF 파일로 저장할 수 있어요.<br>책 이름, 저자, 읽은 날짜, 평점, 독후감이 포함됩니다.</div>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="exportToExcel()">엑셀로 내보내기</button>
       <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-top:10px;background:var(--gold,#B8956A);color:#fff;border:none" onclick="showPdfExportModal()">PDF로 내보내기</button>
     </div>
 
@@ -4749,25 +4749,73 @@ function renderReadingBooks(){
   if(!list.length){
     el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">아직 등록된 책이 없어요. 아래에서 검색해서 추가해보세요!</div>';
   }else{
-    el.innerHTML=list.map((b,i)=>`
-      <div style="display:flex;gap:12px;padding:12px;background:var(--bg-page);border-radius:10px;margin-bottom:8px;align-items:center;cursor:pointer" onclick="toggleReadingBookMenu(${i})">
-        ${b.cover?`<img src="${b.cover}" style="width:40px;height:58px;border-radius:6px;object-fit:cover;flex-shrink:0"/>`
-        :`<div style="width:40px;height:58px;border-radius:6px;background:var(--gl);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)">표지</div>`}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(b.author||'')}${b.publisher?' · '+esc(b.publisher):''}</div>
-          ${b.category?`<div style="display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;background:var(--gl);color:var(--g);margin-top:4px">${esc(b.category)}</div>`:''}
+    el.innerHTML=list.map((b,i)=>{
+      const cur=b.currentPage||0;
+      const total=b.totalPages||0;
+      const pct=total>0?Math.min(Math.round(cur/total*100),100):0;
+      const pctColor=pct>=80?'#4CAF50':pct>=50?'#8BC34A':pct>=20?'var(--g)':'var(--g)';
+      return `
+      <div style="background:var(--bg-page);border-radius:12px;margin-bottom:10px;overflow:hidden">
+        <div style="display:flex;gap:12px;padding:14px 14px 0 14px;align-items:flex-start;cursor:pointer" onclick="toggleReadingBookMenu(${i})">
+          ${b.cover?`<img src="${b.cover}" style="width:52px;height:75px;border-radius:6px;object-fit:cover;flex-shrink:0"/>`
+          :`<div style="width:52px;height:75px;border-radius:6px;background:var(--gl);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)">표지</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.title)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(b.author||'')}${b.publisher?' · '+esc(b.publisher):''}</div>
+            ${total>0?`
+            <div style="margin-top:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <span style="font-size:12px;font-weight:600;color:${pctColor}">${pct}%</span>
+                <span style="font-size:11px;color:var(--muted)">${cur} / ${total} 페이지</span>
+              </div>
+              <div style="width:100%;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${pctColor};border-radius:3px;transition:width .3s"></div>
+              </div>
+            </div>`:`
+            <div style="margin-top:6px;font-size:11px;color:var(--muted)">페이지 정보 없음 (수동 입력 가능)</div>
+            `}
+            ${b.startDate?`<div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:right">${b.startDate} ~</div>`:''}
+          </div>
+          <button onclick="event.stopPropagation();removeReadingBook(${i})" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&times;</button>
         </div>
-        <button onclick="event.stopPropagation();removeReadingBook(${i})" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&times;</button>
-      </div>
-      <div id="readingMenu_${i}" style="display:none;padding:0 12px 10px;margin-top:-4px;margin-bottom:8px">
-        <button onclick="completeReadingBook(${i})" class="btn" style="width:100%;padding:10px;font-size:13px">완독! 독서록 쓰러 가기</button>
-      </div>
-    `).join('');
+        <div style="padding:8px 14px 12px;display:flex;gap:6px;align-items:center">
+          <input type="number" id="pageInput_${i}" placeholder="${total>0?'읽은 페이지':'읽은 페이지'}" value="${cur||''}" min="0" ${total>0?`max="${total}"`:''} style="flex:1;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:12px;color:var(--txt);background:var(--card);width:80px" onkeydown="if(event.key==='Enter')updateReadingPage(${i})"/>
+          ${total<=0?`<input type="number" id="totalInput_${i}" placeholder="전체" min="1" style="width:70px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:12px;color:var(--txt);background:var(--card)" onkeydown="if(event.key==='Enter')updateReadingPage(${i})"/>`:''}
+          <button onclick="updateReadingPage(${i})" class="btn2" style="padding:7px 12px;font-size:11px;white-space:nowrap;flex-shrink:0">기록</button>
+        </div>
+        <div id="readingMenu_${i}" style="display:none;padding:0 14px 12px">
+          <button onclick="completeReadingBook(${i})" class="btn" style="width:100%;padding:10px;font-size:13px">완독! 독서록 쓰러 가기</button>
+        </div>
+      </div>`;
+    }).join('');
   }
   const sel=document.getElementById('timerBook');
   const myBooks=list;
   sel.innerHTML='<option value="">기록할 책 선택</option>'+myBooks.map((b,i)=>`<option value="reading_${i}">${esc(b.title)}</option>`).join('');
+}
+function updateReadingPage(idx){
+  const list=getReadingBooks();
+  const book=list[idx];
+  if(!book)return;
+  const pageInput=document.getElementById('pageInput_'+idx);
+  const totalInput=document.getElementById('totalInput_'+idx);
+  let cur=parseInt(pageInput.value)||0;
+  if(totalInput){
+    const newTotal=parseInt(totalInput.value);
+    if(newTotal&&newTotal>0) book.totalPages=newTotal;
+  }
+  if(cur<0) cur=0;
+  if(book.totalPages>0 && cur>book.totalPages) cur=book.totalPages;
+  book.currentPage=cur;
+  saveReadingBooks(list);
+  renderReadingBooks();
+  const pct=book.totalPages>0?Math.round(cur/book.totalPages*100):0;
+  if(book.totalPages>0 && pct>=100){
+    nt('축하해요! 완독했네요! 🎉 독서록을 작성해보세요.');
+    setTimeout(()=>{if(confirm('완독을 축하해요! 독서록을 작성할까요?')) completeReadingBook(idx);},500);
+  }else{
+    nt(`${cur}페이지 기록됨${book.totalPages>0?' ('+pct+'%)':''}`);
+  }
 }
 function toggleReadingBookMenu(idx){
   const el=document.getElementById('readingMenu_'+idx);
@@ -4849,13 +4897,49 @@ async function searchReadingBook(){
 function pickReadingBook(idx){
   const b=window._readingSearchResults&&window._readingSearchResults[idx];
   if(!b)return;
-  addReadingBook({
+  const bookData={
     title:b.title,
     author:(b.authors||[]).join(', '),
     publisher:b.publisher||'',
     cover:b.thumbnail||'',
-    category:b.category?mapCategory(b.category):''
-  });
+    category:b.category?mapCategory(b.category):'',
+    isbn13:b.isbn||'',
+    totalPages:0,
+    currentPage:0,
+    startDate:new Date().toISOString().slice(0,10)
+  };
+  // 알라딘 상품 조회 API로 페이지수 가져오기
+  if(b.isbn){
+    const isbn13=b.isbn.replace(/-/g,'').trim();
+    if(isbn13.length>=10){
+      fetchAladinPageCount(isbn13, function(pages){
+        bookData.totalPages=pages||0;
+        addReadingBook(bookData);
+      });
+      return;
+    }
+  }
+  addReadingBook(bookData);
+}
+function fetchAladinPageCount(isbn, cb){
+  const cbName='_aladinLookup_'+Date.now();
+  window[cbName]=function(ok, data){
+    let pages=0;
+    try{
+      if(data&&data.item&&data.item[0]&&data.item[0].subInfo){
+        pages=parseInt(data.item[0].subInfo.itemPage)||0;
+      }
+    }catch(e){}
+    cb(pages);
+    try{delete window[cbName];}catch(e){}
+    try{document.getElementById('s_'+cbName).remove();}catch(e){}
+  };
+  const idType=isbn.length===13?'ISBN13':'ISBN';
+  const s=document.createElement('script');
+  s.id='s_'+cbName;
+  s.src=`https://www.aladin.co.kr/ttb/api/ItemLookUp.aspx?ttbkey=ttbkjwoo07080347001&itemIdType=${idType}&ItemId=${isbn}&output=js&Version=20131101&callback=${cbName}`;
+  s.onerror=function(){cb(0);try{delete window[cbName];}catch(e){}};
+  document.body.appendChild(s);
 }
 
 // ========== 독서 캘린더 ==========
