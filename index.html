@@ -17,6 +17,7 @@
 <link rel="icon" type="image/png" href="/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script src="/pilsa-quotes.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
@@ -1009,6 +1010,31 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">독서 기록 내보내기</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">내 독서 기록을 엑셀 파일로 저장할 수 있어요.<br>책 이름, 저자, 읽은 날짜, 평점, 독후감이 포함됩니다.</div>
       <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="exportToExcel()">엑셀로 저장하기</button>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-top:10px;background:var(--gold,#B8956A);color:#fff;border:none" onclick="showPdfExportModal()">PDF로 내보내기</button>
+    </div>
+
+    <!-- PDF 내보내기 모달 -->
+    <div id="pdfExportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%">
+        <div style="font-size:17px;font-weight:700;margin-bottom:18px;color:var(--txt)">PDF 내보내기</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6">현재 테마 색상이 자동으로 적용됩니다.</div>
+        <button onclick="exportPdf('list')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#B8956A);background:var(--card);color:var(--gold,#B8956A);border-radius:10px;cursor:pointer;margin-bottom:10px;text-align:left">
+          전체 독서 목록<br><span style="font-size:11px;font-weight:400;color:var(--muted)">읽은 책 리스트 + 통계 요약</span>
+        </button>
+        <button onclick="exportPdf('detail')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#B8956A);background:var(--card);color:var(--gold,#B8956A);border-radius:10px;cursor:pointer;text-align:left">
+          개별 독서록 선택<br><span style="font-size:11px;font-weight:400;color:var(--muted)">책 한 권의 상세 기록 + 감상평</span>
+        </button>
+        <button onclick="closePdfModal()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
+      </div>
+    </div>
+
+    <!-- 개별 독서록 선택 모달 -->
+    <div id="pdfBookSelectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%;max-height:70vh;overflow-y:auto">
+        <div style="font-size:17px;font-weight:700;margin-bottom:14px;color:var(--txt)">어떤 책을 내보낼까요?</div>
+        <div id="pdfBookList"></div>
+        <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
+      </div>
     </div>
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
@@ -2224,6 +2250,262 @@ async function exportToExcel(){
   const fname='AGORA_독서기록_'+new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')+'.xlsx';
   XLSX.writeFile(wb,fname);
   nt('엑셀 파일이 저장됐습니다!');
+}
+
+// ══ PDF 내보내기 ══
+function showPdfExportModal(){
+  const m=document.getElementById('pdfExportModal');
+  m.style.display='flex';
+}
+function closePdfModal(){
+  document.getElementById('pdfExportModal').style.display='none';
+}
+function closePdfBookSelect(){
+  document.getElementById('pdfBookSelectModal').style.display='none';
+}
+
+function getThemeColors(){
+  const s=getComputedStyle(document.documentElement);
+  const gold=s.getPropertyValue('--gold').trim()||'#B8956A';
+  const g=s.getPropertyValue('--g').trim()||'#8B4A6B';
+  const txt=s.getPropertyValue('--txt').trim()||'#2C1A2E';
+  const muted=s.getPropertyValue('--muted').trim()||'#8A7590';
+  const card=s.getPropertyValue('--card').trim()||'#FFFDFB';
+  return{gold,g,txt,muted,card};
+}
+function hexToRgb(hex){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  return[parseInt(hex.substr(0,2),16),parseInt(hex.substr(2,2),16),parseInt(hex.substr(4,2),16)];
+}
+function lightenColor(hex,amt=0.85){
+  const[r,g,b]=hexToRgb(hex);
+  return[Math.round(r+(255-r)*amt),Math.round(g+(255-g)*amt),Math.round(b+(255-b)*amt)];
+}
+
+async function exportPdf(type){
+  closePdfModal();
+  if(type==='detail'){
+    // 책 선택 모달 보여주기
+    load(true);
+    const{data:books}=await sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false});
+    load(false);
+    if(!books||!books.length){nt('저장된 독서 기록이 없습니다.','err');return;}
+    const list=document.getElementById('pdfBookList');
+    list.innerHTML='';
+    books.forEach(b=>{
+      const btn=document.createElement('button');
+      btn.style.cssText='width:100%;padding:12px 14px;font-size:14px;border:1px solid var(--border);background:var(--card);color:var(--txt);border-radius:10px;cursor:pointer;margin-bottom:8px;text-align:left';
+      btn.innerHTML='<strong>'+((b.title||'제목 없음'))+'</strong><br><span style="font-size:12px;color:var(--muted)">'+(b.author||'저자 미상')+'</span>';
+      btn.onclick=()=>{closePdfBookSelect();generateDetailPdf(b);};
+      list.appendChild(btn);
+    });
+    document.getElementById('pdfBookSelectModal').style.display='flex';
+    return;
+  }
+  generateListPdf();
+}
+
+async function generateListPdf(){
+  load(true);
+  const{data:books}=await sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false});
+  load(false);
+  if(!books||!books.length){nt('저장된 독서 기록이 없습니다.','err');return;}
+
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const W=210,H=297;
+  const tc=getThemeColors();
+  const[gr,gg,gb]=hexToRgb(tc.gold);
+  const[tr,tg,tb]=hexToRgb(tc.txt);
+  const[mr,mg,mb]=hexToRgb(tc.muted);
+  const bgL=lightenColor(tc.gold,0.92);
+  const bgM=lightenColor(tc.gold,0.85);
+
+  // 배경
+  doc.setFillColor(255,253,251);
+  doc.rect(0,0,W,H,'F');
+
+  // 골드 헤더
+  doc.setFillColor(gr,gg,gb);
+  doc.rect(0,0,W,28,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20);
+  doc.text('A G O R A',W/2,14,{align:'center'});
+  doc.setFontSize(8);
+  doc.text('Reading Archive',W/2,21,{align:'center'});
+
+  // 제목
+  doc.setTextColor(tr,tg,tb);
+  doc.setFontSize(18);
+  doc.text('My Reading Record',W/2,42,{align:'center'});
+
+  // 사용자 정보
+  const nick=document.getElementById('currentNickname');
+  const nickName=nick?nick.textContent:'';
+  doc.setFillColor(...bgL);
+  doc.roundedRect(15,48,W-30,18,3,3,'F');
+  doc.setFontSize(10);
+  doc.setTextColor(tr,tg,tb);
+  doc.text('Nickname: '+(nickName||'User'),20,57);
+  const completed=books.filter(b=>b.end_date).length;
+  const reading=books.filter(b=>!b.end_date).length;
+  doc.text('Completed: '+completed,W-60,57);
+  doc.setTextColor(mr,mg,mb);
+  doc.setFontSize(8);
+  doc.text(new Date().toLocaleDateString('ko-KR'),20,63);
+
+  // 통계 카드
+  const cardW=(W-40)/3;
+  const stats=[['Completed',completed+''],[' Reading',reading+''],['Total',books.length+'']];
+  stats.forEach(([label,val],i)=>{
+    const x=15+i*(cardW+5);
+    doc.setFillColor(255,255,255);
+    doc.setDrawColor(...bgM);
+    doc.roundedRect(x,70,cardW,18,2,2,'FD');
+    doc.setFontSize(14);
+    doc.setTextColor(gr,gg,gb);
+    doc.text(val,x+cardW/2,80,{align:'center'});
+    doc.setFontSize(7);
+    doc.setTextColor(mr,mg,mb);
+    doc.text(label,x+cardW/2,86,{align:'center'});
+  });
+
+  // 테이블 헤더
+  let y=96;
+  doc.setFillColor(gr,gg,gb);
+  doc.roundedRect(15,y,W-30,9,1,1,'F');
+  doc.setFontSize(8);
+  doc.setTextColor(255,255,255);
+  const cols=[18,30,95,140,175];
+  ['No.','Title','Author','Start','End'].forEach((h,i)=>doc.text(h,cols[i],y+6));
+
+  // 데이터
+  y+=12;
+  books.forEach((b,i)=>{
+    if(y>275){doc.addPage();y=20;doc.setFillColor(255,253,251);doc.rect(0,0,W,H,'F');}
+    if(i%2===0){doc.setFillColor(...bgL);doc.rect(15,y-4,W-30,10,'F');}
+    doc.setFontSize(8);
+    doc.setTextColor(tr,tg,tb);
+    doc.text((i+1)+'',cols[0],y+2);
+    const title=(b.title||'').substring(0,22);
+    doc.text(title,cols[1],y+2);
+    doc.setTextColor(mr,mg,mb);
+    const author=(b.author||'').substring(0,14);
+    doc.text(author,cols[2],y+2);
+    doc.text((b.start_date||'-').substring(0,10),cols[3],y+2);
+    doc.text((b.end_date||'-').substring(0,10),cols[4],y+2);
+    y+=10;
+  });
+
+  // 푸터
+  doc.setDrawColor(...bgM);
+  doc.line(15,H-18,W-15,H-18);
+  doc.setFontSize(7);
+  doc.setTextColor(mr,mg,mb);
+  doc.text('AGORA - Reading Community',W/2,H-12,{align:'center'});
+  doc.text('agora-archive.com',W/2,H-7,{align:'center'});
+
+  doc.save('AGORA_Reading_List_'+new Date().toISOString().slice(0,10)+'.pdf');
+  nt('PDF 파일이 저장됐습니다!');
+}
+
+function generateDetailPdf(b){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const W=210,H=297;
+  const tc=getThemeColors();
+  const[gr,gg,gb]=hexToRgb(tc.gold);
+  const[tr,tg,tb]=hexToRgb(tc.txt);
+  const[mr,mg,mb]=hexToRgb(tc.muted);
+  const bgL=lightenColor(tc.gold,0.92);
+
+  // 배경
+  doc.setFillColor(255,253,251);
+  doc.rect(0,0,W,H,'F');
+
+  // 골드 헤더
+  doc.setFillColor(gr,gg,gb);
+  doc.rect(0,0,W,22,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16);
+  doc.text('A G O R A',W/2,12,{align:'center'});
+  doc.setFontSize(7);
+  doc.text('Reading Record',W/2,18,{align:'center'});
+
+  // 책 제목
+  doc.setTextColor(tr,tg,tb);
+  doc.setFontSize(20);
+  const title=b.title||'Untitled';
+  doc.text(title,W/2,38,{align:'center'});
+
+  // 장식선
+  doc.setDrawColor(gr,gg,gb);
+  doc.setLineWidth(0.7);
+  doc.line(W/2-15,43,W/2+15,43);
+
+  // 정보 카드
+  doc.setFillColor(...bgL);
+  doc.roundedRect(15,48,W-30,28,3,3,'F');
+  doc.setFontSize(8);
+  doc.setTextColor(mr,mg,mb);
+  doc.text('Author',20,55);
+  doc.text('Publisher',20,67);
+  doc.text('Started',W/2+5,55);
+  doc.text('Completed',W/2+5,67);
+  doc.setFontSize(10);
+  doc.setTextColor(tr,tg,tb);
+  doc.text(b.author||'-',20,60);
+  doc.text(b.publisher||'-',20,72);
+  doc.text((b.start_date||'-').substring(0,10),W/2+5,60);
+  doc.text((b.end_date||'-').substring(0,10),W/2+5,72);
+
+  // 읽은 기간
+  if(b.start_date&&b.end_date){
+    const d1=new Date(b.start_date),d2=new Date(b.end_date);
+    const days=Math.ceil((d2-d1)/(1000*60*60*24));
+    if(days>0){
+      doc.setFontSize(9);doc.setTextColor(gr,gg,gb);
+      doc.text(days+' days',W-20,55,{align:'right'});
+    }
+  }
+
+  // 평점
+  let y=84;
+  if(b.rating){
+    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);
+    doc.text('Rating',20,y);
+    const stars=Array(b.rating).fill('*').join(' ');
+    doc.text(b.rating+'.0 / 5.0    '+stars,60,y);
+    y+=12;
+  }
+
+  // 감상평
+  if(b.review){
+    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);
+    doc.text('Review',20,y);
+    doc.setDrawColor(...bgL);doc.setLineWidth(0.3);
+    doc.line(20,y+2,W-20,y+2);
+    y+=10;
+    doc.setFontSize(9);doc.setTextColor(tr,tg,tb);
+    const lines=doc.splitTextToSize(b.review,W-40);
+    lines.forEach(line=>{
+      if(y>275){doc.addPage();y=20;doc.setFillColor(255,253,251);doc.rect(0,0,W,H,'F');}
+      doc.text(line,20,y);
+      y+=5;
+    });
+  }
+
+  // 푸터
+  doc.setDrawColor(...bgL);
+  doc.line(15,H-18,W-15,H-18);
+  doc.setFontSize(7);doc.setTextColor(mr,mg,mb);
+  doc.text('AGORA - Reading Community',W/2,H-12,{align:'center'});
+  doc.text('agora-archive.com',W/2,H-7,{align:'center'});
+
+  const safeName=(b.title||'book').replace(/[^a-zA-Z0-9가-힣]/g,'_').substring(0,20);
+  doc.save('AGORA_'+safeName+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  nt('PDF 파일이 저장됐습니다!');
 }
 
 function saveCurrentColor(){
