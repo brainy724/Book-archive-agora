@@ -2317,12 +2317,64 @@ async function downloadSelectedPdfs(){
   const selected=[..._pdfSelected].map(i=>_pdfBooks[i]).filter(Boolean);
   closePdfBookSelect();
   load(true);
-  for(const b of selected){
-    await generateDetailPdf(b);
-    if(selected.length>1) await new Promise(r=>setTimeout(r,600));
+
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const c=buildPdfContainer();
+
+  for(let idx=0;idx<selected.length;idx++){
+    const b=selected[idx];
+    c.innerHTML=renderBookHtml(b);
+    await new Promise(r=>setTimeout(r,300));
+    const canvas=await html2canvas(c.firstElementChild,{scale:2,useCORS:true,backgroundColor:'#FFFDFB'});
+    const imgW=210;
+    const imgH=canvas.height*imgW/canvas.width;
+    const pageH=297;
+    let y=0;
+    if(idx>0)doc.addPage();
+    while(y<imgH){
+      if(y>0)doc.addPage();
+      doc.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',0,-y,imgW,imgH);
+      y+=pageH;
+    }
+    c.innerHTML='';
   }
+
+  doc.save('AGORA_독서록_'+selected.length+'권_'+new Date().toISOString().slice(0,10)+'.pdf');
   load(false);
-  nt(selected.length+'권의 PDF가 저장됐습니다!');
+  nt(selected.length+'권의 독서록이 한 PDF로 저장됐습니다!');
+}
+
+function renderBookHtml(b){
+  const tc=getThemeColors();
+  const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
+  let days='';
+  if(b.start_date&&b.end_date){const d=Math.ceil((new Date(b.end_date)-new Date(b.start_date))/(1000*60*60*24));if(d>0)days=d+'일간 읽음';}
+  return `<div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:${tc.txt};background:#FFFDFB;padding:0;line-height:1.6">
+    <div style="background:${tc.gold};padding:22px 40px;text-align:center">
+      <div style="font-size:26px;font-weight:700;color:#fff;letter-spacing:8px">A G O R A</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">Reading Record</div>
+    </div>
+    <div style="padding:30px 40px">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:28px;font-weight:700">${b.title||'제목 없음'}</div>
+        <div style="width:60px;height:3px;background:${tc.gold};margin:14px auto"></div>
+      </div>
+      <div style="background:${tc.gl};border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;position:relative">
+        <div><div style="font-size:11px;color:${tc.muted}">저자</div><div style="font-size:15px;font-weight:600;margin-top:4px">${b.author||'-'}</div></div>
+        <div><div style="font-size:11px;color:${tc.muted}">읽기 시작</div><div style="font-size:15px;font-weight:600;margin-top:4px">${(b.start_date||'-').substring(0,10)}</div></div>
+        <div><div style="font-size:11px;color:${tc.muted}">출판사</div><div style="font-size:15px;font-weight:600;margin-top:4px">${b.publisher||'-'}</div></div>
+        <div><div style="font-size:11px;color:${tc.muted}">완독일</div><div style="font-size:15px;font-weight:600;margin-top:4px">${(b.end_date||'-').substring(0,10)}</div></div>
+        ${days?'<div style="position:absolute;top:16px;right:20px;font-size:13px;font-weight:600;color:'+tc.gold+'">'+days+'</div>':''}
+      </div>
+      ${b.rating?`<div style="margin-bottom:24px"><div style="font-size:15px;font-weight:700;color:${tc.gold};margin-bottom:8px">나의 평점</div><div style="font-size:22px;color:${tc.gold};letter-spacing:4px">${stars} <span style="font-size:14px;color:${tc.muted};letter-spacing:0">${b.rating}.0 / 5.0</span></div></div>`:''}
+      ${b.review?`<div><div style="font-size:15px;font-weight:700;color:${tc.gold};margin-bottom:8px">감상평</div><div style="border-top:1px solid ${tc.border};padding-top:14px;font-size:14px;line-height:2;white-space:pre-wrap">${b.review}</div></div>`:''}
+    </div>
+    <div style="border-top:1px solid ${tc.border};padding:16px 40px;text-align:center;margin-top:20px">
+      <div style="font-size:11px;color:${tc.muted}">AGORA - 여성을 위한 독서 커뮤니티</div>
+      <div style="font-size:11px;color:${tc.muted}">agora-archive.com</div>
+    </div>
+  </div>`;
 }
 
 async function htmlToPdf(el,filename){
@@ -2402,36 +2454,8 @@ async function generateListPdf(){
 }
 
 async function generateDetailPdf(b){
-  const tc=getThemeColors();
-  const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
-  let days='';
-  if(b.start_date&&b.end_date){const d=Math.ceil((new Date(b.end_date)-new Date(b.start_date))/(1000*60*60*24));if(d>0)days=d+'일간 읽음';}
   const c=buildPdfContainer();
-  c.innerHTML=`<div style="font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:${tc.txt};background:#FFFDFB;padding:0;line-height:1.6">
-    <div style="background:${tc.gold};padding:22px 40px;text-align:center">
-      <div style="font-size:26px;font-weight:700;color:#fff;letter-spacing:8px">A G O R A</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">Reading Record</div>
-    </div>
-    <div style="padding:30px 40px">
-      <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:28px;font-weight:700">${b.title||'제목 없음'}</div>
-        <div style="width:60px;height:3px;background:${tc.gold};margin:14px auto"></div>
-      </div>
-      <div style="background:${tc.gl};border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;position:relative">
-        <div><div style="font-size:11px;color:${tc.muted}">저자</div><div style="font-size:15px;font-weight:600;margin-top:4px">${b.author||'-'}</div></div>
-        <div><div style="font-size:11px;color:${tc.muted}">읽기 시작</div><div style="font-size:15px;font-weight:600;margin-top:4px">${(b.start_date||'-').substring(0,10)}</div></div>
-        <div><div style="font-size:11px;color:${tc.muted}">출판사</div><div style="font-size:15px;font-weight:600;margin-top:4px">${b.publisher||'-'}</div></div>
-        <div><div style="font-size:11px;color:${tc.muted}">완독일</div><div style="font-size:15px;font-weight:600;margin-top:4px">${(b.end_date||'-').substring(0,10)}</div></div>
-        ${days?'<div style="position:absolute;top:16px;right:20px;font-size:13px;font-weight:600;color:'+tc.gold+'">'+days+'</div>':''}
-      </div>
-      ${b.rating?`<div style="margin-bottom:24px"><div style="font-size:15px;font-weight:700;color:${tc.gold};margin-bottom:8px">나의 평점</div><div style="font-size:22px;color:${tc.gold};letter-spacing:4px">${stars} <span style="font-size:14px;color:${tc.muted};letter-spacing:0">${b.rating}.0 / 5.0</span></div></div>`:''}
-      ${b.review?`<div><div style="font-size:15px;font-weight:700;color:${tc.gold};margin-bottom:8px">감상평</div><div style="border-top:1px solid ${tc.border};padding-top:14px;font-size:14px;line-height:2;white-space:pre-wrap">${b.review}</div></div>`:''}
-    </div>
-    <div style="border-top:1px solid ${tc.border};padding:16px 40px;text-align:center;margin-top:20px">
-      <div style="font-size:11px;color:${tc.muted}">AGORA - 여성을 위한 독서 커뮤니티</div>
-      <div style="font-size:11px;color:${tc.muted}">agora-archive.com</div>
-    </div>
-  </div>`;
+  c.innerHTML=renderBookHtml(b);
   await new Promise(r=>setTimeout(r,300));
   const safeName=(b.title||'book').replace(/[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ]/g,'_').substring(0,20);
   await htmlToPdf(c.firstElementChild,'AGORA_'+safeName+'_'+new Date().toISOString().slice(0,10)+'.pdf');
