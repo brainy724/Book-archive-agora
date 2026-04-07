@@ -8,7 +8,7 @@
 <title>AGORA</title>
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json"/>
-<meta name="theme-color" content="#B8956A"/>
+<meta name="theme-color" content="#DCBE46"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -26,16 +26,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
- --g:#B8956A;--g2:#9C7B52;--gl:#FFF9F2;--gb:#F0DFC8;
+ --g:#DCBE46;--g2:#C3A532;--gl:#FFFDF3;--gb:#F0E8C0;
  --br:#2C1A2E;--brl:#F9F5FA;--brb:#E4D4EA;
  --card:#FFFFFF;--border:#F2ECE6;--txt:#3D3530;--muted:#A89E96;--red:#C0392B;
  --bg-page:#FFFCF9;--nav-h:56px;--tab-h:62px;
  --font-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
- --gold:#B8956A;--gold2:#9C7B52;
- --shadow-sm:0 1px 4px rgba(184,149,106,.06);
- --shadow-md:0 4px 16px rgba(184,149,106,.1);
- --shadow-lg:0 8px 32px rgba(184,149,106,.14);
+ --gold:#DCBE46;--gold2:#C3A532;
+ --shadow-sm:0 1px 4px rgba(220,190,70,.06);
+ --shadow-md:0 4px 16px rgba(220,190,70,.1);
+ --shadow-lg:0 8px 32px rgba(220,190,70,.14);
  --radius:14px;--radius-sm:10px;--radius-lg:20px;
 }
 body.dark{
@@ -88,26 +88,26 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .sort-bar{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
 .sort-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;color:var(--muted);cursor:pointer;transition:all .25s;font-family:var(--font-body);font-weight:500;}
 .sort-btn:hover{border-color:var(--gb);color:var(--g);}
-.sort-btn.on{background:var(--g);color:#fff;border-color:var(--g);box-shadow:0 2px 8px rgba(156,123,92,.3);}
+.sort-btn.on{background:var(--g);color:#fff;border-color:var(--g);box-shadow:0 2px 8px rgba(220,190,70,.3);}
 .adm-tab{background:none;border:none;padding:10px 18px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-body);font-weight:500;transition:all .2s;}
 .adm-tab.on{color:var(--g);border-bottom-color:var(--g);font-weight:600;}
 /* FAB 버튼 */
-.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:26px;cursor:pointer;display:none!important;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(156,123,92,.35);z-index:150;transition:all .3s;}
-.fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(156,123,92,.45);}
+.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:26px;cursor:pointer;display:none!important;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(220,190,70,.35);z-index:150;transition:all .3s;}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(220,190,70,.45);}
 .show-fab .fab{display:flex;}
 @media(min-width:601px){.fab{display:none!important;}}
 .folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
 .folder-card{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;cursor:pointer;transition:all .25s;text-align:center;background:var(--card);position:relative;box-shadow:var(--shadow-sm);}
 .folder-card:hover{border-color:var(--gb);box-shadow:var(--shadow-md);}
-.folder-card.on{border-color:var(--g);background:var(--gl);box-shadow:0 2px 12px rgba(156,123,92,.15);}
+.folder-card.on{border-color:var(--g);background:var(--gl);box-shadow:0 2px 12px rgba(220,190,70,.15);}
 .folder-card-name{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:2px;word-break:break-all;}
 .folder-card-count{font-size:11px;color:var(--muted);}
 .folder-card-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-bottom:6px;}
 /* 웹 사이드바 */
 .sidebar{display:none;position:fixed;left:0;top:var(--nav-h);bottom:0;width:190px;background:var(--gl);border-right:1px solid var(--border);padding:24px 0;z-index:90;flex-direction:column;}
 .sb-item{padding:13px 24px;cursor:pointer;font-size:13px;color:var(--muted);border-left:3px solid transparent;transition:all .25s;font-family:var(--font-body);font-weight:500;}
-.sb-item:hover{color:var(--g);background:rgba(156,123,92,.06);}
-.sb-item.on{color:var(--g);background:rgba(156,123,92,.08);border-left-color:var(--g);font-weight:600;}
+.sb-item:hover{color:var(--g);background:rgba(220,190,70,.06);}
+.sb-item.on{color:var(--g);background:rgba(220,190,70,.08);border-left-color:var(--g);font-weight:600;}
 .sb-theme-btn{margin:auto 16px 24px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;font-size:13px;color:var(--muted);font-family:var(--font-body);text-align:center;width:calc(100%-32px);transition:all .2s;}
 .sb-theme-btn:hover{border-color:var(--g);color:var(--g);}
 .app-with-sidebar{margin-left:190px;}
@@ -136,7 +136,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 /* 검색 중앙 */
 .search-center{display:flex;justify-content:center;margin-bottom:18px;}
 .search-center input{width:100%;max-width:480px;padding:11px 18px;border:1px solid var(--border);border-radius:24px;font-family:var(--font-body);font-size:14px;color:var(--txt);outline:none;background:var(--card);transition:all .25s;box-shadow:var(--shadow-sm);}
-.search-center input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(156,123,92,.1);}
+.search-center input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(220,190,70,.1);}
 /* 책 그리드 4열 */
 .book-grid4{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
 .book-card4{cursor:pointer;transition:all .3s;}
@@ -161,7 +161,7 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 }
 .search-bar{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
 .search-bar input{flex:1;padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;color:var(--txt);outline:none;background:var(--card);transition:all .25s;}
-.search-bar input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(156,123,92,.1);}
+.search-bar input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(220,190,70,.1);}
 .search-bar button{padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .2s;}
 .search-bar button.on{background:var(--g);color:#fff;border-color:var(--g);}
 .tab-bar{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);}
@@ -200,13 +200,13 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 /* 폼 */
 label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
 input,textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 16px;font-family:'Pretendard','Noto Serif KR',sans-serif;font-size:15px;color:var(--txt);outline:none;transition:all .25s;}
-input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(156,123,92,.1);}
+input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(220,190,70,.1);}
 textarea{resize:vertical;min-height:110px;line-height:1.7;}
 .fg{margin-bottom:18px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 /* 버튼 */
-.btn{background:var(--g);color:#fff;border:none;padding:12px 28px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;letter-spacing:.3px;box-shadow:0 2px 8px rgba(156,123,92,.25);}
-.btn:hover{background:var(--g2);box-shadow:0 4px 16px rgba(156,123,92,.35);transform:translateY(-1px);}
+.btn{background:var(--g);color:#fff;border:none;padding:12px 28px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;letter-spacing:.3px;box-shadow:0 2px 8px rgba(220,190,70,.25);}
+.btn:hover{background:var(--g2);box-shadow:0 4px 16px rgba(220,190,70,.35);transform:translateY(-1px);}
 .btn:active{transform:translateY(0);}
 .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none;}
 .btn2{background:transparent;color:var(--muted);border:1px solid var(--border);padding:11px 22px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;transition:all .25s;}
@@ -235,7 +235,7 @@ textarea{resize:vertical;min-height:110px;line-height:1.7;}
 .trk.on .thm{transform:translateX(18px);}
 /* 이미지 */
 .iua{border:2px dashed var(--gb);border-radius:var(--radius-sm);padding:24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--gl);}
-.iua:hover{border-color:var(--g);background:rgba(156,123,92,.06);}
+.iua:hover{border-color:var(--g);background:rgba(220,190,70,.06);}
 .iua input{display:none;}
 .ipl{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
 .ipw{position:relative;width:76px;height:76px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-sm);}
@@ -371,8 +371,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 <div class="lw active" id="lw">
   <div class="lcard">
     <!-- 배경 장식 원 -->
-    <div style="position:fixed;top:-120px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(156,123,92,.06) 0%,transparent 70%);pointer-events:none"></div>
-    <div style="position:fixed;bottom:-100px;left:-60px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(156,123,92,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="position:fixed;top:-120px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(220,190,70,.06) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="position:fixed;bottom:-100px;left:-60px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(220,190,70,.05) 0%,transparent 70%);pointer-events:none"></div>
 
     <!-- 로고 -->
     <div style="text-align:center;margin-bottom:0">
@@ -398,7 +398,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </div>
 
     <!-- 로그인 카드 -->
-    <div style="width:100%;max-width:360px;background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:0 4px 24px rgba(156,123,92,.08)">
+    <div style="width:100%;max-width:360px;background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:20px;padding:32px 28px;box-shadow:0 4px 24px rgba(220,190,70,.08)">
       <button class="bk-btn" onclick="loginKakao()" style="border-radius:12px;padding:15px 16px;font-size:15px;margin-bottom:0;margin-top:0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
         카카오로 시작하기
@@ -442,36 +442,36 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <!-- 추천 색상 -->
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">추천 색상</div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
-      <div onclick="setColor('#B8956A','#9C7B52','#FFF9F2','#F0DFC8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#B8956A;margin-bottom:6px;box-shadow:0 2px 8px rgba(184,149,106,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">허니골드</div>
+      <div onclick="setColor('#DCBE46','#C3A532','#FFFDF3','#F0E8C0');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#DCBE46;margin-bottom:6px;box-shadow:0 2px 8px rgba(220,190,70,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">월계골드</div>
       </div>
-      <div onclick="setColor('#C4956B','#A87A52','#FFF7F0','#F2DCC4');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#C4956B;margin-bottom:6px;box-shadow:0 2px 8px rgba(196,149,107,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">카라멜</div>
+      <div onclick="setColor('#E8A0B0','#D4849A','#FFF5F7','#F8DDE4');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#E8A0B0;margin-bottom:6px;box-shadow:0 2px 8px rgba(232,160,176,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">로즈핑크</div>
       </div>
-      <div onclick="setColor('#9AAF8E','#7A9070','#F5F9F2','#D8E8CE');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#9AAF8E;margin-bottom:6px;box-shadow:0 2px 8px rgba(154,175,142,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">민트세이지</div>
+      <div onclick="setColor('#8DC4A0','#72AB88','#F3FBF5','#D4EEDA');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#8DC4A0;margin-bottom:6px;box-shadow:0 2px 8px rgba(141,196,160,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">피스타치오</div>
       </div>
-      <div onclick="setColor('#B89AAE','#967A90','#FAF4F8','#E8D4E0');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#B89AAE;margin-bottom:6px;box-shadow:0 2px 8px rgba(184,154,174,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">라벤더</div>
+      <div onclick="setColor('#B8A0DC','#9D84C4','#F8F5FD','#E4DAF2');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#B8A0DC;margin-bottom:6px;box-shadow:0 2px 8px rgba(184,160,220,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">라일락</div>
       </div>
-      <div onclick="setColor('#8DA5B8','#6E8698','#F2F6FA','#D0DEE8');closeCustom()" style="cursor:pointer;text-align:center">
-        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#8DA5B8;margin-bottom:6px;box-shadow:0 2px 8px rgba(141,165,184,.3)"></div>
-        <div style="font-size:10px;color:var(--muted)">스카이</div>
+      <div onclick="setColor('#7EB8D0','#64A0BA','#F2F8FB','#D0E8F2');closeCustom()" style="cursor:pointer;text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:12px;background:#7EB8D0;margin-bottom:6px;box-shadow:0 2px 8px rgba(126,184,208,.3)"></div>
+        <div style="font-size:10px;color:var(--muted)">아쿠아</div>
       </div>
     </div>
 
     <!-- 직접 선택 -->
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:12px">직접 선택</div>
     <div style="display:flex;align-items:center;gap:12px;background:#F9F9F9;padding:12px 16px;border-radius:12px">
-      <input type="color" id="customColorPicker" value="#B8956A"
+      <input type="color" id="customColorPicker" value="#DCBE46"
         style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:0"
         oninput="applyCustomColor(this.value)"/>
       <div>
-        <div style="font-size:13px;font-weight:500" id="colorHexDisplay">#B8956A</div>
+        <div style="font-size:13px;font-weight:500" id="colorHexDisplay">#DCBE46</div>
         <div style="font-size:11px;color:var(--muted)">색상 코드</div>
       </div>
       <button class="btn" style="margin-left:auto;padding:8px 14px;font-size:13px" onclick="applyCustomColor(document.getElementById('customColorPicker').value);closeCustom()">적용</button>
@@ -974,11 +974,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <!-- 색상 선택 -->
       <div style="background:#F9F9F9;border-radius:14px;padding:20px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-          <input type="color" id="mainColorPicker" value="#B8956A"
+          <input type="color" id="mainColorPicker" value="#DCBE46"
             style="width:56px;height:56px;border:none;border-radius:12px;cursor:pointer;padding:0;background:none"
             oninput="previewColor(this.value)"/>
           <div>
-            <div style="font-size:15px;font-weight:600" id="pickerHexDisplay">#B8956A</div>
+            <div style="font-size:15px;font-weight:600" id="pickerHexDisplay">#DCBE46</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px">색상을 선택하세요</div>
           </div>
           <button class="btn" style="margin-left:auto;padding:10px 18px;font-size:13px" onclick="applyMainColor()">적용</button>
@@ -986,11 +986,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <!-- 자주 쓰는 색상 -->
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">추천 색상</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <div onclick="quickColor('#B8956A')" style="width:36px;height:36px;border-radius:50%;background:#B8956A;cursor:pointer;border:2px solid transparent;transition:all .2s" title="허니골드 (기본)" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#C4956B')" style="width:36px;height:36px;border-radius:50%;background:#C4956B;cursor:pointer;border:2px solid transparent;transition:all .2s" title="카라멜" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#9AAF8E')" style="width:36px;height:36px;border-radius:50%;background:#9AAF8E;cursor:pointer;border:2px solid transparent;transition:all .2s" title="민트세이지" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#B89AAE')" style="width:36px;height:36px;border-radius:50%;background:#B89AAE;cursor:pointer;border:2px solid transparent;transition:all .2s" title="라벤더" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
-          <div onclick="quickColor('#8DA5B8')" style="width:36px;height:36px;border-radius:50%;background:#8DA5B8;cursor:pointer;border:2px solid transparent;transition:all .2s" title="스카이" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#DCBE46')" style="width:36px;height:36px;border-radius:50%;background:#DCBE46;cursor:pointer;border:2px solid transparent;transition:all .2s" title="월계골드 (기본)" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#E8A0B0')" style="width:36px;height:36px;border-radius:50%;background:#E8A0B0;cursor:pointer;border:2px solid transparent;transition:all .2s" title="로즈핑크" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#8DC4A0')" style="width:36px;height:36px;border-radius:50%;background:#8DC4A0;cursor:pointer;border:2px solid transparent;transition:all .2s" title="피스타치오" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#B8A0DC')" style="width:36px;height:36px;border-radius:50%;background:#B8A0DC;cursor:pointer;border:2px solid transparent;transition:all .2s" title="라일락" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
+          <div onclick="quickColor('#7EB8D0')" style="width:36px;height:36px;border-radius:50%;background:#7EB8D0;cursor:pointer;border:2px solid transparent;transition:all .2s" title="아쿠아" onmouseover="this.style.borderColor='#333';this.style.transform='scale(1.15)'" onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'"></div>
         </div>
       </div>
 
@@ -1011,7 +1011,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">독서 기록 내보내기</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.8">내 독서 기록을 엑셀 또는 PDF 파일로 저장할 수 있어요.<br>책 이름, 저자, 읽은 날짜, 평점, 독후감이 포함됩니다.</div>
       <button class="btn" style="width:100%;padding:12px;font-size:14px" onclick="exportToExcel()">엑셀로 내보내기</button>
-      <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-top:10px;background:var(--gold,#B8956A);color:#fff;border:none" onclick="showPdfExportModal()">PDF로 내보내기</button>
+      <button class="btn" style="width:100%;padding:12px;font-size:14px;margin-top:10px;background:var(--gold,#DCBE46);color:#fff;border:none" onclick="showPdfExportModal()">PDF로 내보내기</button>
     </div>
 
     <!-- PDF 내보내기 모달 -->
@@ -1019,10 +1019,10 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%">
         <div style="font-size:17px;font-weight:700;margin-bottom:18px;color:var(--txt)">PDF 내보내기</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6">현재 테마 색상이 자동으로 적용됩니다.</div>
-        <button onclick="exportPdf('list')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#B8956A);background:var(--card);color:var(--gold,#B8956A);border-radius:10px;cursor:pointer;margin-bottom:10px;text-align:left">
+        <button onclick="exportPdf('list')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#DCBE46);background:var(--card);color:var(--gold,#DCBE46);border-radius:10px;cursor:pointer;margin-bottom:10px;text-align:left">
           전체 독서 목록<br><span style="font-size:11px;font-weight:400;color:var(--muted)">읽은 책 리스트 + 통계 요약</span>
         </button>
-        <button onclick="exportPdf('detail')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#B8956A);background:var(--card);color:var(--gold,#B8956A);border-radius:10px;cursor:pointer;text-align:left">
+        <button onclick="exportPdf('detail')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#DCBE46);background:var(--card);color:var(--gold,#DCBE46);border-radius:10px;cursor:pointer;text-align:left">
           개별 독서록 선택<br><span style="font-size:11px;font-weight:400;color:var(--muted)">책 한 권의 상세 기록 + 감상평</span>
         </button>
         <button onclick="closePdfModal()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
@@ -1035,7 +1035,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <div style="font-size:17px;font-weight:700;margin-bottom:6px;color:var(--txt)">내보낼 책을 선택하세요</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">여러 권을 선택할 수 있어요</div>
         <div id="pdfBookList" style="flex:1;overflow-y:auto;margin-bottom:14px"></div>
-        <button id="pdfDownloadBtn" onclick="downloadSelectedPdfs()" style="width:100%;padding:13px;font-size:14px;font-weight:600;background:var(--gold,#B8956A);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px" disabled>선택한 책 내보내기 (0권)</button>
+        <button id="pdfDownloadBtn" onclick="downloadSelectedPdfs()" style="width:100%;padding:13px;font-size:14px;font-weight:600;background:var(--gold,#DCBE46);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px" disabled>선택한 책 내보내기 (0권)</button>
         <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
       </div>
     </div>
@@ -1333,7 +1333,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div class="fg">
       <label>색상</label>
       <div class="color-swatches" id="folderColorSwatches">
-        <div class="color-sw on" data-color="#B8956A" style="background:#B8956A" onclick="selFolderColor('#B8956A')"></div>
+        <div class="color-sw on" data-color="#DCBE46" style="background:#DCBE46" onclick="selFolderColor('#DCBE46')"></div>
         <div class="color-sw" data-color="#8B4A6B" style="background:#8B4A6B" onclick="selFolderColor('#8B4A6B')"></div>
         <div class="color-sw" data-color="#7B5EA7" style="background:#7B5EA7" onclick="selFolderColor('#7B5EA7')"></div>
         <div class="color-sw" data-color="#5B7E9A" style="background:#5B7E9A" onclick="selFolderColor('#5B7E9A')"></div>
@@ -1642,7 +1642,7 @@ async function ok(u){
  checkUnreadNotifs();
  initNotifRealtime();
 }
-function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;window.close();if(!window.closed){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-family:serif;font-size:28px;color:#B8956A;letter-spacing:4px;margin-bottom:16px">AGORA</div><div style="font-size:15px;color:#888;line-height:1.8">로그아웃 되었습니다.<br>앱을 종료해주세요.</div></div></div>';}}
+function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;window.close();if(!window.closed){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-family:serif;font-size:28px;color:#DCBE46;letter-spacing:4px;margin-bottom:16px">AGORA</div><div style="font-size:15px;color:#888;line-height:1.8">로그아웃 되었습니다.<br>앱을 종료해주세요.</div></div></div>';}}
 async function withdrawAccount(){
  if(!CU) return;
  const ok1=confirm('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.');
@@ -1658,7 +1658,7 @@ async function withdrawAccount(){
   localStorage.removeItem('agora_gender');
   CU=null;
   load(false);
-  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">👋</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">탈퇴가 완료되었습니다</div><div style="font-size:14px;color:#888;line-height:1.8">그동안 아고라를 이용해주셔서 감사합니다.</div><div style="margin-top:24px"><a href="/" style="color:#B8956A;font-size:14px">홈으로 돌아가기</a></div></div></div>';
+  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">👋</div><div style="font-size:18px;font-weight:600;margin-bottom:8px">탈퇴가 완료되었습니다</div><div style="font-size:14px;color:#888;line-height:1.8">그동안 아고라를 이용해주셔서 감사합니다.</div><div style="margin-top:24px"><a href="/" style="color:#DCBE46;font-size:14px">홈으로 돌아가기</a></div></div></div>';
  }catch(e){load(false);nt('탈퇴 처리 중 오류가 발생했습니다.','err');}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('lw').style.display!=='none')doAuth();});
@@ -2266,7 +2266,7 @@ function closePdfBookSelect(){document.getElementById('pdfBookSelectModal').styl
 function getThemeColors(){
   const s=getComputedStyle(document.documentElement);
   return{
-    gold:s.getPropertyValue('--gold').trim()||'#B8956A',
+    gold:s.getPropertyValue('--gold').trim()||'#DCBE46',
     g:s.getPropertyValue('--g').trim()||'#8B4A6B',
     txt:s.getPropertyValue('--txt').trim()||'#2C1A2E',
     muted:s.getPropertyValue('--muted').trim()||'#8A7590',
@@ -2284,7 +2284,7 @@ function updatePdfBtn(){
 }
 function togglePdfBook(id,el){
   if(_pdfSelected.has(id)){_pdfSelected.delete(id);el.style.borderColor='var(--border)';el.style.background='var(--card)';}
-  else{_pdfSelected.add(id);el.style.borderColor='var(--gold,#B8956A)';el.style.background='var(--gl,#F9F0F4)';}
+  else{_pdfSelected.add(id);el.style.borderColor='var(--gold,#DCBE46)';el.style.background='var(--gl,#F9F0F4)';}
   updatePdfBtn();
 }
 
@@ -2464,7 +2464,7 @@ async function generateDetailPdf(b){
 
 function saveCurrentColor(){
   const picker=document.getElementById('mainColorPicker');
-  const hex=picker?picker.value:'#B8956A';
+  const hex=picker?picker.value:'#DCBE46';
   const saved=JSON.parse(localStorage.getItem('agora_saved_colors')||'[]');
   if(saved.includes(hex)){nt('이미 저장된 색상이에요.');return;}
   saved.unshift(hex);
@@ -2504,7 +2504,7 @@ function quickColor(hex){
 }
 function applyMainColor(){
   const p=document.getElementById('mainColorPicker');
-  const hex=p?p.value:'#B8956A';
+  const hex=p?p.value:'#DCBE46';
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   const gl=`rgba(${r},${g},${b},0.1)`;
   const gb2=`rgba(${r},${g},${b},0.25)`;
@@ -2679,7 +2679,7 @@ function setForumCat(cat){
   });
   rForum();
 }
-let pubFolder='all', forumFolder='all', selFolderClr='#B8956A';
+let pubFolder='all', forumFolder='all', selFolderClr='#DCBE46';
 
 async function loadFolders(type){
   const{data}=await sb.from('agora_folders').select('*').eq('user_id',CU.id).eq('type',type).order('created_at',{ascending:true});
@@ -2797,8 +2797,8 @@ function openNewFolder(type){
   document.getElementById('folderEditId').value='';
   document.getElementById('folderNameInput').value='';
   document.getElementById('folderDelBtn').style.display='none';
-  selFolderClr='#B8956A';
-  document.querySelectorAll('.color-sw').forEach(s=>s.classList.toggle('on',s.dataset.color==='#B8956A'));
+  selFolderClr='#DCBE46';
+  document.querySelectorAll('.color-sw').forEach(s=>s.classList.toggle('on',s.dataset.color==='#DCBE46'));
   document.getElementById('folderModalOv').classList.add('open');
 }
 function openEditFolder(id,name,color,type){
