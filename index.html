@@ -17,7 +17,7 @@
 <link rel="icon" type="image/png" href="/icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="/pilsa-quotes.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
@@ -1030,10 +1030,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <!-- 개별 독서록 선택 모달 -->
     <div id="pdfBookSelectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
-      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%;max-height:70vh;overflow-y:auto">
-        <div style="font-size:17px;font-weight:700;margin-bottom:14px;color:var(--txt)">어떤 책을 내보낼까요?</div>
-        <div id="pdfBookList"></div>
-        <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
+      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%;max-height:70vh;display:flex;flex-direction:column">
+        <div style="font-size:17px;font-weight:700;margin-bottom:6px;color:var(--txt)">내보낼 책을 선택하세요</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">여러 권을 선택할 수 있어요</div>
+        <div id="pdfBookList" style="flex:1;overflow-y:auto;margin-bottom:14px"></div>
+        <button id="pdfDownloadBtn" onclick="downloadSelectedPdfs()" style="width:100%;padding:13px;font-size:14px;font-weight:600;background:var(--gold,#B8956A);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px" disabled>선택한 책 내보내기 (0권)</button>
+        <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
       </div>
     </div>
 
@@ -2253,15 +2255,18 @@ async function exportToExcel(){
 }
 
 // ══ PDF 내보내기 ══
+let _pdfBooks=[];
+let _pdfSelected=new Set();
+
 function showPdfExportModal(){
-  const m=document.getElementById('pdfExportModal');
-  m.style.display='flex';
+  document.getElementById('pdfExportModal').style.display='flex';
 }
 function closePdfModal(){
   document.getElementById('pdfExportModal').style.display='none';
 }
 function closePdfBookSelect(){
   document.getElementById('pdfBookSelectModal').style.display='none';
+  _pdfSelected.clear();
 }
 
 function getThemeColors(){
@@ -2270,8 +2275,7 @@ function getThemeColors(){
   const g=s.getPropertyValue('--g').trim()||'#8B4A6B';
   const txt=s.getPropertyValue('--txt').trim()||'#2C1A2E';
   const muted=s.getPropertyValue('--muted').trim()||'#8A7590';
-  const card=s.getPropertyValue('--card').trim()||'#FFFDFB';
-  return{gold,g,txt,muted,card};
+  return{gold,g,txt,muted};
 }
 function hexToRgb(hex){
   hex=hex.replace('#','');
@@ -2283,27 +2287,81 @@ function lightenColor(hex,amt=0.85){
   return[Math.round(r+(255-r)*amt),Math.round(g+(255-g)*amt),Math.round(b+(255-b)*amt)];
 }
 
+async function ensureJsPdf(){
+  if(window.jspdf)return true;
+  try{
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload=res;s.onerror=rej;
+      document.head.appendChild(s);
+    });
+    return !!window.jspdf;
+  }catch(e){return false;}
+}
+
+function updatePdfBtn(){
+  const btn=document.getElementById('pdfDownloadBtn');
+  const cnt=_pdfSelected.size;
+  btn.textContent='선택한 책 내보내기 ('+cnt+'권)';
+  btn.disabled=cnt===0;
+  btn.style.opacity=cnt===0?'0.5':'1';
+}
+
+function togglePdfBook(id,el){
+  if(_pdfSelected.has(id)){
+    _pdfSelected.delete(id);
+    el.style.borderColor='var(--border)';
+    el.style.background='var(--card)';
+  }else{
+    _pdfSelected.add(id);
+    el.style.borderColor='var(--gold,#B8956A)';
+    el.style.background='var(--gl,#F9F0F4)';
+  }
+  updatePdfBtn();
+}
+
 async function exportPdf(type){
   closePdfModal();
+  const ok=await ensureJsPdf();
+  if(!ok){nt('PDF 라이브러리를 불러오지 못했어요. 새로고침 후 다시 시도해주세요.','err');return;}
+
   if(type==='detail'){
-    // 책 선택 모달 보여주기
     load(true);
     const{data:books}=await sb.from('agora_books').select('*').eq('user_id',CU.id).order('created_at',{ascending:false});
     load(false);
     if(!books||!books.length){nt('저장된 독서 기록이 없습니다.','err');return;}
+    _pdfBooks=books;
+    _pdfSelected.clear();
     const list=document.getElementById('pdfBookList');
     list.innerHTML='';
-    books.forEach(b=>{
-      const btn=document.createElement('button');
-      btn.style.cssText='width:100%;padding:12px 14px;font-size:14px;border:1px solid var(--border);background:var(--card);color:var(--txt);border-radius:10px;cursor:pointer;margin-bottom:8px;text-align:left';
-      btn.innerHTML='<strong>'+((b.title||'제목 없음'))+'</strong><br><span style="font-size:12px;color:var(--muted)">'+(b.author||'저자 미상')+'</span>';
-      btn.onclick=()=>{closePdfBookSelect();generateDetailPdf(b);};
-      list.appendChild(btn);
+    books.forEach((b,i)=>{
+      const div=document.createElement('div');
+      div.style.cssText='padding:12px 14px;font-size:14px;border:2px solid var(--border);background:var(--card);color:var(--txt);border-radius:10px;cursor:pointer;margin-bottom:8px;text-align:left;transition:all .2s';
+      div.innerHTML='<strong>'+(b.title||'제목 없음')+'</strong><br><span style="font-size:12px;color:var(--muted)">'+(b.author||'저자 미상')+'</span>';
+      div.onclick=function(){togglePdfBook(i,this);};
+      list.appendChild(div);
     });
+    updatePdfBtn();
     document.getElementById('pdfBookSelectModal').style.display='flex';
     return;
   }
   generateListPdf();
+}
+
+async function downloadSelectedPdfs(){
+  if(_pdfSelected.size===0)return;
+  const ok=await ensureJsPdf();
+  if(!ok){nt('PDF 라이브러리를 불러오지 못했어요.','err');return;}
+
+  const selected=[..._pdfSelected].map(i=>_pdfBooks[i]).filter(Boolean);
+  closePdfBookSelect();
+
+  for(const b of selected){
+    generateDetailPdf(b);
+    if(selected.length>1) await new Promise(r=>setTimeout(r,500));
+  }
+  nt(selected.length+'권의 PDF가 저장됐습니다!');
 }
 
 async function generateListPdf(){
@@ -2322,11 +2380,9 @@ async function generateListPdf(){
   const bgL=lightenColor(tc.gold,0.92);
   const bgM=lightenColor(tc.gold,0.85);
 
-  // 배경
   doc.setFillColor(255,253,251);
   doc.rect(0,0,W,H,'F');
 
-  // 골드 헤더
   doc.setFillColor(gr,gg,gb);
   doc.rect(0,0,W,28,'F');
   doc.setTextColor(255,255,255);
@@ -2335,12 +2391,10 @@ async function generateListPdf(){
   doc.setFontSize(8);
   doc.text('Reading Archive',W/2,21,{align:'center'});
 
-  // 제목
   doc.setTextColor(tr,tg,tb);
   doc.setFontSize(18);
   doc.text('My Reading Record',W/2,42,{align:'center'});
 
-  // 사용자 정보
   const nick=document.getElementById('currentNickname');
   const nickName=nick?nick.textContent:'';
   doc.setFillColor(...bgL);
@@ -2355,54 +2409,41 @@ async function generateListPdf(){
   doc.setFontSize(8);
   doc.text(new Date().toLocaleDateString('ko-KR'),20,63);
 
-  // 통계 카드
   const cardW=(W-40)/3;
-  const stats=[['Completed',completed+''],[' Reading',reading+''],['Total',books.length+'']];
-  stats.forEach(([label,val],i)=>{
+  [['Completed',completed+''],['Reading',reading+''],['Total',books.length+'']].forEach(([label,val],i)=>{
     const x=15+i*(cardW+5);
     doc.setFillColor(255,255,255);
     doc.setDrawColor(...bgM);
     doc.roundedRect(x,70,cardW,18,2,2,'FD');
-    doc.setFontSize(14);
-    doc.setTextColor(gr,gg,gb);
+    doc.setFontSize(14);doc.setTextColor(gr,gg,gb);
     doc.text(val,x+cardW/2,80,{align:'center'});
-    doc.setFontSize(7);
-    doc.setTextColor(mr,mg,mb);
+    doc.setFontSize(7);doc.setTextColor(mr,mg,mb);
     doc.text(label,x+cardW/2,86,{align:'center'});
   });
 
-  // 테이블 헤더
   let y=96;
   doc.setFillColor(gr,gg,gb);
   doc.roundedRect(15,y,W-30,9,1,1,'F');
-  doc.setFontSize(8);
-  doc.setTextColor(255,255,255);
+  doc.setFontSize(8);doc.setTextColor(255,255,255);
   const cols=[18,30,95,140,175];
   ['No.','Title','Author','Start','End'].forEach((h,i)=>doc.text(h,cols[i],y+6));
 
-  // 데이터
   y+=12;
   books.forEach((b,i)=>{
     if(y>275){doc.addPage();y=20;doc.setFillColor(255,253,251);doc.rect(0,0,W,H,'F');}
     if(i%2===0){doc.setFillColor(...bgL);doc.rect(15,y-4,W-30,10,'F');}
-    doc.setFontSize(8);
-    doc.setTextColor(tr,tg,tb);
+    doc.setFontSize(8);doc.setTextColor(tr,tg,tb);
     doc.text((i+1)+'',cols[0],y+2);
-    const title=(b.title||'').substring(0,22);
-    doc.text(title,cols[1],y+2);
+    doc.text((b.title||'').substring(0,22),cols[1],y+2);
     doc.setTextColor(mr,mg,mb);
-    const author=(b.author||'').substring(0,14);
-    doc.text(author,cols[2],y+2);
+    doc.text((b.author||'').substring(0,14),cols[2],y+2);
     doc.text((b.start_date||'-').substring(0,10),cols[3],y+2);
     doc.text((b.end_date||'-').substring(0,10),cols[4],y+2);
     y+=10;
   });
 
-  // 푸터
-  doc.setDrawColor(...bgM);
-  doc.line(15,H-18,W-15,H-18);
-  doc.setFontSize(7);
-  doc.setTextColor(mr,mg,mb);
+  doc.setDrawColor(...bgM);doc.line(15,H-18,W-15,H-18);
+  doc.setFontSize(7);doc.setTextColor(mr,mg,mb);
   doc.text('AGORA - Reading Community',W/2,H-12,{align:'center'});
   doc.text('agora-archive.com',W/2,H-7,{align:'center'});
 
@@ -2420,92 +2461,58 @@ function generateDetailPdf(b){
   const[mr,mg,mb]=hexToRgb(tc.muted);
   const bgL=lightenColor(tc.gold,0.92);
 
-  // 배경
-  doc.setFillColor(255,253,251);
-  doc.rect(0,0,W,H,'F');
-
-  // 골드 헤더
-  doc.setFillColor(gr,gg,gb);
-  doc.rect(0,0,W,22,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(16);
+  doc.setFillColor(255,253,251);doc.rect(0,0,W,H,'F');
+  doc.setFillColor(gr,gg,gb);doc.rect(0,0,W,22,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(16);
   doc.text('A G O R A',W/2,12,{align:'center'});
-  doc.setFontSize(7);
-  doc.text('Reading Record',W/2,18,{align:'center'});
+  doc.setFontSize(7);doc.text('Reading Record',W/2,18,{align:'center'});
 
-  // 책 제목
-  doc.setTextColor(tr,tg,tb);
-  doc.setFontSize(20);
-  const title=b.title||'Untitled';
-  doc.text(title,W/2,38,{align:'center'});
-
-  // 장식선
-  doc.setDrawColor(gr,gg,gb);
-  doc.setLineWidth(0.7);
+  doc.setTextColor(tr,tg,tb);doc.setFontSize(20);
+  doc.text(b.title||'Untitled',W/2,38,{align:'center'});
+  doc.setDrawColor(gr,gg,gb);doc.setLineWidth(0.7);
   doc.line(W/2-15,43,W/2+15,43);
 
-  // 정보 카드
-  doc.setFillColor(...bgL);
-  doc.roundedRect(15,48,W-30,28,3,3,'F');
-  doc.setFontSize(8);
-  doc.setTextColor(mr,mg,mb);
-  doc.text('Author',20,55);
-  doc.text('Publisher',20,67);
-  doc.text('Started',W/2+5,55);
-  doc.text('Completed',W/2+5,67);
-  doc.setFontSize(10);
-  doc.setTextColor(tr,tg,tb);
-  doc.text(b.author||'-',20,60);
-  doc.text(b.publisher||'-',20,72);
+  doc.setFillColor(...bgL);doc.roundedRect(15,48,W-30,28,3,3,'F');
+  doc.setFontSize(8);doc.setTextColor(mr,mg,mb);
+  doc.text('Author',20,55);doc.text('Publisher',20,67);
+  doc.text('Started',W/2+5,55);doc.text('Completed',W/2+5,67);
+  doc.setFontSize(10);doc.setTextColor(tr,tg,tb);
+  doc.text(b.author||'-',20,60);doc.text(b.publisher||'-',20,72);
   doc.text((b.start_date||'-').substring(0,10),W/2+5,60);
   doc.text((b.end_date||'-').substring(0,10),W/2+5,72);
 
-  // 읽은 기간
   if(b.start_date&&b.end_date){
     const d1=new Date(b.start_date),d2=new Date(b.end_date);
     const days=Math.ceil((d2-d1)/(1000*60*60*24));
-    if(days>0){
-      doc.setFontSize(9);doc.setTextColor(gr,gg,gb);
-      doc.text(days+' days',W-20,55,{align:'right'});
-    }
+    if(days>0){doc.setFontSize(9);doc.setTextColor(gr,gg,gb);doc.text(days+' days',W-20,55,{align:'right'});}
   }
 
-  // 평점
   let y=84;
   if(b.rating){
-    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);
-    doc.text('Rating',20,y);
-    const stars=Array(b.rating).fill('*').join(' ');
-    doc.text(b.rating+'.0 / 5.0    '+stars,60,y);
+    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);doc.text('Rating',20,y);
+    doc.text(b.rating+'.0 / 5.0',60,y);
     y+=12;
   }
 
-  // 감상평
   if(b.review){
-    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);
-    doc.text('Review',20,y);
-    doc.setDrawColor(...bgL);doc.setLineWidth(0.3);
-    doc.line(20,y+2,W-20,y+2);
+    doc.setFontSize(11);doc.setTextColor(gr,gg,gb);doc.text('Review',20,y);
+    doc.setDrawColor(...bgL);doc.setLineWidth(0.3);doc.line(20,y+2,W-20,y+2);
     y+=10;
     doc.setFontSize(9);doc.setTextColor(tr,tg,tb);
     const lines=doc.splitTextToSize(b.review,W-40);
     lines.forEach(line=>{
       if(y>275){doc.addPage();y=20;doc.setFillColor(255,253,251);doc.rect(0,0,W,H,'F');}
-      doc.text(line,20,y);
-      y+=5;
+      doc.text(line,20,y);y+=5;
     });
   }
 
-  // 푸터
-  doc.setDrawColor(...bgL);
-  doc.line(15,H-18,W-15,H-18);
+  doc.setDrawColor(...bgL);doc.line(15,H-18,W-15,H-18);
   doc.setFontSize(7);doc.setTextColor(mr,mg,mb);
   doc.text('AGORA - Reading Community',W/2,H-12,{align:'center'});
   doc.text('agora-archive.com',W/2,H-7,{align:'center'});
 
-  const safeName=(b.title||'book').replace(/[^a-zA-Z0-9가-힣]/g,'_').substring(0,20);
+  const safeName=(b.title||'book').replace(/[^a-zA-Z0-9]/g,'_').substring(0,20);
   doc.save('AGORA_'+safeName+'_'+new Date().toISOString().slice(0,10)+'.pdf');
-  nt('PDF 파일이 저장됐습니다!');
 }
 
 function saveCurrentColor(){
