@@ -1017,34 +1017,6 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
     <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
 
-    <!-- PDF 내보내기 모달 -->
-    <div id="pdfExportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
-      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%">
-        <div style="font-size:17px;font-weight:700;margin-bottom:18px;color:var(--txt)">PDF 내보내기</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6">현재 테마 색상이 자동으로 적용됩니다.</div>
-        <button onclick="exportPdf('list')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#D4B878);background:var(--card);color:var(--gold,#D4B878);border-radius:10px;cursor:pointer;margin-bottom:10px;text-align:left">
-          전체 독서 목록<br><span style="font-size:11px;font-weight:400;color:var(--muted)">읽은 책 리스트 + 통계 요약</span>
-        </button>
-        <button onclick="exportPdf('detail')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#D4B878);background:var(--card);color:var(--gold,#D4B878);border-radius:10px;cursor:pointer;text-align:left">
-          개별 독서록 선택<br><span style="font-size:11px;font-weight:400;color:var(--muted)">책 한 권의 상세 기록 + 감상평</span>
-        </button>
-        <button onclick="closePdfModal()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
-      </div>
-    </div>
-
-    <!-- 개별 독서록 선택 모달 -->
-    <div id="pdfBookSelectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
-      <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%;max-height:70vh;display:flex;flex-direction:column">
-        <div style="font-size:17px;font-weight:700;margin-bottom:6px;color:var(--txt)">내보낼 책을 선택하세요</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">여러 권을 선택할 수 있어요</div>
-        <div id="pdfBookList" style="flex:1;overflow-y:auto;margin-bottom:14px"></div>
-        <button id="pdfDownloadBtn" onclick="downloadSelectedPdfs()" style="width:100%;padding:13px;font-size:14px;font-weight:600;background:var(--gold,#D4B878);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px" disabled>선택한 책 내보내기 (0권)</button>
-        <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
-      </div>
-    </div>
-
-    <div style="height:1px;background:var(--border);margin-bottom:32px"></div>
-
     <!-- 1:1 고객센터 -->
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:14px">1:1 고객센터</div>
@@ -1093,9 +1065,9 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </div>
   </div></div>
  <!-- 지원 페이지 모달 -->
- <div id="settingsPageModal" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto">
+ <div id="settingsPageModal" style="display:none;position:fixed;inset:0;background:#FFFCF9;z-index:9999;overflow-y:auto">
    <div style="max-width:600px;margin:0 auto;padding:20px 16px 40px">
-     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:1">
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;position:sticky;top:0;background:#FFFCF9;padding:12px 0;z-index:1">
        <div style="font-size:18px;font-weight:700;color:var(--txt)" id="settingsPageTitle"></div>
        <button onclick="closeSettingsPage()" style="background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer;padding:4px 8px">✕</button>
      </div>
@@ -5867,5 +5839,31 @@ function closeGuide(){
   document.getElementById('guideOverlay').style.display='none';
 }
 </script>
+<!-- PDF 내보내기 모달 (전역) -->
+<div id="pdfExportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%">
+    <div style="font-size:17px;font-weight:700;margin-bottom:18px;color:var(--txt)">PDF 내보내기</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6">현재 테마 색상이 자동으로 적용됩니다.</div>
+    <button onclick="exportPdf('list')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#D4B878);background:var(--card);color:var(--gold,#D4B878);border-radius:10px;cursor:pointer;margin-bottom:10px;text-align:left">
+      전체 독서 목록<br><span style="font-size:11px;font-weight:400;color:var(--muted)">읽은 책 리스트 + 통계 요약</span>
+    </button>
+    <button onclick="exportPdf('detail')" style="width:100%;padding:14px;font-size:14px;font-weight:600;border:2px solid var(--gold,#D4B878);background:var(--card);color:var(--gold,#D4B878);border-radius:10px;cursor:pointer;text-align:left">
+      개별 독서록 선택<br><span style="font-size:11px;font-weight:400;color:var(--muted)">책 한 권의 상세 기록 + 감상평</span>
+    </button>
+    <button onclick="closePdfModal()" style="width:100%;padding:12px;font-size:13px;margin-top:14px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
+  </div>
+</div>
+
+<!-- 개별 독서록 선택 모달 (전역) -->
+<div id="pdfBookSelectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:16px;padding:28px;max-width:340px;width:100%;max-height:70vh;display:flex;flex-direction:column">
+    <div style="font-size:17px;font-weight:700;margin-bottom:6px;color:var(--txt)">내보낼 책을 선택하세요</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">여러 권을 선택할 수 있어요</div>
+    <div id="pdfBookList" style="flex:1;overflow-y:auto;margin-bottom:14px"></div>
+    <button id="pdfDownloadBtn" onclick="downloadSelectedPdfs()" style="width:100%;padding:13px;font-size:14px;font-weight:600;background:var(--gold,#D4B878);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px" disabled>선택한 책 내보내기 (0권)</button>
+    <button onclick="closePdfBookSelect()" style="width:100%;padding:12px;font-size:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer">닫기</button>
+  </div>
+</div>
+
 </body>
 </html>
