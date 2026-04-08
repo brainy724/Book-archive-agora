@@ -1167,6 +1167,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <span style="font-weight:600;color:var(--g)">알라딘</span> 도서 데이터 제공
    </div>
 
+   <!-- 도서 검색 → 알라딘 구매 -->
+   <div style="display:flex;gap:8px;margin-bottom:16px">
+     <input id="recBookSearch" placeholder="읽고 싶은 책을 검색해보세요" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-body);font-size:13px;color:var(--txt);background:var(--card);outline:none" onkeydown="if(event.key==='Enter')searchRecBook()"/>
+     <button onclick="searchRecBook()" class="btn2" style="padding:10px 14px;font-size:13px;white-space:nowrap;border-radius:10px">검색</button>
+   </div>
+   <div id="recSearchResults" style="display:none;margin-bottom:18px"></div>
+
    <!-- 서브탭 -->
    <div class="tab-bar" style="margin:0 0 18px">
      <button class="tab-btn on" id="recTab-best" onclick="switchRecTab('best')">베스트셀러</button>
@@ -2095,7 +2102,7 @@ async function searchBookInfo(){
     if(kakaoRes.status==='fulfilled'){
       const kd=await kakaoRes.value.json();
       (kd.documents||[]).forEach(b=>{
-        books.push({url:b.thumbnail||'',title:b.title,author:(b.authors||[]).join(', '),publisher:b.publisher||'',source:'카카오',category:b.category||''});
+        books.push({url:b.thumbnail||'',title:b.title,author:(b.authors||[]).join(', '),publisher:b.publisher||'',source:'카카오',category:b.category||'',isbn:b.isbn||''});
       });
     }
 
@@ -5319,6 +5326,40 @@ function aladinJSONP(queryType, callback){
 
 // ========== 알라딘 베스트셀러 ==========
 let _bestLoaded=false;
+// ========== 추천 탭 도서 검색 → 알라딘 구매 연결 ==========
+async function searchRecBook(){
+  const q=document.getElementById('recBookSearch').value.trim();
+  if(!q){nt('검색어를 입력해주세요.','err');return;}
+  const resEl=document.getElementById('recSearchResults');
+  resEl.style.display='block';
+  resEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">검색 중...</div>';
+  try{
+    const res=await fetch(`https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(q)}&size=5`,{
+      headers:{'Authorization':`KakaoAK ${KK_REST_KEY}`}
+    });
+    const data=await res.json();
+    if(!data.documents||!data.documents.length){
+      resEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">검색 결과가 없어요.</div>';
+      return;
+    }
+    resEl.innerHTML=data.documents.map(b=>`
+      <a href="https://www.aladin.co.kr/search/wsearchresult.aspx?SearchTarget=All&SearchWord=${encodeURIComponent(b.title.replace(/<[^>]*>/g,''))}" target="_blank" style="text-decoration:none;color:inherit">
+        <div class="card" style="display:flex;gap:12px;padding:14px 16px;align-items:center;cursor:pointer;margin-bottom:6px">
+          ${b.thumbnail?`<img src="${b.thumbnail}" style="width:45px;height:65px;border-radius:6px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)"/>`
+          :`<div style="width:45px;height:65px;border-radius:6px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;color:var(--muted)">표지없음</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.title.replace(/<[^>]*>/g,'')}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${(b.authors||[]).join(', ')} · ${b.publisher||''}</div>
+          </div>
+          <div style="flex-shrink:0;font-size:10px;padding:5px 10px;background:var(--g);color:#fff;border-radius:6px;font-weight:600">구매</div>
+        </div>
+      </a>
+    `).join('');
+  }catch(e){
+    resEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">검색에 실패했어요.</div>';
+  }
+}
+
 function loadBest(){
   if(_bestLoaded) return;
   aladinJSONP('Bestseller', function(data){
