@@ -703,7 +703,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <option value="기타">기타</option>
    </select>
  </div>
- <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:140px" placeholder="책에 대한 생각을 자유롭게 적어보세요..." maxlength="2000" oninput="document.getElementById('reviewCount').textContent=this.value.length"></textarea>
+ <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:140px;max-height:300px;overflow-y:auto;resize:vertical" placeholder="책에 대한 생각을 자유롭게 적어보세요..." maxlength="2000" oninput="document.getElementById('reviewCount').textContent=this.value.length"></textarea>
  <div style="text-align:right;margin-top:6px;font-size:11px;color:var(--muted)"><span id="reviewCount">0</span> / 2,000</div>
  </div>
  <div class="fg">
