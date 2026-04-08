@@ -534,14 +534,14 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="h1 serif">내 서재</div>
  <div class="sub" id="libSub" style="margin-bottom:0">나의 독서 공간</div>
 
- <!-- 서브탭: 내 책 / 독서 습관 -->
+ <!-- 서브탭: 읽은 책 / 독서 습관 -->
  <div class="tab-bar" style="margin:18px 0 16px">
-   <button class="tab-btn on" id="libSubTab-books" onclick="switchLibSubTab('books')">내 책</button>
+   <button class="tab-btn on" id="libSubTab-books" onclick="switchLibSubTab('books')">읽은 책</button>
    <button class="tab-btn" id="libSubTab-note" onclick="switchLibSubTab('note')">독서 습관</button>
    <button class="tab-btn" id="libSubTab-export" onclick="switchLibSubTab('export')">내보내기</button>
  </div>
 
- <!-- 내 책 섹션 -->
+ <!-- 읽은 책 섹션 -->
  <div id="libBooksSection">
  <div class="cat-bar" id="libCatBar" style="margin-bottom:14px">
    <button class="cat-btn on" onclick="setLibCat('')">전체</button>
@@ -4768,7 +4768,7 @@ if('serviceWorker' in navigator){
 const _guideTexts={
   library:{
     title:'내 서재',
-    body:'나만의 독서 공간입니다.<br><br>· <b>내 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.'
+    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.'
   },
   forum:{
     title:'광장',
