@@ -5808,7 +5808,7 @@ async function deletePilsa(id){
   // 서브탭 정의: {탭ID: [서브탭 목록, 현재 서브탭 가져오는 함수, 전환 함수]}
   const subTabMap={
     forum:{ tabs:['public','posts','club','pilsa'], get:()=>document.querySelector('#plazaTab-public.on')?'public':document.querySelector('#plazaTab-posts.on')?'posts':document.querySelector('#plazaTab-club.on')?'club':'pilsa', go:switchPlazaTab },
-    library:{ tabs:['books','note'], get:()=>document.querySelector('#libSubTab-books.on')?'books':'note', go:switchLibSubTab },
+    library:{ tabs:['books','note','export'], get:()=>document.querySelector('#libSubTab-books.on')?'books':document.querySelector('#libSubTab-note.on')?'note':document.querySelector('#libSubTab-export.on')?'export':'books', go:switchLibSubTab },
     match:{ tabs:['best','new','match'], get:()=>document.querySelector('#recTab-best.on')?'best':document.querySelector('#recTab-new.on')?'new':'match', go:switchRecTab }
   };
 
