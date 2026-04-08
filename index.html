@@ -534,10 +534,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="h1 serif">내 서재</div>
  <div class="sub" id="libSub" style="margin-bottom:0">나의 독서 공간</div>
 
- <!-- 서브탭: 읽은 책 / 독서 습관 -->
+ <!-- 서브탭: 읽은 책 / 독서 습관 / 월계관 / 내보내기 -->
  <div class="tab-bar" style="margin:18px 0 16px">
    <button class="tab-btn on" id="libSubTab-books" onclick="switchLibSubTab('books')">읽은 책</button>
    <button class="tab-btn" id="libSubTab-note" onclick="switchLibSubTab('note')">독서 습관</button>
+   <button class="tab-btn" id="libSubTab-laurel" onclick="switchLibSubTab('laurel')">월계관</button>
    <button class="tab-btn" id="libSubTab-export" onclick="switchLibSubTab('export')">내보내기</button>
  </div>
 
@@ -635,6 +636,20 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <div id="timerHistory"></div>
    </div>
   </div><!-- /libNoteSection -->
+
+  <!-- 월계관 섹션 (내 서재 안) -->
+  <div id="libLaurelSection" style="display:none">
+    <div style="text-align:center;padding:20px 0 10px">
+      <div style="font-size:13px;color:var(--muted);font-weight:600;letter-spacing:1px;margin-bottom:6px">나의 월계관</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px">책 한 권을 읽을 때마다 잎이 하나씩 자라납니다</div>
+      <div id="laurelWrap" style="display:flex;justify-content:center;align-items:center;margin-bottom:20px">
+        <svg id="laurelSvg" viewBox="0 0 300 300" width="260" height="260"></svg>
+      </div>
+      <div id="laurelCount" style="font-family:var(--font-serif);font-size:28px;font-weight:700;color:var(--g);margin-bottom:4px"></div>
+      <div id="laurelMsg" style="font-size:13px;color:var(--muted);margin-bottom:20px"></div>
+      <div id="laurelBadges" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:16px"></div>
+    </div>
+  </div><!-- /libLaurelSection -->
 
   <!-- 내보내기 섹션 (내 서재 안) -->
   <div id="libExportSection" style="display:none">
@@ -2625,6 +2640,7 @@ async function rLib(){
   return new Date(b.created_at)-new Date(a.created_at); // date_desc 기본
 });
  const libQ=(document.getElementById('libSearch')||{value:''}).value.trim().toLowerCase();
+  window._myBooks=books;
   let filteredBooks=books;
   if(libCat) filteredBooks=filteredBooks.filter(b=>b.category===libCat);
   if(libQ) filteredBooks=filteredBooks.filter(b=>(b.title||'').toLowerCase().includes(libQ)||(b.author||'').toLowerCase().includes(libQ));
@@ -4768,7 +4784,7 @@ if('serviceWorker' in navigator){
 const _guideTexts={
   library:{
     title:'내 서재',
-    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
+    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.<br>· <b>월계관</b> — 책을 읽을수록 월계관에 잎이 하나씩 자라나요. 40권을 채워 완성해보세요!<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
   },
   forum:{
     title:'광장',
@@ -4925,6 +4941,93 @@ function updateReadingPage(idx){
   }
 }
 // ── 읽고 있는 책 드래그 정렬 (long-press) ──
+// ── 월계관 (책 1권 = 잎 1개) ──
+function renderLaurel(){
+  if(!CU) return;
+  const svg=document.getElementById('laurelSvg');
+  const countEl=document.getElementById('laurelCount');
+  const msgEl=document.getElementById('laurelMsg');
+  const badgeEl=document.getElementById('laurelBadges');
+  // 읽은 책 수 (DB 기반)
+  const books=window._myBooks||[];
+  const n=books.length;
+  const maxLeaves=40; // 월계관 최대 잎 수 (좌우 20개씩)
+  const leaves=Math.min(n, maxLeaves);
+
+  // SVG 월계관 그리기
+  const cx=150, cy=150, r=100;
+  let paths='';
+
+  // 잎 하나 그리기 함수
+  function leaf(x, y, angle, filled){
+    const col=filled?'var(--g,#D4B878)':'#E8E0D4';
+    const stroke=filled?'#B8956A':'#D5CEC5';
+    return `<g transform="translate(${x},${y}) rotate(${angle})">
+      <path d="M0,0 C-5,-14 -3,-22 0,-28 C3,-22 5,-14 0,0Z" fill="${col}" stroke="${stroke}" stroke-width="0.5" opacity="${filled?1:0.35}"/>
+    </g>`;
+  }
+
+  // 좌우 각각 20개씩, 아래에서 위로 배치
+  for(let side=0;side<2;side++){
+    const dir=side===0?-1:1; // 좌=-1, 우=1
+    for(let i=0;i<maxLeaves/2;i++){
+      const leafIdx=side*(maxLeaves/2)+i;
+      const filled=leafIdx<leaves;
+      // 아래(180도)에서 위(0도)로 반원 배치
+      const angle=Math.PI - (i/(maxLeaves/2-1))*Math.PI; // π → 0
+      const lx=cx + dir*(r*Math.sin(angle))*0.92;
+      const ly=cy + (r*Math.cos(angle))*0.88;
+      const rot=dir*(90-i*(180/(maxLeaves/2-1)));
+      paths+=leaf(lx, ly, rot, filled);
+    }
+  }
+
+  // 중앙 리본
+  paths+=`<circle cx="${cx}" cy="${cy+r+16}" r="8" fill="var(--g,#D4B878)" opacity="0.7"/>`;
+  paths+=`<path d="M${cx-6},${cy+r+16} Q${cx},${cy+r+30} ${cx+6},${cy+r+16}" fill="none" stroke="var(--g,#D4B878)" stroke-width="1.5"/>`;
+
+  // 중앙 책 수
+  paths+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="var(--font-serif)" font-size="42" font-weight="700" fill="var(--g,#D4B878)">${n}</text>`;
+  paths+=`<text x="${cx}" y="${cy+26}" text-anchor="middle" font-size="11" fill="#A89E96">권 읽음</text>`;
+
+  svg.innerHTML=paths;
+
+  // 카운트 & 메시지
+  countEl.textContent='';
+  const msgs=[
+    [0,'첫 번째 책을 기록해보세요!'],
+    [1,'첫 잎이 피었어요! 🌱'],
+    [3,'월계관이 자라나고 있어요 🌿'],
+    [5,'다섯 잎! 독서 습관이 붙고 있네요 📖'],
+    [10,'열 권 돌파! 멋진 독서가예요 ✨'],
+    [20,'스무 권! 월계관이 반쯤 완성됐어요 🏆'],
+    [30,'서른 권! 거의 다 채웠어요 👑'],
+    [40,'완성! 빛나는 월계관의 주인공 🌟']
+  ];
+  let msg=msgs[0][1];
+  for(const [threshold, m] of msgs){
+    if(n>=threshold) msg=m;
+  }
+  msgEl.textContent=msg;
+
+  // 뱃지
+  const badges=[
+    [1,'🌱','첫 독서'],
+    [5,'📖','다독가의 시작'],
+    [10,'✨','10권 달성'],
+    [20,'🏆','20권 돌파'],
+    [30,'👑','30권 마스터'],
+    [40,'🌟','월계관 완성']
+  ];
+  badgeEl.innerHTML=badges.map(([threshold,icon,label])=>{
+    const earned=n>=threshold;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${earned?1:0.3};filter:${earned?'none':'grayscale(1)'}">
+      <div style="width:44px;height:44px;border-radius:50%;background:${earned?'var(--gl)':'#f0ede8'};display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid ${earned?'var(--g)':'#ddd'}">${icon}</div>
+      <div style="font-size:10px;color:${earned?'var(--txt)':'var(--muted)'};font-weight:${earned?'600':'400'}">${label}</div>
+    </div>`;
+  }).join('');
+}
+
 function initReadingDragSort(){
   const container=document.getElementById('readingBookList');
   const items=container.querySelectorAll('.rb-item');
@@ -5458,12 +5561,15 @@ if(typeof _guideTexts!=='undefined'){
 function switchLibSubTab(tab){
   document.getElementById('libSubTab-books').classList.toggle('on',tab==='books');
   document.getElementById('libSubTab-note').classList.toggle('on',tab==='note');
+  document.getElementById('libSubTab-laurel').classList.toggle('on',tab==='laurel');
   document.getElementById('libSubTab-export').classList.toggle('on',tab==='export');
   document.getElementById('libBooksSection').style.display=tab==='books'?'block':'none';
   document.getElementById('libNoteSection').style.display=tab==='note'?'block':'none';
+  document.getElementById('libLaurelSection').style.display=tab==='laurel'?'block':'none';
   document.getElementById('libExportSection').style.display=tab==='export'?'block':'none';
   if(tab==='note') rStats();
-  // FAB: 내 책 탭일 때만 표시
+  if(tab==='laurel') renderLaurel();
+  // FAB: 읽은 책 탭일 때만 표시
   const _fab=document.getElementById('fabAdd');
   if(_fab&&window.innerWidth<=600){
     if(tab==='books'){_fab.style.cssText='display:flex!important';_fab.onclick=function(){go('addBook');};}
@@ -5808,7 +5914,7 @@ async function deletePilsa(id){
   // 서브탭 정의: {탭ID: [서브탭 목록, 현재 서브탭 가져오는 함수, 전환 함수]}
   const subTabMap={
     forum:{ tabs:['public','posts','club','pilsa'], get:()=>document.querySelector('#plazaTab-public.on')?'public':document.querySelector('#plazaTab-posts.on')?'posts':document.querySelector('#plazaTab-club.on')?'club':'pilsa', go:switchPlazaTab },
-    library:{ tabs:['books','note','export'], get:()=>document.querySelector('#libSubTab-books.on')?'books':document.querySelector('#libSubTab-note.on')?'note':document.querySelector('#libSubTab-export.on')?'export':'books', go:switchLibSubTab },
+    library:{ tabs:['books','note','laurel','export'], get:()=>document.querySelector('#libSubTab-books.on')?'books':document.querySelector('#libSubTab-note.on')?'note':document.querySelector('#libSubTab-laurel.on')?'laurel':document.querySelector('#libSubTab-export.on')?'export':'books', go:switchLibSubTab },
     match:{ tabs:['best','new','match'], get:()=>document.querySelector('#recTab-best.on')?'best':document.querySelector('#recTab-new.on')?'new':'match', go:switchRecTab }
   };
 
