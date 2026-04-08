@@ -4941,7 +4941,8 @@ function updateReadingPage(idx){
   }
 }
 // ── 읽고 있는 책 드래그 정렬 (long-press) ──
-// ── 월계관 (책 1권 = 잎 1개, 아래부터 채워짐) ──
+// ── 월계관 (책 1권 = 잎 1개, 가지 양쪽에 잎, 아래부터 채움) ──
+// ── 월계관 (원형 U자, 양쪽 잎, 아래부터 채움, 진한 골드) ──
 function renderLaurel(){
   if(!CU) return;
   const svg=document.getElementById('laurelSvg');
@@ -4950,91 +4951,79 @@ function renderLaurel(){
   const badgeEl=document.getElementById('laurelBadges');
   const books=window._myBooks||[];
   const n=books.length;
-  const perSide=20;
-  const maxLeaves=perSide*2;
+  const perSide=10;
+  const maxLeaves=perSide*2*2;
   const leaves=Math.min(n, maxLeaves);
 
-  const cx=150, cy=150;
+  const cx=150, cy=140, R=95;
   let paths='';
 
-  // 가지 (아래에서 교차하며 올라가는 곡선)
-  paths+=`<path d="M${cx-8},${cy+108} Q${cx-75},${cy+40} ${cx-72},${cy-85}" fill="none" stroke="#8B6F47" stroke-width="4" stroke-linecap="round"/>`;
-  paths+=`<path d="M${cx+8},${cy+108} Q${cx+75},${cy+40} ${cx+72},${cy-85}" fill="none" stroke="#8B6F47" stroke-width="4" stroke-linecap="round"/>`;
-  // 교차 부분
-  paths+=`<path d="M${cx-8},${cy+108} Q${cx},${cy+100} ${cx+8},${cy+108}" fill="none" stroke="#8B6F47" stroke-width="3.5" stroke-linecap="round"/>`;
-
-  // 잎 배치: 아래(교차점)부터 위로
-  function drawLeaf(lx, ly, angle, filled, idx){
-    // 골드/그린 색상 - 이미지처럼 골드 베이스에 일부 그린
-    const fillCol=filled?'#C9A96E':'#E8E0D4';
-    const strokeCol=filled?'#A8884D':'#D5CEC5';
-    const op=filled?1:0.25;
-    return `<g transform="translate(${lx},${ly}) rotate(${angle})">
-      <ellipse cx="0" cy="-11" rx="5.5" ry="13" fill="${fillCol}" stroke="${strokeCol}" stroke-width="0.6" opacity="${op}"/>
-      <line x1="0" y1="0" x2="0" y2="-22" stroke="${strokeCol}" stroke-width="0.4" opacity="${op}"/>
-    </g>`;
+  function arcPt(deg){
+    const rad=deg*Math.PI/180;
+    return [cx+R*Math.cos(rad), cy+R*Math.sin(rad)];
   }
 
-  // 왼쪽 가지: 아래(교차점)에서 위로, 베지에 곡선 따라 배치
+  // 가지: 동그란 원호
+  paths+=`<path d="M ${arcPt(250).join(',')} A ${R} ${R} 0 0 0 ${arcPt(95).join(',')}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
+  paths+=`<path d="M ${arcPt(290).join(',')} A ${R} ${R} 0 0 1 ${arcPt(85).join(',')}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
+  // 교차
+  const [bLx,bLy]=arcPt(250);
+  const [bRx,bRy]=arcPt(290);
+  paths+=`<path d="M${bLx},${bLy} Q${cx},${cy+R+20} ${bRx},${bRy}" fill="none" stroke="#8B6914" stroke-width="3.5" stroke-linecap="round"/>`;
+
+  // 잎
+  function drawLeaf(lx, ly, angle, filled){
+    const fc=filled?'#D4A017':'#EAE2D4';
+    const sc=filled?'#B8860B':'#D5CEC5';
+    const op=filled?1:0.18;
+    return `<g transform="translate(${lx},${ly}) rotate(${angle})"><path d="M0,0 C-4.5,-7 -5,-16 0,-22 C5,-16 4.5,-7 0,0Z" fill="${fc}" stroke="${sc}" stroke-width="0.7" opacity="${op}"/><line x1="0" y1="-1" x2="0" y2="-20" stroke="${sc}" stroke-width="0.4" opacity="${op*0.5}"/></g>`;
+  }
+
+  let leafNum=0;
+  // 왼쪽 (250→95, 반시계)
   for(let i=0;i<perSide;i++){
-    const t=i/(perSide-1); // 0=아래, 1=위
-    // 베지에 보간: P0=(cx-8,cy+108), P1=(cx-75,cy+40), P2=(cx-72,cy-85)
-    const px=(1-t)*(1-t)*(cx-8)+2*(1-t)*t*(cx-75)+t*t*(cx-72);
-    const py=(1-t)*(1-t)*(cy+108)+2*(1-t)*t*(cy+40)+t*t*(cy-85);
-    const angle=-30-t*50; // 아래쪽 잎은 바깥, 위쪽은 더 바깥
-    const leafIdx=i; // 왼쪽은 0부터
-    const filled=leafIdx<Math.ceil(leaves/2);
-    paths+=drawLeaf(px-6, py, angle, filled, i);
+    const deg=250-i*((250-95)/(perSide-1));
+    const rad=deg*Math.PI/180;
+    const [px,py]=arcPt(deg);
+    const tang=deg+90;
+    const nx=Math.cos(rad), ny=Math.sin(rad);
+    // 바깥
+    paths+=drawLeaf(px+nx*7, py+ny*7, tang+20, leafNum<leaves);
+    leafNum++;
+    // 안쪽
+    paths+=drawLeaf(px-nx*7, py-ny*7, tang-20+180, leafNum<leaves);
+    leafNum++;
   }
-
-  // 오른쪽 가지: 아래에서 위로
+  // 오른쪽 (290→445, 시계)
   for(let i=0;i<perSide;i++){
-    const t=i/(perSide-1);
-    const px=(1-t)*(1-t)*(cx+8)+2*(1-t)*t*(cx+75)+t*t*(cx+72);
-    const py=(1-t)*(1-t)*(cy+108)+2*(1-t)*t*(cy+40)+t*t*(cy-85);
-    const angle=30+t*50;
-    const leafIdx=i;
-    const filled=leafIdx<Math.floor(leaves/2)+(leaves%2===1&&i<1?1:0);
-    paths+=drawLeaf(px+6, py, angle, filled, i);
+    const deg=290+i*((360+85-290)/(perSide-1));
+    const normDeg=deg%360;
+    const rad=normDeg*Math.PI/180;
+    const [px,py]=arcPt(normDeg);
+    const tang=normDeg+90;
+    const nx=Math.cos(rad), ny=Math.sin(rad);
+    // 바깥
+    paths+=drawLeaf(px+nx*7, py+ny*7, tang-20+180, leafNum<leaves);
+    leafNum++;
+    // 안쪽
+    paths+=drawLeaf(px-nx*7, py-ny*7, tang+20, leafNum<leaves);
+    leafNum++;
   }
 
-  // 중앙 텍스트
-  paths+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" font-family="var(--font-serif)" font-size="38" font-weight="700" fill="var(--g,#D4B878)">${n}</text>`;
-  paths+=`<text x="${cx}" y="${cy+28}" text-anchor="middle" font-size="11" fill="#A89E96">권 읽음</text>`;
-
+  paths+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="var(--font-serif)" font-size="38" font-weight="700" fill="#D4A017">${n}</text>`;
+  paths+=`<text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="11" fill="#A89E96">권 읽음</text>`;
   svg.innerHTML=paths;
 
   countEl.textContent='';
-  const msgs=[
-    [0,'첫 번째 책을 기록해보세요!'],
-    [1,'첫 잎이 피었어요! 🌱'],
-    [3,'월계관이 자라나고 있어요 🌿'],
-    [5,'다섯 잎! 독서 습관이 붙고 있네요 📖'],
-    [10,'열 권 돌파! 멋진 독서가예요 ✨'],
-    [20,'스무 권! 월계관이 반쯤 완성됐어요 🏆'],
-    [30,'서른 권! 거의 다 채웠어요 👑'],
-    [40,'완성! 빛나는 월계관의 주인공 🌟']
-  ];
+  const msgs=[[0,'첫 번째 책을 기록해보세요!'],[1,'첫 잎이 피었어요! 🌱'],[3,'월계관이 자라나고 있어요 🌿'],[5,'다섯 잎! 독서 습관이 붙고 있네요 📖'],[10,'열 권 돌파! 멋진 독서가예요 ✨'],[20,'스무 권! 월계관이 반쯤 완성됐어요 🏆'],[30,'서른 권! 거의 다 채웠어요 👑'],[40,'완성! 빛나는 월계관의 주인공 🌟']];
   let msg=msgs[0][1];
-  for(const [threshold, m] of msgs){
-    if(n>=threshold) msg=m;
-  }
+  for(const [th,m] of msgs){ if(n>=th) msg=m; }
   msgEl.textContent=msg;
 
-  const badges=[
-    [1,'🌱','첫 독서'],
-    [5,'📖','다독가의 시작'],
-    [10,'✨','10권 달성'],
-    [20,'🏆','20권 돌파'],
-    [30,'👑','30권 마스터'],
-    [40,'🌟','월계관 완성']
-  ];
-  badgeEl.innerHTML=badges.map(([threshold,icon,label])=>{
-    const earned=n>=threshold;
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${earned?1:0.3};filter:${earned?'none':'grayscale(1)'}">
-      <div style="width:44px;height:44px;border-radius:50%;background:${earned?'var(--gl)':'#f0ede8'};display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid ${earned?'var(--g)':'#ddd'}">${icon}</div>
-      <div style="font-size:10px;color:${earned?'var(--txt)':'var(--muted)'};font-weight:${earned?'600':'400'}">${label}</div>
-    </div>`;
+  const badges=[[1,'🌱','첫 독서'],[5,'📖','다독가의 시작'],[10,'✨','10권 달성'],[20,'🏆','20권 돌파'],[30,'👑','30권 마스터'],[40,'🌟','월계관 완성']];
+  badgeEl.innerHTML=badges.map(([th,icon,label])=>{
+    const e=n>=th;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${e?1:0.3};filter:${e?'none':'grayscale(1)'}"><div style="width:44px;height:44px;border-radius:50%;background:${e?'var(--gl)':'#f0ede8'};display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid ${e?'#D4A017':'#ddd'}">${icon}</div><div style="font-size:10px;color:${e?'var(--txt)':'var(--muted)'};font-weight:${e?'600':'400'}">${label}</div></div>`;
   }).join('');
 }
 
