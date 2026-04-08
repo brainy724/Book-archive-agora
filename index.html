@@ -1657,7 +1657,9 @@ async function ok(u){
    showGender();
    return; // 성별 확인 전까지 앱 진입 차단
  }
-  go(localStorage.getItem("agora_lastTab")||"library");
+  var lastTab=localStorage.getItem("agora_lastTab");
+  if(!lastTab||['library','forum','match','libmap','points','admin'].indexOf(lastTab)===-1) lastTab='library';
+  go(lastTab);
  loadNotifSettings();
  checkUnreadNotifs();
  initNotifRealtime();
@@ -4943,6 +4945,7 @@ function updateReadingPage(idx){
 // ── 읽고 있는 책 드래그 정렬 (long-press) ──
 // ── 월계관 (책 1권 = 잎 1개, 가지 양쪽에 잎, 아래부터 채움) ──
 // ── 월계관 (원형 U자, 양쪽 잎, 아래부터 채움, 진한 골드) ──
+// ── 월계관 (U자: 아래 붙고 위 열림, 아래 가운데부터 잎 채움, 풍성한 잎) ──
 function renderLaurel(){
   if(!CU) return;
   const svg=document.getElementById('laurelSvg');
@@ -4955,63 +4958,81 @@ function renderLaurel(){
   const maxLeaves=perSide*2*2;
   const leaves=Math.min(n, maxLeaves);
 
-  const cx=150, cy=140, R=95;
+  const cx=150, cy=155, R=92;
   let paths='';
 
+  // U자 형태: 아래 붙고(270도) 위로 열림
+  // 왼쪽 가지: 270도(아래) → 100도(위 왼쪽) — 반시계
+  // 오른쪽 가지: 270도(아래) → 80도(위 오른쪽) — 시계
   function arcPt(deg){
     const rad=deg*Math.PI/180;
     return [cx+R*Math.cos(rad), cy+R*Math.sin(rad)];
   }
 
-  // 가지: 동그란 원호
-  paths+=`<path d="M ${arcPt(250).join(',')} A ${R} ${R} 0 0 0 ${arcPt(95).join(',')}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
-  paths+=`<path d="M ${arcPt(290).join(',')} A ${R} ${R} 0 0 1 ${arcPt(85).join(',')}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
-  // 교차
-  const [bLx,bLy]=arcPt(250);
-  const [bRx,bRy]=arcPt(290);
-  paths+=`<path d="M${bLx},${bLy} Q${cx},${cy+R+20} ${bRx},${bRy}" fill="none" stroke="#8B6914" stroke-width="3.5" stroke-linecap="round"/>`;
+  // 왼쪽 가지 (270→105, 반시계 = large arc)
+  const [lsx,lsy]=arcPt(270);
+  const [lex,ley]=arcPt(105);
+  paths+=`<path d="M${lsx},${lsy} A${R},${R} 0 0 0 ${lex},${ley}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
+  // 오른쪽 가지 (270→75, 시계 = large arc)
+  const [rex,rey]=arcPt(75);
+  paths+=`<path d="M${lsx},${lsy} A${R},${R} 0 0 1 ${rex},${rey}" fill="none" stroke="#8B6914" stroke-width="4" stroke-linecap="round"/>`;
 
-  // 잎
+  // 잎 그리기 — 넓고 풍성, 가지에 밀착
   function drawLeaf(lx, ly, angle, filled){
     const fc=filled?'#D4A017':'#EAE2D4';
     const sc=filled?'#B8860B':'#D5CEC5';
     const op=filled?1:0.18;
-    return `<g transform="translate(${lx},${ly}) rotate(${angle})"><path d="M0,0 C-4.5,-7 -5,-16 0,-22 C5,-16 4.5,-7 0,0Z" fill="${fc}" stroke="${sc}" stroke-width="0.7" opacity="${op}"/><line x1="0" y1="-1" x2="0" y2="-20" stroke="${sc}" stroke-width="0.4" opacity="${op*0.5}"/></g>`;
+    // 넓은 잎 (rx=7, ry=14)
+    return `<g transform="translate(${lx},${ly}) rotate(${angle})"><path d="M0,0 C-7,-6 -8,-15 0,-21 C8,-15 7,-6 0,0Z" fill="${fc}" stroke="${sc}" stroke-width="0.6" opacity="${op}"/><line x1="0" y1="0" x2="0" y2="-19" stroke="${sc}" stroke-width="0.4" opacity="${op*0.5}"/></g>`;
   }
 
   let leafNum=0;
-  // 왼쪽 (250→95, 반시계)
+
+  // 왼쪽 가지: 270도→105도 (반시계, 아래→위)
   for(let i=0;i<perSide;i++){
-    const deg=250-i*((250-95)/(perSide-1));
+    const deg=270-(i*((270-105)/(perSide-1)));
     const rad=deg*Math.PI/180;
-    const [px,py]=arcPt(deg);
+    const px=cx+R*Math.cos(rad);
+    const py=cy+R*Math.sin(rad);
+    // 접선방향: 원의 접선 = 반지름에 수직
     const tang=deg+90;
-    const nx=Math.cos(rad), ny=Math.sin(rad);
-    // 바깥
-    paths+=drawLeaf(px+nx*7, py+ny*7, tang+20, leafNum<leaves);
+    // 바깥쪽 잎 (원 바깥)
+    const outOff=3;
+    const ox=px+outOff*Math.cos(rad);
+    const oy=py+outOff*Math.sin(rad);
+    paths+=drawLeaf(ox, oy, tang+25, leafNum<leaves);
     leafNum++;
-    // 안쪽
-    paths+=drawLeaf(px-nx*7, py-ny*7, tang-20+180, leafNum<leaves);
-    leafNum++;
-  }
-  // 오른쪽 (290→445, 시계)
-  for(let i=0;i<perSide;i++){
-    const deg=290+i*((360+85-290)/(perSide-1));
-    const normDeg=deg%360;
-    const rad=normDeg*Math.PI/180;
-    const [px,py]=arcPt(normDeg);
-    const tang=normDeg+90;
-    const nx=Math.cos(rad), ny=Math.sin(rad);
-    // 바깥
-    paths+=drawLeaf(px+nx*7, py+ny*7, tang-20+180, leafNum<leaves);
-    leafNum++;
-    // 안쪽
-    paths+=drawLeaf(px-nx*7, py-ny*7, tang+20, leafNum<leaves);
+    // 안쪽 잎 (원 안쪽)
+    const ix=px-outOff*Math.cos(rad);
+    const iy=py-outOff*Math.sin(rad);
+    paths+=drawLeaf(ix, iy, tang-25+180, leafNum<leaves);
     leafNum++;
   }
 
-  paths+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="var(--font-serif)" font-size="38" font-weight="700" fill="#D4A017">${n}</text>`;
-  paths+=`<text x="${cx}" y="${cy+24}" text-anchor="middle" font-size="11" fill="#A89E96">권 읽음</text>`;
+  // 오른쪽 가지: 270도→75도 (시계, 아래→위)
+  for(let i=0;i<perSide;i++){
+    const deg=270+(i*((360+75-270)/(perSide-1)));
+    const normDeg=deg%360;
+    const rad=normDeg*Math.PI/180;
+    const px=cx+R*Math.cos(rad);
+    const py=cy+R*Math.sin(rad);
+    const tang=normDeg+90;
+    const outOff=3;
+    // 바깥쪽
+    const ox=px+outOff*Math.cos(rad);
+    const oy=py+outOff*Math.sin(rad);
+    paths+=drawLeaf(ox, oy, tang-25+180, leafNum<leaves);
+    leafNum++;
+    // 안쪽
+    const ix=px-outOff*Math.cos(rad);
+    const iy=py-outOff*Math.sin(rad);
+    paths+=drawLeaf(ix, iy, tang+25, leafNum<leaves);
+    leafNum++;
+  }
+
+  // 중앙 텍스트
+  paths+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="var(--font-serif)" font-size="38" font-weight="700" fill="#D4A017">${n}</text>`;
+  paths+=`<text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="11" fill="#A89E96">권 읽음</text>`;
   svg.innerHTML=paths;
 
   countEl.textContent='';
