@@ -757,15 +757,15 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div style="flex:1;min-width:0">
  <div><div class="h1 serif">광장</div><div class="sub">함께 읽고, 함께 나누는 공간</div></div>
 
- <!-- 메인 서브탭: 자유글 / 공개 서재 / 독서모임 -->
+ <!-- 메인 서브탭: 토론방 / 공개 서재 / 독서모임 -->
  <div class="tab-bar" style="margin-bottom:16px">
    <button class="tab-btn on" id="plazaTab-public" onclick="switchPlazaTab('public')">공개 서재</button>
-   <button class="tab-btn" id="plazaTab-posts" onclick="switchPlazaTab('posts')">자유글</button>
+   <button class="tab-btn" id="plazaTab-posts" onclick="switchPlazaTab('posts')">토론방</button>
    <button class="tab-btn" id="plazaTab-club" onclick="switchPlazaTab('club')">독서모임</button>
    <button class="tab-btn" id="plazaTab-pilsa" onclick="switchPlazaTab('pilsa')">필사</button>
  </div>
 
- <!-- 자유글 섹션 -->
+ <!-- 토론방 섹션 -->
  <div id="plazaPosts" style="display:none">
  <!-- 내 활동 탭 -->
  <div class="tab-bar" style="margin-bottom:14px">
@@ -1651,7 +1651,9 @@ async function ok(u){
  load(false);
  history.replaceState({tab:'library',page:'library'},'',location.href);
  for(let _i=0;_i<20;_i++) history.pushState({tab:'library',page:'library'},'',location.href);
- const navU=document.getElementById('navUser');if(navU)navU.textContent=u.username||'';upPts(u.points||0);
+ const _loginBadge=u.badge||localStorage.getItem('agora_myBadge')||'';
+ if(u.badge)localStorage.setItem('agora_myBadge',u.badge); else if(!u.badge&&!localStorage.getItem('agora_myBadge'))localStorage.removeItem('agora_myBadge');
+ const navU=document.getElementById('navUser');if(navU)navU.textContent=(_loginBadge?_loginBadge+' ':'')+(u.username||'');upPts(u.points||0);
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  updateNavTabs();
  // 무료체험 팝업: 관리자 제외, 이미 시작했거나 한 세션당 1번만
@@ -2003,14 +2005,15 @@ async function openBook(id){
     sb.from('agora_books').select('*').eq('id',id).single(),
     sb.from('agora_book_images').select('*').eq('book_id',id).order('sort_order',{ascending:true}),
     sb.from('agora_hearts').select('*').eq('book_id',id),
-    sb.from('agora_users').select('id,username').eq('id',(await sb.from('agora_books').select('user_id').eq('id',id).single()).data?.user_id||'')
+    sb.from('agora_users').select('id,username,badge').eq('id',(await sb.from('agora_books').select('user_id').eq('id',id).single()).data?.user_id||'')
   ]);
   if(!b)return;
   const imgs=imgd||[];
   const imgUrls=imgs.map(i=>i.url);
   const stars=b.rating?'★'.repeat(b.rating)+'☆'.repeat(5-b.rating):'';
   const liked=(hd||[]).some(h=>h.user_id===CU.id);
-  const uname=b.is_anonymous?'익명의 독서가':((ud&&ud[0])?ud[0].username:'');
+  const _ubadge=(ud&&ud[0]&&ud[0].badge)?ud[0].badge:'';
+  const uname=b.is_anonymous?'익명의 독서가':((ud&&ud[0])?(_ubadge?_ubadge+' ':'')+ud[0].username:'');
   document.getElementById('bookModalBody').innerHTML=`
     <div style="position:relative;background:linear-gradient(180deg,var(--gl) 0%,#fff 100%);padding:32px 24px 24px;border-radius:20px 20px 0 0;text-align:center">
       <button onclick="closeBookModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1">✕</button>
@@ -2149,13 +2152,13 @@ async function loadBookComments(bookId){
   }
   // 유저 닉네임 조회
   const uids=[...new Set(comments.map(c=>c.user_id))];
-  const{data:users}=await sb.from('agora_users').select('id,username').in('id',uids);
-  const umap={};(users||[]).forEach(u=>umap[u.id]=u.username);
+  const{data:users}=await sb.from('agora_users').select('id,username,badge').in('id',uids);
+  const umap={};const ubmap={};(users||[]).forEach(u=>{umap[u.id]=u.username;ubmap[u.id]=u.badge||'';});
   el.innerHTML=comments.map(c=>`
     <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-          <span style="font-size:12px;font-weight:600;color:var(--g)">${esc(umap[c.user_id]||'탈퇴한 회원')}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--g)">${ubmap[c.user_id]?ubmap[c.user_id]+' ':''}${esc(umap[c.user_id]||'탈퇴한 회원')}</span>
           <span style="font-size:10px;color:var(--muted)">${new Date(c.created_at).toLocaleDateString('ko-KR')}</span>
         </div>
         <div style="font-size:13px;color:var(--txt);line-height:1.6">${esc(c.content)}</div>
@@ -2972,15 +2975,16 @@ async function rPub(){
     sb.from('agora_books').select('*').eq('is_public',true).order('created_at',{ascending:false}),
     sb.from('agora_hearts').select('*'),
     sb.from('agora_book_images').select('*').order('sort_order',{ascending:true}),
-    sb.from('agora_users').select('id,username')
+    sb.from('agora_users').select('id,username,badge')
   ]);
   load(false);
-  const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
+  const userMap={};const badgeMap={};(ud||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
   let allBooks=(bd||[]).map(b=>({
     ...b,
     hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),
     images:(imgd||[]).filter(i=>i.book_id===b.id),
-    username:userMap[b.user_id]||''
+    username:userMap[b.user_id]||'',
+    userBadge:badgeMap[b.user_id]||''
   }));
   await renderPubFolders(allBooks);
   const pubQ=(document.getElementById('pubSearch')||{value:''}).value.trim().toLowerCase();
@@ -3024,7 +3028,7 @@ async function rPub(){
       ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        ${showName?`<div onclick="event.stopPropagation();filterByUser('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(b.username)}</div>`:'<div></div>'}
+        ${showName?`<div onclick="event.stopPropagation();filterByUser('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${b.userBadge?b.userBadge+' ':''}${esc(b.username)}</div>`:'<div></div>'}
         <button onclick="event.stopPropagation();toggleCardHeart('${b.id}','${b.user_id}')" style="background:none;border:none;cursor:pointer;font-size:12px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px;display:flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="${liked?'#C0392B':'none'}" stroke="${liked?'#C0392B':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${b.hearts.length}</button>
       </div>
     </div>`;
@@ -3230,10 +3234,10 @@ async function openPost(id){
  aPid=id;load(true);
  const[{data:p},{data:ud}]=await Promise.all([
    sb.from('agora_posts').select('*, agora_comments(*)').eq('id',id).single(),
-   sb.from('agora_users').select('id,username')
+   sb.from('agora_users').select('id,username,badge')
  ]);
  load(false);if(!p)return;
- const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
+ const userMap={};const badgeMap={};(ud||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
  const allCmts=(p.agora_comments||[]).filter(c=>!c.is_deleted);
  const roots=allCmts.filter(c=>!c.parent_id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
  const replies=allCmts.filter(c=>c.parent_id);
@@ -3627,14 +3631,14 @@ async function sendDm(){
 }
 async function loadDmHistory(){
   const{data}=await sb.from('agora_notifications').select('*').eq('type','dm').order('created_at',{ascending:false}).limit(30);
-  const{data:users}=await sb.from('agora_users').select('id,username');
-  const userMap={};(users||[]).forEach(u=>userMap[u.id]=u.username);
+  const{data:users}=await sb.from('agora_users').select('id,username,badge');
+  const userMap={};const badgeMap={};(users||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
   const el=document.getElementById('dmHistory');
   if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:13px;color:var(--muted)">보낸 메시지가 없습니다.</div>';return;}
   el.innerHTML=data.map(d=>`<div class="card" style="padding:12px 16px;margin-bottom:8px;border-left:3px solid ${d.is_read?'var(--g)':'var(--muted)'}">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-      <span style="font-size:12px;font-weight:600;color:var(--txt)">To. ${esc(userMap[d.user_id]||'알 수 없음')}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--txt)">To. ${(badgeMap[d.user_id]||"")?badgeMap[d.user_id]+" ":""}${esc(userMap[d.user_id]||"알 수 없음")}</span>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:11px;color:var(--muted)">${ago(d.created_at)} · ${d.is_read?'읽음':'안읽음'}</span>
         <button onclick="deleteDm('${d.id}')" style="background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:2px 4px">삭제</button>
@@ -3674,7 +3678,7 @@ async function rAdmin(){
   </div>`).join('');
 
   // 신고 목록
-  const userMap={};(ud||[]).forEach(u=>userMap[u.id]=u.username);
+  const userMap={};const badgeMap={};(ud||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
   const admReportsEl=document.getElementById('admReports');
   if(admReportsEl){
     if(!rpts||!rpts.length){
@@ -3717,7 +3721,7 @@ async function rAdmin(){
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:11px;font-weight:600;color:${inq.admin_reply?'var(--g)':'var(--red)'}">${inq.admin_reply?'답변완료':'미답변'}</span>
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:11px;color:var(--muted)">${esc(userMap[inq.user_id]||'알 수 없음')} · ${ago(inq.created_at)}</span>
+              <span style="font-size:11px;color:var(--muted)">${badgeMap[inq.user_id]?badgeMap[inq.user_id]+' ':''}${esc(userMap[inq.user_id]||'알 수 없음')} · ${ago(inq.created_at)}</span>
               <button class="btnd" style="font-size:11px;padding:3px 8px;background:#fff" onclick="deleteInquiry('${inq.id}')">삭제</button>
             </div>
           </div>
@@ -3740,7 +3744,7 @@ async function rAdmin(){
     return`<div class="card" style="padding:12px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
         <div style="cursor:pointer" onclick="openMembershipModal('${u.id}','${esc(u.username)}')">
-          <div style="font-size:14px;font-weight:500;display:flex;align-items:center">${esc(u.username)}${statusBadge}</div>
+          <div style="font-size:14px;font-weight:500;display:flex;align-items:center">${u.badge?u.badge+" ":""}${esc(u.username)}${statusBadge}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
@@ -4193,13 +4197,13 @@ async function openClub(id){
   const[{data:c},{data:members},{data:users},{data:posts},{data:clubCmts}]=await Promise.all([
     sb.from('agora_clubs').select('*').eq('id',id).single(),
     sb.from('agora_club_members').select('*').eq('club_id',id),
-    sb.from('agora_users').select('id,username'),
+    sb.from('agora_users').select('id,username,badge'),
     sb.from('agora_club_posts').select('*').eq('club_id',id).order('created_at',{ascending:true}),
     sb.from('agora_club_comments').select('*').eq('club_id',id).order('created_at',{ascending:true})
   ]);
   load(false);
   if(!c)return;
-  const userMap={};(users||[]).forEach(u=>userMap[u.id]=u.username);
+  const userMap={};const badgeMap={};(users||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
   const isMember=(members||[]).some(m=>m.user_id===CU.id);
   const isHost=c.host_id===CU.id;
   const full=c.max_members&&(members||[]).length>=c.max_members;
@@ -4216,7 +4220,7 @@ async function openClub(id){
         ${c.schedule?`<div>🗓 ${esc(c.schedule)}</div>`:''}
         ${c.age_limit?`<div>🎂 나이제한: ${esc(c.age_limit)}</div>`:''}
         <div>👥 ${(members||[]).length}/${c.max_members||'∞'}명</div>
-        <div>방장: <strong style="color:var(--txt)">${esc(userMap[c.host_id]||'알 수 없음')}</strong></div>
+        <div>방장: <strong style="color:var(--txt)">${badgeMap[c.host_id]?badgeMap[c.host_id]+' ':''}${esc(userMap[c.host_id]||'알 수 없음')}</strong></div>
       </div>
       ${c.host_message?`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--g);line-height:1.7;margin-bottom:16px">💬 ${esc(c.host_message)}</div>`:''}
       ${!isMember
@@ -4232,7 +4236,7 @@ async function openClub(id){
     <!-- 멤버 -->
     <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:10px">멤버 ${(members||[]).length}명</div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px">
-      ${(members||[]).map(m=>`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--g);font-weight:500">${m.user_id===c.host_id?'👑 ':''} ${esc(userMap[m.user_id]||'알 수 없음')}</div>`).join('')}
+      ${(members||[]).map(m=>`<div style="background:var(--gl);border:1px solid var(--gb);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--g);font-weight:500">${m.user_id===c.host_id?'👑 ':(badgeMap[m.user_id]?badgeMap[m.user_id]+' ':'')}${esc(userMap[m.user_id]||'알 수 없음')}</div>`).join('')}
     </div>
 
     <!-- 게시판 -->
@@ -4246,7 +4250,7 @@ async function openClub(id){
           const isMyPost=p.user_id===CU.id;
           return`<div class="card" style="padding:16px 18px;margin-bottom:12px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
-              <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':''} ${esc(userMap[p.user_id]||'알 수 없음')}</div>
+              <div style="font-size:12px;font-weight:600;color:var(--g)">${p.user_id===c.host_id?'👑 ':(badgeMap[p.user_id]?badgeMap[p.user_id]+' ':'')}${esc(userMap[p.user_id]||'알 수 없음')}</div>
               <div style="display:flex;gap:8px;align-items:center">
                 <span style="font-size:11px;color:var(--muted)">${ago(p.created_at)}</span>
                 ${isMyPost||isHost?`<span onclick="deleteClubPost('${p.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
@@ -4258,7 +4262,7 @@ async function openClub(id){
             ${pCmts.map(cm=>`
             <div style="background:var(--gl);border-radius:8px;padding:9px 12px;margin-bottom:6px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                <span style="font-size:12px;font-weight:600;color:var(--g)">${cm.user_id===c.host_id?'👑 ':''} ${esc(userMap[cm.user_id]||'알 수 없음')}</span>
+                <span style="font-size:12px;font-weight:600;color:var(--g)">${cm.user_id===c.host_id?'👑 ':(badgeMap[cm.user_id]?badgeMap[cm.user_id]+' ':'')}${esc(userMap[cm.user_id]||'알 수 없음')}</span>
                 <div style="display:flex;gap:6px">
                   <span style="font-size:11px;color:var(--muted)">${ago(cm.created_at)}</span>
                   ${cm.user_id===CU.id||isHost?`<span onclick="delClubComment('${cm.id}','${c.id}')" style="font-size:11px;color:var(--red);cursor:pointer">삭제</span>`:''}
@@ -4795,7 +4799,7 @@ const _guideTexts={
   },
   forum:{
     title:'광장',
-    body:'함께 읽고, 함께 나누는 공간입니다.<br><br>· <b>공개 서재</b> — 다른 회원들의 독서 기록을 둘러보고 하트로 공감을 전해보세요.<br>· <b>자유글</b> — 책에 대한 이야기를 익명으로 자유롭게 나눌 수 있어요.<br>· <b>독서모임</b> — 지역별 오프라인 독서모임을 만들고 참여해보세요.<br>· <b>필사</b> — 매일 새로운 문장을 만나고, 손글씨로 기록해 공유해보세요.'
+    body:'함께 읽고, 함께 나누는 공간입니다.<br><br>· <b>공개 서재</b> — 다른 회원들의 독서 기록을 둘러보고 하트로 공감을 전해보세요.<br>· <b>토론방</b> — 책에 대한 이야기를 익명으로 자유롭게 나눌 수 있어요.<br>· <b>독서모임</b> — 지역별 오프라인 독서모임을 만들고 참여해보세요.<br>· <b>필사</b> — 매일 새로운 문장을 만나고, 손글씨로 기록해 공유해보세요.'
   },
   libmap:{
     title:'도서관 찾기',
@@ -4980,6 +4984,7 @@ function renderLaurel(){
 
   // 스탬프 그리드 (5×10)
   if(!grid) return;
+  const curBadge2=localStorage.getItem('agora_myBadge')||'';
   let html='';
   for(let i=1;i<=maxStamps;i++){
     const filled=i<=stamps;
@@ -4987,10 +4992,11 @@ function renderLaurel(){
     if(ms){
       // 뱃지 위치
       const earned=filled;
+      const sel=curBadge2===ms.icon&&earned;
       if(earned){
-        html+=`<div style="width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(145deg,#FFF9E8,#FFE8A0);border:2.5px solid #D4A017;box-shadow:0 3px 10px rgba(212,160,23,0.2);position:relative">
+        html+=`<div onclick="selectBadge('${ms.icon}')" style="width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:${sel?'linear-gradient(145deg,#FFE8A0,#FFD54F)':'linear-gradient(145deg,#FFF9E8,#FFE8A0)'};border:${sel?'3px solid #D4A017':'2.5px solid #D4A017'};box-shadow:${sel?'0 0 12px rgba(212,160,23,0.4)':'0 3px 10px rgba(212,160,23,0.2)'};position:relative;cursor:pointer;transition:all .2s">
           ${ms.icon}
-          <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:#5A7A5A;color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div>
+          <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:${sel?'#D4A017':'#5A7A5A'};color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700">${sel?'★':'✓'}</div>
         </div>`;
       } else {
         html+=`<div style="width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:#F0EDE8;border:2px dashed #D5C9A8;opacity:0.4;filter:grayscale(1)">${ms.icon}</div>`;
@@ -5037,14 +5043,18 @@ function renderLaurel(){
   _applyBadgeToNav();
 }
 
-// ── 뱃지 선택 (닉네임 앞에 장착) ──
-function selectBadge(icon){
+// ── 뱃지 선택 (닉네임 앞에 장착 + DB 저장) ──
+async function selectBadge(icon){
   const cur=localStorage.getItem('agora_myBadge')||'';
-  if(cur===icon){
-    // 같은 뱃지 다시 누르면 해제
-    localStorage.removeItem('agora_myBadge');
+  const newBadge=cur===icon?'':icon;
+  if(newBadge){
+    localStorage.setItem('agora_myBadge',newBadge);
   } else {
-    localStorage.setItem('agora_myBadge',icon);
+    localStorage.removeItem('agora_myBadge');
+  }
+  // DB에도 저장 (badge 컬럼, 없으면 무시)
+  if(CU){
+    try{ await sb.from('agora_users').update({badge:newBadge}).eq('id',CU.id); CU.badge=newBadge; }catch(e){}
   }
   renderLaurel();
 }
@@ -5054,8 +5064,14 @@ function _applyBadgeToNav(){
   const navU=document.getElementById('navUser');
   if(!navU||!CU) return;
   const name=CU.username||'';
-  const badge=localStorage.getItem('agora_myBadge')||'';
+  const badge=localStorage.getItem('agora_myBadge')||CU.badge||'';
   navU.textContent=(badge?badge+' ':'')+name;
+}
+
+// 유저 닉네임에 뱃지 붙여서 반환하는 헬퍼
+function badgedName(username, userBadge){
+  if(!userBadge) return username||'';
+  return userBadge+' '+(username||'');
 }
 
 // 하위호환
