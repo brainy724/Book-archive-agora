@@ -538,7 +538,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="tab-bar" style="margin:18px 0 16px;display:flex;gap:0">
    <button class="tab-btn on" id="libSubTab-books" onclick="switchLibSubTab('books')" style="flex:1;text-align:center;padding:10px 6px;font-size:13px;white-space:nowrap">읽은 책</button>
    <button class="tab-btn" id="libSubTab-note" onclick="switchLibSubTab('note')" style="flex:1;text-align:center;padding:10px 6px;font-size:13px;white-space:nowrap">독서 습관</button>
-   <button class="tab-btn" id="libSubTab-laurel" onclick="switchLibSubTab('laurel')" style="flex:1;text-align:center;padding:10px 6px;font-size:13px;white-space:nowrap">독서 스탬프</button>
+   <button class="tab-btn" id="libSubTab-laurel" onclick="switchLibSubTab('laurel')" style="flex:1;text-align:center;padding:10px 6px;font-size:13px;white-space:nowrap">마일스톤</button>
    <button class="tab-btn" id="libSubTab-export" onclick="switchLibSubTab('export')" style="flex:1;text-align:center;padding:10px 6px;font-size:13px;white-space:nowrap">내보내기</button>
  </div>
 
@@ -2331,8 +2331,8 @@ async function saveNickname(){
   const{error}=await sb.from('agora_users').update({username:val}).eq('id',CU.id);
   if(error){msgEl.textContent='오류가 발생했습니다.';msgEl.style.color='var(--red)';return;}
   CU.username=val;localStorage.setItem('agora_sess',JSON.stringify(CU));
-  const _bkCnt=(window._myBooks||[]).length;
-  const _nuEl2=document.getElementById('navUser');if(_nuEl2)_nuEl2.textContent=(_bkCnt>=50?'👑 ':'')+val;
+  const _badge=localStorage.getItem('agora_myBadge')||'';
+  const _nuEl2=document.getElementById('navUser');if(_nuEl2)_nuEl2.textContent=(_badge?_badge+' ':'')+val;
   document.getElementById('currentNickname').textContent=val;
   document.getElementById('nicknameInput').value='';
   msgEl.textContent='닉네임이 변경됐습니다.';msgEl.style.color='var(--g)';
@@ -4791,7 +4791,7 @@ if('serviceWorker' in navigator){
 const _guideTexts={
   library:{
     title:'내 서재',
-    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.<br>· <b>독서 스탬프</b> — 책을 읽을수록 월계수 잎이 하나씩! 5권마다 특별 뱃지를 획득하고, 50권을 채워 황금 왕관을 완성해보세요! 👑<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
+    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.<br>· <b>마일스톤</b> — 책을 읽을수록 월계수 잎이 하나씩! 5권마다 특별 뱃지를 획득하고 닉네임에 장착해보세요! 👑<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
   },
   forum:{
     title:'광장',
@@ -4964,14 +4964,14 @@ function renderLaurel(){
 
   // 5권마다 뱃지 (위치: 5,10,15,...50)
   const milestones=[
-    {at:5, icon:'📖',label:'다독 시작'},
-    {at:10,icon:'✨',label:'10권 달성'},
-    {at:15,icon:'🌸',label:'15권 돌파'},
-    {at:20,icon:'🌳',label:'20권 달성'},
+    {at:5, icon:'🌱',label:'새싹'},
+    {at:10,icon:'🌿',label:'10권 달성'},
+    {at:15,icon:'🌳',label:'15권 돌파'},
+    {at:20,icon:'💐',label:'20권 달성'},
     {at:25,icon:'💫',label:'25권 돌파'},
-    {at:30,icon:'🔥',label:'30권 달성'},
-    {at:35,icon:'💎',label:'35권 돌파'},
-    {at:40,icon:'⭐',label:'40권 달성'},
+    {at:30,icon:'✨',label:'30권 달성'},
+    {at:35,icon:'⭐',label:'35권 돌파'},
+    {at:40,icon:'🏅',label:'40권 달성'},
     {at:45,icon:'🏆',label:'45권 돌파'},
     {at:50,icon:'👑',label:'완성!'}
   ];
@@ -5026,26 +5026,40 @@ function renderLaurel(){
   for(const [th,m] of msgs){ if(n>=th) msg=m; }
   msgEl.textContent=msg;
 
-  // 하단 뱃지 컬렉션
-  badgeEl.innerHTML=milestones.map(m=>{
+  // 하단 뱃지 컬렉션 (클릭하면 닉네임 앞에 뱃지 장착)
+  const curBadge=localStorage.getItem('agora_myBadge')||'';
+  badgeEl.innerHTML='<div style="font-size:11px;color:var(--muted);margin-bottom:10px;width:100%;text-align:center">뱃지를 탭하면 닉네임 앞에 장착돼요!</div>'+milestones.map(m=>{
     const e=n>=m.at;
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${e?1:0.3};filter:${e?'none':'grayscale(1)'}"><div style="width:44px;height:44px;border-radius:50%;background:${e?'linear-gradient(145deg,#FFF9E8,#FFE8A0)':'#f0ede8'};display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid ${e?'#D4A017':'#ddd'}">${m.icon}</div><div style="font-size:10px;color:${e?'var(--txt)':'var(--muted)'};font-weight:${e?'600':'400'}">${m.label}</div></div>`;
+    const sel=curBadge===m.icon;
+    return `<div onclick="${e?`selectBadge('${m.icon}')`:''}" style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${e?1:0.3};filter:${e?'none':'grayscale(1)'};cursor:${e?'pointer':'default'}"><div style="width:48px;height:48px;border-radius:50%;background:${e?(sel?'linear-gradient(145deg,#FFE8A0,#FFD54F)':'linear-gradient(145deg,#FFF9E8,#FFE8A0)'):'#f0ede8'};display:flex;align-items:center;justify-content:center;font-size:22px;border:${sel?'3px solid #D4A017':'2px solid '+(e?'#D4A017':'#ddd')};box-shadow:${sel?'0 0 12px rgba(212,160,23,0.4)':'none'};transition:all .2s">${m.icon}</div><div style="font-size:10px;color:${sel?'#D4A017':(e?'var(--txt)':'var(--muted)')};font-weight:${sel||e?'600':'400'}">${sel?'장착중':m.label}</div></div>`;
   }).join('');
 
-  _updateCrownBadge(n);
+  _applyBadgeToNav();
 }
 
-// ── 50권 달성 시 닉네임 앞에 👑 배지 ──
-function _updateCrownBadge(bookCount){
+// ── 뱃지 선택 (닉네임 앞에 장착) ──
+function selectBadge(icon){
+  const cur=localStorage.getItem('agora_myBadge')||'';
+  if(cur===icon){
+    // 같은 뱃지 다시 누르면 해제
+    localStorage.removeItem('agora_myBadge');
+  } else {
+    localStorage.setItem('agora_myBadge',icon);
+  }
+  renderLaurel();
+}
+
+// ── 닉네임 앞에 선택된 뱃지 표시 ──
+function _applyBadgeToNav(){
   const navU=document.getElementById('navUser');
   if(!navU||!CU) return;
   const name=CU.username||'';
-  if(bookCount>=50){
-    navU.textContent='👑 '+name;
-  } else {
-    navU.textContent=name;
-  }
+  const badge=localStorage.getItem('agora_myBadge')||'';
+  navU.textContent=(badge?badge+' ':'')+name;
 }
+
+// 하위호환
+function _updateCrownBadge(){ _applyBadgeToNav(); }
 
 function initReadingDragSort(){
   const container=document.getElementById('readingBookList');
