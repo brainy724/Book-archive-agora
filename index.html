@@ -4608,15 +4608,21 @@ function setLibMapType(type){
   displayLibResults(libAllData);
 }
 
-async function fetchLibApi(url){
-  const res=await fetch(url);
-  const text=await res.text();
-  try{ return JSON.parse(text); }catch(e){
-    // XML 응답이 올 경우 파싱 시도
-    const parser=new DOMParser();
-    const xml=parser.parseFromString(text,'text/xml');
-    const errMsg=xml.querySelector('error');
-    if(errMsg) console.warn('API 에러:',errMsg.textContent);
+async function fetchLibApi(originalUrl){
+  // Vercel 프록시를 통해 CORS 우회
+  const proxyUrl='/api/lib-proxy?url='+encodeURIComponent(originalUrl);
+  try{
+    const res=await fetch(proxyUrl);
+    const text=await res.text();
+    try{ return JSON.parse(text); }catch(e){
+      const parser=new DOMParser();
+      const xml=parser.parseFromString(text,'text/xml');
+      const errMsg=xml.querySelector('error');
+      if(errMsg) console.warn('API 에러:',errMsg.textContent);
+      return {response:{libs:[]}};
+    }
+  }catch(e){
+    console.error('프록시 호출 실패:',e);
     return {response:{libs:[]}};
   }
 }
