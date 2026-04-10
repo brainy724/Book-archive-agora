@@ -4563,6 +4563,19 @@ function setLibMapType(type){
   displayLibResults(libAllData);
 }
 
+async function fetchLibApi(url){
+  const res=await fetch(url);
+  const text=await res.text();
+  try{ return JSON.parse(text); }catch(e){
+    // XML 응답이 올 경우 파싱 시도
+    const parser=new DOMParser();
+    const xml=parser.parseFromString(text,'text/xml');
+    const errMsg=xml.querySelector('error');
+    if(errMsg) console.warn('API 에러:',errMsg.textContent);
+    return {response:{libs:[]}};
+  }
+}
+
 async function searchLibMap(){
   if(!libMap)initLibMap();
   const region=document.getElementById('libmapRegion').value;
@@ -4571,9 +4584,8 @@ async function searchLibMap(){
   libAllData=[];
   try{
     // 일반 도서관 검색
-    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&dtl_region=${region}&pageSize=200&format=json${keyword?'&libName='+encodeURIComponent(keyword):''}`;
-    const libRes=await fetch(libUrl);
-    const libJson=await libRes.json();
+    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json${keyword?'&libName='+encodeURIComponent(keyword):''}`;
+    const libJson=await fetchLibApi(libUrl);
     const libs=(libJson.response&&libJson.response.libs)||[];
     libs.forEach(item=>{
       const l=item.lib||item;
@@ -4591,9 +4603,8 @@ async function searchLibMap(){
     });
 
     // 스마트도서관 검색 (별도 엔드포인트는 없으므로 키워드에 '스마트' 추가 검색)
-    const smartUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&dtl_region=${region}&pageSize=200&format=json&libName=${encodeURIComponent('스마트')}`;
-    const smartRes=await fetch(smartUrl);
-    const smartJson=await smartRes.json();
+    const smartUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json&libName=${encodeURIComponent('스마트')}`;
+    const smartJson=await fetchLibApi(smartUrl);
     const smarts=(smartJson.response&&smartJson.response.libs)||[];
     smarts.forEach(item=>{
       const l=item.lib||item;
@@ -4618,10 +4629,17 @@ async function searchLibMap(){
       if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
     });
 
+    if(!libAllData.length && keyword){
+      nt('검색 결과가 없습니다. 도서관명을 다시 확인해주세요.','err');
+    }
     displayLibResults(libAllData);
   }catch(e){
     console.error('도서관 검색 오류:',e);
-    nt('도서관 검색 중 오류가 발생했습니다. API 키를 확인해주세요.','err');
+    if(e.message&&e.message.includes('Failed to fetch')){
+      nt('네트워크 오류입니다. 잠시 후 다시 시도해주세요.','err');
+    }else{
+      nt('도서관 검색 중 오류가 발생했습니다.','err');
+    }
   }
   load(false);
 }
