@@ -1,4 +1,13 @@
 export default async function handler(req, res) {
+  // CORS 허용
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   const { url } = req.query;
 
   if (!url || !url.includes('data4library.kr')) {
@@ -8,11 +17,9 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(url);
     const text = await response.text();
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.status(200).send(text);
+    return res.status(200).send(text);
   } catch (error) {
-    res.status(500).json({ error: 'Proxy fetch failed', detail: error.message });
+    return res.status(500).json({ error: 'Proxy failed', detail: error.message });
   }
 }
