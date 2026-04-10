@@ -4684,6 +4684,13 @@ async function searchLibMap(){
       if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
     });
 
+    // 키워드가 있으면 이름 또는 주소에 키워드 포함된 것만 필터링
+    if(keyword){
+      libAllData=libAllData.filter(d=>
+        (d.name||'').includes(keyword)||(d.addr||'').includes(keyword)
+      );
+    }
+
     if(!libAllData.length && keyword){
       nt('검색 결과가 없습니다. 도서관명을 다시 확인해주세요.','err');
     }
