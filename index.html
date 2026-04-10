@@ -722,7 +722,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      <option value="기타">기타</option>
    </select>
  </div>
- <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:140px;max-height:300px;overflow-y:auto;resize:vertical" placeholder="책에 대한 생각을 자유롭게 적어보세요..." maxlength="2000" oninput="document.getElementById('reviewCount').textContent=this.value.length"></textarea>
+ <div class="fg"><label>감상평</label><textarea id="bReview" style="min-height:260px;max-height:500px;overflow-y:auto;resize:vertical" placeholder="책에 대한 생각을 자유롭게 적어보세요..." maxlength="2000" oninput="document.getElementById('reviewCount').textContent=this.value.length"></textarea>
  <div style="text-align:right;margin-top:6px;font-size:11px;color:var(--muted)"><span id="reviewCount">0</span> / 2,000</div>
  </div>
  <div class="fg">
@@ -1228,12 +1228,12 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="sub">커뮤니티 관리</div>
  <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
  <!-- 탭 -->
- <div class="tab-bar" style="margin-bottom:20px">
-   <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')">신고<br>접수</button>
-   <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')">1:1<br>문의</button>
-   <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')">회원<br>목록</button>
-   <button class="tab-btn" id="admTab-notice" onclick="switchAdmTab('notice')">공지</button>
-   <button class="tab-btn" id="admTab-dm" onclick="switchAdmTab('dm')">쪽지</button>
+ <div class="tab-bar" style="margin-bottom:20px;display:flex;gap:0">
+   <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">신고<br>접수</button>
+   <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">1:1<br>문의</button>
+   <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">회원<br>목록</button>
+   <button class="tab-btn" id="admTab-notice" onclick="switchAdmTab('notice')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">공지</button>
+   <button class="tab-btn" id="admTab-dm" onclick="switchAdmTab('dm')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">쪽지</button>
  </div>
  <!-- 신고 목록 -->
  <div id="admReportsSection">
@@ -3739,15 +3739,47 @@ async function rAdmin(){
   }
 
   // 회원 목록
-  document.getElementById('uList').innerHTML=normal.map(u=>{
+  // 그룹 목록 추출
+  const allGroups=[...new Set(normal.map(u=>u.user_group).filter(Boolean))];
+  const groupFilterHtml=`<div style="margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+    <button class="sort-btn on" id="ugf-all" onclick="filterUserGroup('all')" style="font-size:12px;padding:4px 10px">전체</button>
+    ${allGroups.map(g=>`<button class="sort-btn" id="ugf-${g}" onclick="filterUserGroup('${esc(g)}')" style="font-size:12px;padding:4px 10px">${esc(g)}</button>`).join('')}
+    <button class="sort-btn" id="ugf-none" onclick="filterUserGroup('none')" style="font-size:12px;padding:4px 10px">미지정</button>
+  </div>`;
+
+  window._adminUsers=normal;
+  window._currentGroupFilter='all';
+
+  document.getElementById('uList').innerHTML=groupFilterHtml+'<div id="uListInner"></div>';
+  renderUserList(normal);
+
+  switchAdmTab('reports');loadDmTargets();loadDmHistory();
+}
+
+function filterUserGroup(g){
+  window._currentGroupFilter=g;
+  document.querySelectorAll('[id^="ugf-"]').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('ugf-'+g);if(el)el.classList.add('on');
+  let filtered=window._adminUsers||[];
+  if(g==='none') filtered=filtered.filter(u=>!u.user_group);
+  else if(g!=='all') filtered=filtered.filter(u=>u.user_group===g);
+  renderUserList(filtered);
+}
+
+function renderUserList(list){
+  const el=document.getElementById('uListInner');
+  if(!el)return;
+  el.innerHTML=list.map(u=>{
     const statusBadge=`<span style="font-size:10px;background:var(--gl);color:var(--g);border:1px solid var(--gb);border-radius:10px;padding:2px 7px;margin-left:6px">프리미엄</span>`;
+    const groupTag=u.user_group?`<span style="font-size:10px;background:#E8F0FE;color:#1A73E8;border:1px solid #C2D9FC;border-radius:10px;padding:2px 7px;margin-left:4px">${esc(u.user_group)}</span>`:'';
     return`<div class="card" style="padding:12px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div style="cursor:pointer" onclick="openMembershipModal('${u.id}','${esc(u.username)}')">
-          <div style="font-size:14px;font-weight:500;display:flex;align-items:center">${u.badge?u.badge+" ":""}${esc(u.username)}${statusBadge}</div>
+        <div style="cursor:pointer;flex:1;min-width:0" onclick="openMembershipModal('${u.id}','${esc(u.username)}')">
+          <div style="font-size:14px;font-weight:500;display:flex;align-items:center;flex-wrap:wrap;gap:2px">${u.badge?u.badge+" ":""}${esc(u.username)}${statusBadge}${groupTag}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">${ago(u.created_at)}${u.strikes?` · 경고 ${u.strikes}회`:''}</div>
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+          <button class="btn2" style="font-size:11px;padding:4px 8px" onclick="setUserGroup('${u.id}','${esc(u.username)}')">그룹</button>
           ${u.banned
             ?`<button class="btn2" style="font-size:12px;padding:5px 10px" onclick="unban('${u.id}')">제한 해제</button>`
             :`<button class="btnd" style="font-size:12px;padding:5px 10px" onclick="ban('${u.id}')">차단</button>`
@@ -3756,9 +3788,22 @@ async function rAdmin(){
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('')||'<div class="empty"><div class="et">해당 그룹의 회원이 없습니다</div></div>';
+}
 
-  switchAdmTab('reports');loadDmTargets();loadDmHistory();
+async function setUserGroup(userId,username){
+  const existing=(window._adminUsers||[]).find(u=>u.id===userId);
+  const currentGroup=existing?.user_group||'';
+  const allGroups=[...new Set((window._adminUsers||[]).map(u=>u.user_group).filter(Boolean))];
+  const suggestions=allGroups.length?`\n기존 그룹: ${allGroups.join(', ')}`:'';
+  const input=prompt(`${username}님의 그룹을 설정하세요.\n비워두면 그룹이 해제됩니다.${suggestions}`,currentGroup);
+  if(input===null)return; // 취소
+  const group=input.trim()||null;
+  load(true);
+  await sb.from('agora_users').update({user_group:group}).eq('id',userId);
+  load(false);
+  nt(group?`${username}님을 '${group}' 그룹으로 설정했습니다.`:`${username}님의 그룹을 해제했습니다.`);
+  rAdmin();
 }
 
 async function grantAllPremium(){
@@ -4602,27 +4647,31 @@ async function searchLibMap(){
       }
     });
 
-    // 스마트도서관 검색 (별도 엔드포인트는 없으므로 키워드에 '스마트' 추가 검색)
-    const smartUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json&libName=${encodeURIComponent('스마트')}`;
-    const smartJson=await fetchLibApi(smartUrl);
-    const smarts=(smartJson.response&&smartJson.response.libs)||[];
-    smarts.forEach(item=>{
-      const l=item.lib||item;
-      if(l.latitude&&l.longitude){
-        const exists=libAllData.some(d=>d.lat===parseFloat(l.latitude)&&d.lng===parseFloat(l.longitude));
-        if(!exists){
-          libAllData.push({
-            name:l.libName||'스마트도서관',
-            addr:l.address||'',
-            tel:l.tel||'',
-            lat:parseFloat(l.latitude),
-            lng:parseFloat(l.longitude),
-            type:(l.libName||'').includes('스마트')?'smart':'lib',
-            homepage:l.homepage||''
-          });
+    // 스마트도서관 검색 — 키워드가 있으면 키워드로, 없으면 '스마트'로 검색
+    const smartKeyword=keyword||'스마트';
+    const smartUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json&libName=${encodeURIComponent(smartKeyword)}`;
+    // 키워드가 있으면 일반 검색에서 이미 포함되므로 스마트 별도 검색 스킵
+    if(!keyword){
+      const smartJson=await fetchLibApi(smartUrl);
+      const smarts=(smartJson.response&&smartJson.response.libs)||[];
+      smarts.forEach(item=>{
+        const l=item.lib||item;
+        if(l.latitude&&l.longitude){
+          const exists=libAllData.some(d=>d.lat===parseFloat(l.latitude)&&d.lng===parseFloat(l.longitude));
+          if(!exists){
+            libAllData.push({
+              name:l.libName||'스마트도서관',
+              addr:l.address||'',
+              tel:l.tel||'',
+              lat:parseFloat(l.latitude),
+              lng:parseFloat(l.longitude),
+              type:(l.libName||'').includes('스마트')?'smart':'lib',
+              homepage:l.homepage||''
+            });
+          }
         }
-      }
-    });
+      });
+    }
 
     // 기존 결과에서도 스마트 분류
     libAllData.forEach(d=>{
