@@ -4658,6 +4658,7 @@ async function searchLibMap(){
       if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
     });
 
+    const beforeCount=libAllData.length;
     // 키워드가 있으면 이름 또는 주소에 포함된 것만 필터링
     if(keyword){
       const kw=keyword.toLowerCase();
@@ -4665,6 +4666,7 @@ async function searchLibMap(){
         (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
       );
     }
+    alert('디버그: keyword=['+keyword+'] 전체='+beforeCount+'개 → 필터후='+libAllData.length+'개');
 
     if(!libAllData.length && keyword){
       nt(`'${keyword}' 검색 결과가 없습니다.`,'err');
