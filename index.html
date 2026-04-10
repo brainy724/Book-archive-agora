@@ -4669,12 +4669,11 @@ async function searchLibMap(){
     if(keyword){
       const kw=keyword.toLowerCase();
       const before=libAllData.length;
-      // 디버그: 첫 5개 도서관 이름+주소 확인
-      const sample=libAllData.slice(0,5).map(d=>d.name+'|'+d.addr).join('\n');
+      const sample=libAllData.slice(0,3).map(d=>'이름:['+d.name+'] 주소:['+d.addr+']').join('\n');
       libAllData=libAllData.filter(d=>
         (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
       );
-      alert('전체='+before+'개, 필터후='+libAllData.length+'개\n키워드=['+kw+']\n샘플:\n'+sample);
+      alert('전체='+before+'개, 필터후='+libAllData.length+'개\n키워드=['+kw+']\n'+sample);
     }
 
     if(!libAllData.length && keyword){
