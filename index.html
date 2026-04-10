@@ -4635,7 +4635,7 @@ async function searchLibMap(){
   libAllData=[];
   try{
     // 항상 해당 지역 전체 도서관을 가져옴 (API의 libName 필터가 불안정하므로)
-    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json`;
+    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=500&format=json`;
     const libJson=await fetchLibApi(libUrl);
     const libs=(libJson.response&&libJson.response.libs)||[];
     libs.forEach(item=>{
@@ -4658,7 +4658,6 @@ async function searchLibMap(){
       if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
     });
 
-    const beforeCount=libAllData.length;
     // 키워드가 있으면 이름 또는 주소에 포함된 것만 필터링
     if(keyword){
       const kw=keyword.toLowerCase();
@@ -4666,7 +4665,6 @@ async function searchLibMap(){
         (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
       );
     }
-    alert('디버그: keyword=['+keyword+'] 전체='+beforeCount+'개 → 필터후='+libAllData.length+'개');
 
     if(!libAllData.length && keyword){
       nt(`'${keyword}' 검색 결과가 없습니다.`,'err');
