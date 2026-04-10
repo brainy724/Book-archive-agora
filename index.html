@@ -4609,20 +4609,35 @@ function setLibMapType(type){
 }
 
 async function fetchLibApi(originalUrl){
-  // Vercel 프록시를 통해 CORS 우회
   const proxyUrl='/api/lib-proxy?url='+encodeURIComponent(originalUrl);
   try{
     const res=await fetch(proxyUrl);
     const text=await res.text();
-    try{ return JSON.parse(text); }catch(e){
-      const parser=new DOMParser();
-      const xml=parser.parseFromString(text,'text/xml');
-      const errMsg=xml.querySelector('error');
-      if(errMsg) console.warn('API 에러:',errMsg.textContent);
-      return {response:{libs:[]}};
-    }
+    // 디버그: XML 원본 첫 1000자 확인 (1회만)
+    if(!window._libDebugDone){window._libDebugDone=true;alert('XML원본(첫800자):\n'+text.substring(0,800));}
+    // JSON이면 그대로 파싱
+    try{
+      const json=JSON.parse(text);
+      return json;
+    }catch(e){}
+    // XML이면 DOMParser로 파싱
+    const parser=new DOMParser();
+    const xml=parser.parseFromString(text,'text/xml');
+    const libEls=xml.querySelectorAll('lib');
+    const libs=[];
+    libEls.forEach(el=>{
+      const g=tag=>{const n=el.querySelector(tag);return n?n.textContent.trim():'';};
+      libs.push({lib:{
+        libCode:g('libCode'),libName:g('libName'),address:g('address'),
+        tel:g('tel'),fax:g('fax'),latitude:g('latitude'),longitude:g('longitude'),
+        homepage:g('homepage'),closed:g('closed'),operatingTime:g('operatingTime'),
+        BookCount:g('BookCount')
+      }});
+    });
+    const nf=xml.querySelector('numFound');
+    return {response:{numFound:nf?parseInt(nf.textContent):libs.length,resultNum:libs.length,libs:libs}};
   }catch(e){
-    console.error('프록시 호출 실패:',e);
+    console.error('fetchLibApi 오류:',e);
     return {response:{libs:[]}};
   }
 }
