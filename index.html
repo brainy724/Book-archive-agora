@@ -4634,8 +4634,8 @@ async function searchLibMap(){
   load(true);
   libAllData=[];
   try{
-    // 일반 도서관 검색
-    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json${keyword?'&libName='+encodeURIComponent(keyword):''}`;
+    // 항상 해당 지역 전체 도서관을 가져옴 (API의 libName 필터가 불안정하므로)
+    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json`;
     const libJson=await fetchLibApi(libUrl);
     const libs=(libJson.response&&libJson.response.libs)||[];
     libs.forEach(item=>{
@@ -4653,46 +4653,23 @@ async function searchLibMap(){
       }
     });
 
-    // 스마트도서관 검색 — 키워드가 있으면 키워드로, 없으면 '스마트'로 검색
-    const smartKeyword=keyword||'스마트';
-    const smartUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json&libName=${encodeURIComponent(smartKeyword)}`;
-    // 키워드가 있으면 일반 검색에서 이미 포함되므로 스마트 별도 검색 스킵
-    if(!keyword){
-      const smartJson=await fetchLibApi(smartUrl);
-      const smarts=(smartJson.response&&smartJson.response.libs)||[];
-      smarts.forEach(item=>{
-        const l=item.lib||item;
-        if(l.latitude&&l.longitude){
-          const exists=libAllData.some(d=>d.lat===parseFloat(l.latitude)&&d.lng===parseFloat(l.longitude));
-          if(!exists){
-            libAllData.push({
-              name:l.libName||'스마트도서관',
-              addr:l.address||'',
-              tel:l.tel||'',
-              lat:parseFloat(l.latitude),
-              lng:parseFloat(l.longitude),
-              type:(l.libName||'').includes('스마트')?'smart':'lib',
-              homepage:l.homepage||''
-            });
-          }
-        }
-      });
-    }
-
-    // 기존 결과에서도 스마트 분류
+    // 기존 결과에서 스마트 분류
     libAllData.forEach(d=>{
       if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
     });
 
-    // 키워드가 있으면 이름 또는 주소에 키워드 포함된 것만 필터링
+    // 키워드가 있으면 이름 또는 주소에 포함된 것만 필터링
     if(keyword){
+      const kw=keyword.toLowerCase();
       libAllData=libAllData.filter(d=>
-        (d.name||'').includes(keyword)||(d.addr||'').includes(keyword)
+        (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
       );
     }
 
     if(!libAllData.length && keyword){
-      nt('검색 결과가 없습니다. 도서관명을 다시 확인해주세요.','err');
+      nt(`'${keyword}' 검색 결과가 없습니다.`,'err');
+    } else if(libAllData.length){
+      nt(`${libAllData.length}개 도서관을 찾았습니다!`);
     }
     displayLibResults(libAllData);
   }catch(e){
