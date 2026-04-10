@@ -4634,11 +4634,25 @@ async function searchLibMap(){
   load(true);
   libAllData=[];
   try{
-    // 항상 해당 지역 전체 도서관을 가져옴 (API의 libName 필터가 불안정하므로)
-    const libUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=500&format=json`;
-    const libJson=await fetchLibApi(libUrl);
-    const libs=(libJson.response&&libJson.response.libs)||[];
-    libs.forEach(item=>{
+    // 해당 지역 전체 도서관을 가져옴 (페이지 나눠서)
+    const baseUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json`;
+    const page1=await fetchLibApi(baseUrl+'&pageNo=1');
+    const libs1=(page1.response&&page1.response.libs)||[];
+    const numFound=page1.response&&page1.response.numFound?parseInt(page1.response.numFound):0;
+    let allLibs=[...libs1];
+    // 200개 이상이면 2페이지도 가져옴
+    if(numFound>200){
+      const page2=await fetchLibApi(baseUrl+'&pageNo=2');
+      const libs2=(page2.response&&page2.response.libs)||[];
+      allLibs=allLibs.concat(libs2);
+    }
+    // 400개 이상이면 3페이지도
+    if(numFound>400){
+      const page3=await fetchLibApi(baseUrl+'&pageNo=3');
+      const libs3=(page3.response&&page3.response.libs)||[];
+      allLibs=allLibs.concat(libs3);
+    }
+    allLibs.forEach(item=>{
       const l=item.lib||item;
       if(l.latitude&&l.longitude){
         libAllData.push({
