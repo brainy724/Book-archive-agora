@@ -4644,62 +4644,63 @@ async function fetchLibApi(originalUrl){
 async function searchLibMap(){
   if(!libMap)initLibMap();
   const region=document.getElementById('libmapRegion').value;
+  const regionName=document.getElementById('libmapRegion').selectedOptions[0].text;
   const keyword=document.getElementById('libmapKeyword').value.trim();
   load(true);
   libAllData=[];
   try{
-    // 해당 지역 전체 도서관을 가져옴 (항상 2페이지까지 호출)
-    const baseUrl=`https://data4library.kr/api/libSrch?authKey=${LIB_API_KEY}&region=${region}&pageSize=200&format=json`;
-    const page1=await fetchLibApi(baseUrl+'&pageNo=1');
-    const libs1=(page1.response&&page1.response.libs)||[];
-    let allLibs=[...libs1];
-    // 200개가 왔으면 다음 페이지가 있을 수 있음
-    if(libs1.length>=200){
-      const page2=await fetchLibApi(baseUrl+'&pageNo=2');
-      const libs2=(page2.response&&page2.response.libs)||[];
-      allLibs=allLibs.concat(libs2);
-    }
-    allLibs.forEach(item=>{
-      const l=item.lib||item;
-      if(l.latitude&&l.longitude){
-        libAllData.push({
-          name:l.libName||'도서관',
-          addr:l.address||'',
-          tel:l.tel||'',
-          lat:parseFloat(l.latitude),
-          lng:parseFloat(l.longitude),
-          type:'lib',
-          homepage:l.homepage||''
-        });
-      }
+    // 카카오 키워드 검색으로 도서관 찾기
+    const ps=new kakao.maps.services.Places();
+    const searchQuery=keyword?(keyword+' 도서관'):(regionName+' 도서관');
+
+    const doSearch=(query,page)=>new Promise(resolve=>{
+      ps.keywordSearch(query,(data,status,pagination)=>{
+        if(status===kakao.maps.services.Status.OK){
+          data.forEach(d=>{
+            const exists=libAllData.some(e=>e.lat===parseFloat(d.y)&&e.lng===parseFloat(d.x));
+            if(!exists){
+              libAllData.push({
+                name:d.place_name,
+                addr:d.road_address_name||d.address_name||'',
+                tel:d.phone||'',
+                lat:parseFloat(d.y),
+                lng:parseFloat(d.x),
+                type:(d.place_name||'').includes('스마트')||(d.place_name||'').includes('무인')?'smart':'lib',
+                homepage:d.place_url||''
+              });
+            }
+          });
+          resolve(pagination);
+        }else{
+          resolve(null);
+        }
+      },{page:page||1,size:15});
     });
 
-    // 기존 결과에서 스마트 분류
-    libAllData.forEach(d=>{
-      if((d.name||'').includes('스마트')||(d.name||'').includes('무인'))d.type='smart';
-    });
+    // 최대 3페이지까지 검색 (45개)
+    const p1=await doSearch(searchQuery,1);
+    if(p1&&p1.hasNextPage) await doSearch(searchQuery,2);
+    if(p1&&p1.last>2){const p2=await doSearch(searchQuery,3);}
 
-    // 키워드가 있으면 이름 또는 주소에 포함된 것만 필터링
-    if(keyword){
-      const kw=keyword.toLowerCase();
-      libAllData=libAllData.filter(d=>
-        (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
-      );
+    // 스마트도서관도 추가 검색
+    if(!keyword){
+      await doSearch(regionName+' 스마트도서관',1);
     }
 
     if(!libAllData.length && keyword){
       nt(`'${keyword}' 검색 결과가 없습니다.`,'err');
     } else if(libAllData.length){
       nt(`${libAllData.length}개 도서관을 찾았습니다!`);
+      // 첫 번째 결과로 지도 이동
+      if(libAllData[0]){
+        libMap.setCenter(new kakao.maps.LatLng(libAllData[0].lat,libAllData[0].lng));
+        libMap.setLevel(keyword?5:8);
+      }
     }
     displayLibResults(libAllData);
   }catch(e){
     console.error('도서관 검색 오류:',e);
-    if(e.message&&e.message.includes('Failed to fetch')){
-      nt('네트워크 오류입니다. 잠시 후 다시 시도해주세요.','err');
-    }else{
-      nt('도서관 검색 중 오류가 발생했습니다.','err');
-    }
+    nt('도서관 검색 중 오류가 발생했습니다.','err');
   }
   load(false);
 }
