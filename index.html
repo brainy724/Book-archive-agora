@@ -1669,6 +1669,7 @@ async function ok(u){
  loadNotifSettings();
  checkUnreadNotifs();
  initNotifRealtime();
+ loadReadingBooksFromDB().then(()=>renderReadingBooks());
 }
 function logout(){sb.auth.signOut();localStorage.removeItem('agora_sess');CU=null;window.close();if(!window.closed){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F5;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-family:serif;font-size:28px;color:#D4B878;letter-spacing:4px;margin-bottom:16px">AGORA</div><div style="font-size:15px;color:#888;line-height:1.8">로그아웃 되었습니다.<br>앱을 종료해주세요.</div></div></div>';}}
 // ── 지원 페이지 (공지사항, 이용약관, 개인정보처리방침) ──
@@ -4613,8 +4614,6 @@ async function fetchLibApi(originalUrl){
   try{
     const res=await fetch(proxyUrl);
     const text=await res.text();
-    // 디버그: XML 원본 첫 1000자 확인 (1회만)
-    if(!window._libDebugDone){window._libDebugDone=true;alert('XML원본(첫800자):\n'+text.substring(0,800));}
     // JSON이면 그대로 파싱
     try{
       const json=JSON.parse(text);
@@ -4683,14 +4682,9 @@ async function searchLibMap(){
     // 키워드가 있으면 이름 또는 주소에 포함된 것만 필터링
     if(keyword){
       const kw=keyword.toLowerCase();
-      const before=libAllData.length;
-      // 디버그: 양평 포함 항목 찾기
-      const found=libAllData.filter(d=>(d.name+d.addr).toLowerCase().includes(kw));
-      const foundSample=found.slice(0,3).map(d=>'['+d.name+'] ['+d.addr+']').join(' /// ');
       libAllData=libAllData.filter(d=>
         (d.name||'').toLowerCase().includes(kw)||(d.addr||'').toLowerCase().includes(kw)
       );
-      alert('전체='+before+' 합친검색='+found.length+' 분리검색='+libAllData.length+'\n'+foundSample);
     }
 
     if(!libAllData.length && keyword){
@@ -4946,12 +4940,43 @@ async function saveTimerRecord(){
   resetTimer(); rStats();
 }
 
-// ========== 읽고 있는 책 관리 ==========
+// ========== 읽고 있는 책 관리 (Supabase) ==========
+let _readingBooksCache=null;
 function getReadingBooks(){
-  try{return JSON.parse(localStorage.getItem('agora_reading_'+CU.id)||'[]');}catch{return[];}
+  if(_readingBooksCache!==null) return _readingBooksCache;
+  // fallback: localStorage에서 마이그레이션
+  try{
+    const local=JSON.parse(localStorage.getItem('agora_reading_'+CU.id)||'[]');
+    _readingBooksCache=local;
+    return local;
+  }catch{_readingBooksCache=[];return[];}
 }
 function saveReadingBooks(list){
+  _readingBooksCache=list;
+  // Supabase에 저장
+  if(CU&&CU.id){
+    sb.from('agora_users').update({reading_books:JSON.stringify(list)}).eq('id',CU.id).then(()=>{});
+  }
+  // localStorage 백업도 유지
   localStorage.setItem('agora_reading_'+CU.id, JSON.stringify(list));
+}
+async function loadReadingBooksFromDB(){
+  if(!CU||!CU.id)return;
+  const{data}=await sb.from('agora_users').select('reading_books').eq('id',CU.id).single();
+  if(data&&data.reading_books){
+    try{
+      _readingBooksCache=JSON.parse(data.reading_books);
+      // localStorage에도 동기화
+      localStorage.setItem('agora_reading_'+CU.id, JSON.stringify(_readingBooksCache));
+    }catch{_readingBooksCache=[];}
+  }else{
+    // DB에 없으면 localStorage에서 마이그레이션
+    const local=getReadingBooks();
+    if(local.length>0){
+      await sb.from('agora_users').update({reading_books:JSON.stringify(local)}).eq('id',CU.id);
+    }
+    _readingBooksCache=local;
+  }
 }
 function renderReadingBooks(){
   const list=getReadingBooks();
