@@ -4648,10 +4648,22 @@ async function searchLibMap(){
   const keyword=document.getElementById('libmapKeyword').value.trim();
   load(true);
   libAllData=[];
+
+  // 지역별 중심 좌표
+  const regionCenter={
+    '11':{lat:37.5665,lng:126.978},'21':{lat:35.1796,lng:129.0756},'22':{lat:35.8714,lng:128.6014},
+    '23':{lat:37.4563,lng:126.7052},'24':{lat:35.1595,lng:126.8526},'25':{lat:36.3504,lng:127.3845},
+    '26':{lat:35.5394,lng:129.3114},'29':{lat:36.48,lng:127.0},'31':{lat:37.275,lng:127.009},
+    '32':{lat:37.8228,lng:128.1555},'33':{lat:36.6357,lng:127.4917},'34':{lat:36.5184,lng:126.8},
+    '35':{lat:35.82,lng:127.108},'36':{lat:34.816,lng:126.463},'37':{lat:36.019,lng:129.343},
+    '38':{lat:35.228,lng:128.682},'39':{lat:33.4996,lng:126.5312}
+  };
+  const center=regionCenter[region]||{lat:37.5665,lng:126.978};
+
   try{
-    // 카카오 키워드 검색으로 도서관 찾기
     const ps=new kakao.maps.services.Places();
-    const searchQuery=keyword?(keyword+' 도서관'):(regionName+' 도서관');
+    // 키워드가 있으면 "서울 양평 도서관", 없으면 "서울 도서관"
+    const searchQuery=keyword?(regionName+' '+keyword+' 도서관'):(regionName+' 도서관');
 
     const doSearch=(query,page)=>new Promise(resolve=>{
       ps.keywordSearch(query,(data,status,pagination)=>{
@@ -4674,13 +4686,13 @@ async function searchLibMap(){
         }else{
           resolve(null);
         }
-      },{page:page||1,size:15});
+      },{page:page||1,size:15,location:new kakao.maps.LatLng(center.lat,center.lng),sort:kakao.maps.services.SortBy.DISTANCE});
     });
 
     // 최대 3페이지까지 검색 (45개)
     const p1=await doSearch(searchQuery,1);
     if(p1&&p1.hasNextPage) await doSearch(searchQuery,2);
-    if(p1&&p1.last>2){const p2=await doSearch(searchQuery,3);}
+    if(p1&&p1.last>2) await doSearch(searchQuery,3);
 
     // 스마트도서관도 추가 검색
     if(!keyword){
@@ -4691,7 +4703,6 @@ async function searchLibMap(){
       nt(`'${keyword}' 검색 결과가 없습니다.`,'err');
     } else if(libAllData.length){
       nt(`${libAllData.length}개 도서관을 찾았습니다!`);
-      // 첫 번째 결과로 지도 이동
       if(libAllData[0]){
         libMap.setCenter(new kakao.maps.LatLng(libAllData[0].lat,libAllData[0].lng));
         libMap.setLevel(keyword?5:8);
