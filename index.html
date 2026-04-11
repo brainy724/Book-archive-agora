@@ -403,6 +403,10 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.477 3 2 6.75 2 11.25c0 2.9 1.8 5.45 4.5 6.95L5.5 21.5l4.95-2.85c.51.07 1.03.1 1.55.1 5.523 0 10-3.75 10-8.5S17.523 3 12 3z"/></svg>
         카카오로 시작하기
       </button>
+      <div style="height:10px"></div>
+      <button onclick="loginGuest()" style="width:100%;border-radius:12px;padding:13px 16px;font-size:14px;background:var(--gl);color:var(--g);border:1px solid var(--gb);cursor:pointer;font-family:var(--font-body);font-weight:500;transition:all .2s">
+        둘러보기 (게스트)
+      </button>
       <div style="height:14px"></div>
       <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7">
         카카오 계정 하나로 간편하게<br>
@@ -1001,6 +1005,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div style="margin-bottom:32px">
       <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;margin-bottom:16px">테마 색상</div>
 
+      <!-- 프리셋 테마 -->
+      <div style="background:#F9F9F9;border-radius:14px;padding:18px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:14px">프리셋 테마</div>
+        <div id="presetThemes" style="display:flex;flex-direction:column;gap:10px">
+        </div>
+      </div>
+
       <!-- 색상 선택 -->
       <div style="background:#F9F9F9;border-radius:14px;padding:20px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
@@ -1536,6 +1547,32 @@ async function handleOAuth(session){
  }
 }
 
+async function loginGuest(){
+  load(true);
+  const guestId='guest_'+Date.now();
+  const guestUser={
+    id:guestId,
+    username:'게스트',
+    is_admin:false,
+    isAdmin:false,
+    strikes:0,
+    banned:false,
+    points:0,
+    gender_confirmed:true,
+    premium_until:new Date(Date.now()+365*24*60*60*1000).toISOString(),
+    isGuest:true
+  };
+  CU=guestUser;
+  localStorage.setItem('agora_sess',JSON.stringify(guestUser));
+  document.getElementById('lw').classList.remove('active');
+  document.getElementById('lw').style.display='none';
+  document.getElementById('app').style.display='block';
+  load(false);
+  const navU=document.getElementById('navUser');if(navU)navU.textContent='게스트';
+  updateNavTabs();
+  go('library');
+  nt('게스트 모드로 둘러보고 있어요. 기록을 저장하려면 카카오 로그인이 필요해요.');
+}
 function loginKakao(){
  if(KK_REST_KEY==='YOUR_KAKAO_REST_KEY'){nt('카카오 REST API 키를 설정해주세요','err');return;}
  // 카카오 인가 코드 요청 (성별, 생년월일 동의 포함)
@@ -2619,6 +2656,48 @@ function deleteSavedColor(hex){
   localStorage.setItem('agora_saved_colors',JSON.stringify(saved));
   renderSavedColors();
 }
+// 프리셋 테마 정의
+const PRESET_THEMES=[
+  {id:'classic',name:'클래식 골드',desc:'따뜻하고 지적인 기본 테마',g:'#D4B878',g2:'#BFA562',gl:'#FFFCF5',gb:'#F0E8D4',bg:'#FFFCF9',colors:['#D4B878','#BFA562','#FFFCF5','#F0E8D4']},
+  {id:'rosegold',name:'로즈골드',desc:'부드럽고 여성스러운 분위기',g:'#C4908A',g2:'#B07A74',gl:'#FFF8F6',gb:'#F0DDD8',bg:'#FFFAF9',colors:['#C4908A','#B07A74','#FFF8F6','#F0DDD8']},
+  {id:'elegant',name:'엘레강트 골드',desc:'깊고 우아한 클래식 무드',g:'#B8956A',g2:'#9E7D55',gl:'#FBF8F3',gb:'#EDE4D4',bg:'#FEFCF8',colors:['#B8956A','#9E7D55','#FBF8F3','#EDE4D4']}
+];
+
+function renderPresetThemes(){
+  const el=document.getElementById('presetThemes');
+  if(!el)return;
+  const current=localStorage.getItem('agora_preset')||'classic';
+  el.innerHTML=PRESET_THEMES.map(t=>`
+    <div onclick="applyPresetTheme('${t.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;border:2px solid ${current===t.id?'var(--g)':'var(--border)'};background:${current===t.id?'var(--gl)':'#fff'};transition:all .2s">
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        ${t.colors.map(c=>`<div style="width:20px;height:20px;border-radius:50%;background:${c};border:1.5px solid rgba(0,0,0,.08)"></div>`).join('')}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--txt)">${t.name}${current===t.id?' ✓':''}</div>
+        <div style="font-size:11px;color:var(--muted)">${t.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyPresetTheme(id){
+  const t=PRESET_THEMES.find(p=>p.id===id);
+  if(!t)return;
+  const rs=document.documentElement.style;
+  rs.setProperty('--g',t.g);rs.setProperty('--g2',t.g2);
+  rs.setProperty('--gl',t.gl);rs.setProperty('--gb',t.gb);
+  rs.setProperty('--gold',t.g);rs.setProperty('--gold2',t.g2);
+  if(t.bg)rs.setProperty('--bg-page',t.bg);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',t.g);
+  localStorage.setItem('agora_color',JSON.stringify({g:t.g,g2:t.g2,gl:t.gl,gb:t.gb}));
+  localStorage.setItem('agora_preset',id);
+  // 색상 피커도 동기화
+  const p=document.getElementById('mainColorPicker');if(p)p.value=t.g;
+  const d=document.getElementById('pickerHexDisplay');if(d)d.textContent=t.g;
+  renderPresetThemes();
+  nt(t.name+' 테마가 적용됐습니다!');
+}
+
 function previewColor(hex){
   const el=document.getElementById('pickerHexDisplay');if(el)el.textContent=hex;
 }
@@ -3394,6 +3473,7 @@ async function rPoints(){
   const ni=document.getElementById('nicknameInput');if(ni)ni.value='';
   const nm=document.getElementById('nicknameMsg');if(nm)nm.style.display='none';
   if(typeof renderSavedColors==='function')renderSavedColors();
+  renderPresetThemes();
   const col=localStorage.getItem('agora_color');
   if(col){try{const c=JSON.parse(col);const cp=document.getElementById('mainColorPicker');if(cp)cp.value=c.g;const hx=document.getElementById('pickerHexDisplay');if(hx)hx.textContent=c.g;setColorPreset(c.g,c.g2,c.gl,c.gb);}catch{}}
 
