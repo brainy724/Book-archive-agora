@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.agora_archive.twa",
+    "sha256_cert_fingerprints": ["79:67:BA:77:4B:CB:BA:C4:13:83:7C:E5:78:4D:EA:55:A6:E1:08:6B:06:B7:95:F4:3E:CB:C1:34:94:9A:6D:FD"]
+  }
+}]
