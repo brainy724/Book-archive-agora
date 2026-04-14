@@ -578,6 +578,52 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <!-- 독서 습관 섹션 (내 서재 안) -->
   <div id="libNoteSection" style="display:none">
 
+   <!-- 이번 달 독서 목표 -->
+   <div class="card" style="padding:24px;text-align:center">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">이번 달 독서 목표</div>
+     <div id="goalDisplay" style="display:none">
+       <div style="position:relative;width:140px;height:140px;margin:0 auto 18px">
+         <svg viewBox="0 0 140 140" style="transform:rotate(-90deg)">
+           <circle cx="70" cy="70" r="60" fill="none" stroke="var(--border)" stroke-width="10"/>
+           <circle id="goalCircle" cx="70" cy="70" r="60" fill="none" stroke="var(--g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" style="transition:stroke-dashoffset .8s ease"/>
+         </svg>
+         <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+           <div id="goalCurrent" style="font-family:var(--font-serif);font-size:36px;font-weight:700;color:var(--g);line-height:1">0</div>
+           <div style="font-size:11px;color:var(--muted);margin-top:2px">/ <span id="goalTarget">0</span>권</div>
+         </div>
+       </div>
+       <div id="goalPercent" style="font-size:15px;font-weight:600;color:var(--g);margin-bottom:6px">0%</div>
+       <div id="goalMsg" style="font-size:13px;color:var(--muted);margin-bottom:18px"></div>
+       <div id="goalStreak" style="display:inline-flex;align-items:center;gap:6px;background:var(--gl);border:1px solid var(--gb);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--g);font-weight:600;margin-bottom:16px">
+         <span>🔥</span> 연속 <span id="goalStreakNum">0</span>개월 달성 중
+       </div>
+       <div style="display:flex;gap:8px;justify-content:center">
+         <button onclick="editGoal()" class="btn2" style="padding:8px 18px;font-size:12px">목표 수정</button>
+         <button onclick="deleteGoal()" class="btn2" style="padding:8px 18px;font-size:12px;color:var(--red);border-color:var(--red)">삭제</button>
+       </div>
+     </div>
+     <div id="goalSetup">
+       <div style="font-size:14px;color:var(--txt);margin-bottom:16px;line-height:1.7">
+         매달 독서 목표를 설정하고<br>달성해보세요! 📚
+       </div>
+       <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px">
+         <button onclick="adjustGoal(-1)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-size:18px;cursor:pointer;color:var(--muted);transition:all .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='var(--card)'">−</button>
+         <div>
+           <input id="goalInput" type="number" value="5" min="1" max="100" style="width:60px;text-align:center;font-family:var(--font-serif);font-size:32px;font-weight:700;color:var(--g);border:none;outline:none;background:transparent"/>
+           <div style="font-size:12px;color:var(--muted)">권</div>
+         </div>
+         <button onclick="adjustGoal(1)" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-size:18px;cursor:pointer;color:var(--muted);transition:all .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='var(--card)'">+</button>
+       </div>
+       <button onclick="saveGoal()" class="btn" style="padding:12px 40px;font-size:14px">목표 설정하기</button>
+     </div>
+   </div>
+
+   <!-- 월별 달성 기록 -->
+   <div class="card" id="goalHistoryCard" style="padding:22px;display:none">
+     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">월별 달성 기록</div>
+     <div id="goalHistory" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+   </div>
+
    <!-- 지금 읽고 있는 책 -->
    <div class="card" style="padding:22px">
      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;letter-spacing:1px">지금 읽고 있는 책</div>
@@ -4979,7 +5025,7 @@ if('serviceWorker' in navigator){
 const _guideTexts={
   library:{
     title:'내 서재',
-    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 독서 타이머, 캘린더, 통계로 나의 독서 습관을 한눈에 확인할 수 있어요.<br>· <b>마일스톤</b> — 책을 읽을수록 월계수 잎이 하나씩! 5권마다 특별 뱃지를 획득하고 닉네임에 장착해보세요! 👑<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
+    body:'나만의 독서 공간입니다.<br><br>· <b>읽은 책</b> — 읽은 책을 기록하고 관리할 수 있어요. 책 제목 검색으로 간편하게 등록해보세요.<br>· <b>독서 습관</b> — 매달 독서 목표를 설정하고, 타이머·캘린더·통계로 나의 독서 습관을 한눈에 확인할 수 있어요. 🎯<br>· <b>마일스톤</b> — 책을 읽을수록 월계수 잎이 하나씩! 5권마다 특별 뱃지를 획득하고 닉네임에 장착해보세요! 👑<br>· <b>내보내기</b> — 내 독서 기록을 엑셀이나 PDF 파일로 저장할 수 있어요.'
   },
   forum:{
     title:'광장',
@@ -5614,6 +5660,7 @@ async function renderCal(){
 // ========== 통계 렌더링 ==========
 async function rStats(){
   if(!CU)return;
+  renderGoal();
   const now=new Date();
   if(!_calYear){_calYear=now.getFullYear();_calMonth=now.getMonth();}
   renderCal();
@@ -5815,6 +5862,115 @@ async function searchByISBN(isbn){
   }catch(e){
     nt('검색 중 오류가 발생했어요.','err');
   }
+}
+
+// ========== 독서 목표 기능 ==========
+function getGoalKey(){
+  const now=new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+function getGoalData(){
+  try{return JSON.parse(localStorage.getItem('agora_goals')||'{}');}catch(e){return{};}
+}
+function saveGoalData(data){
+  localStorage.setItem('agora_goals',JSON.stringify(data));
+}
+function adjustGoal(delta){
+  const inp=document.getElementById('goalInput');
+  let v=parseInt(inp.value)||5;
+  v=Math.max(1,Math.min(100,v+delta));
+  inp.value=v;
+}
+function saveGoal(){
+  const inp=document.getElementById('goalInput');
+  const target=parseInt(inp.value)||5;
+  const data=getGoalData();
+  const key=getGoalKey();
+  data[key]={target:target,set_at:new Date().toISOString()};
+  saveGoalData(data);
+  nt('목표가 설정되었어요! 📚');
+  renderGoal();
+}
+function editGoal(){
+  const data=getGoalData();
+  const key=getGoalKey();
+  const current=data[key];
+  if(current) document.getElementById('goalInput').value=current.target;
+  document.getElementById('goalDisplay').style.display='none';
+  document.getElementById('goalSetup').style.display='block';
+}
+function deleteGoal(){
+  if(!confirm('이번 달 목표를 삭제할까요?'))return;
+  const data=getGoalData();
+  delete data[getGoalKey()];
+  saveGoalData(data);
+  nt('목표가 삭제되었어요');
+  renderGoal();
+}
+async function renderGoal(){
+  const data=getGoalData();
+  const key=getGoalKey();
+  const goal=data[key];
+  const setupEl=document.getElementById('goalSetup');
+  const displayEl=document.getElementById('goalDisplay');
+  const now=new Date();
+  const monthStart=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const nextMonth=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const monthEnd=`${nextMonth.getFullYear()}-${String(nextMonth.getMonth()+1).padStart(2,'0')}-01`;
+  let readCount=0;
+  if(typeof sb!=='undefined'&&CU){
+    const{data:books}=await sb.from('agora_books').select('id').eq('user_id',CU.id).gte('finished_at',monthStart).lt('finished_at',monthEnd);
+    readCount=(books||[]).length;
+  }
+  if(!goal){
+    setupEl.style.display='block';
+    displayEl.style.display='none';
+  }else{
+    setupEl.style.display='none';
+    displayEl.style.display='block';
+    const target=goal.target;
+    const pct=Math.min(100,Math.round((readCount/target)*100));
+    document.getElementById('goalCurrent').textContent=readCount;
+    document.getElementById('goalTarget').textContent=target;
+    document.getElementById('goalPercent').textContent=pct+'%';
+    const circumference=2*Math.PI*60;
+    const offset=circumference-(pct/100)*circumference;
+    const circle=document.getElementById('goalCircle');
+    circle.setAttribute('stroke-dasharray',circumference);
+    circle.setAttribute('stroke-dashoffset',offset);
+    const msgs=readCount>=target?
+      ['🎉 축하해요! 이번 달 목표 달성!','👏 대단해요! 목표를 완료했어요!','🏆 멋지게 달성했어요!']:
+      readCount===0?['첫 책을 시작해볼까요?','아직 시간이 있어요, 힘내요!']:
+      [`${target-readCount}권만 더 읽으면 달성!`,`벌써 ${pct}% 완료! 조금만 더!`];
+    document.getElementById('goalMsg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    let streak=0;
+    const checkDate=new Date(now.getFullYear(),now.getMonth(),1);
+    if(readCount>=target) streak++;
+    for(let i=1;i<24;i++){
+      checkDate.setMonth(checkDate.getMonth()-1);
+      const k=`${checkDate.getFullYear()}-${String(checkDate.getMonth()+1).padStart(2,'0')}`;
+      if(data[k]&&data[k].achieved) streak++; else break;
+    }
+    document.getElementById('goalStreakNum').textContent=streak;
+    document.getElementById('goalStreak').style.display=streak>0?'inline-flex':'none';
+    if(readCount>=target){data[key].achieved=true;saveGoalData(data);}
+  }
+  // 월별 달성 기록
+  const histEl=document.getElementById('goalHistory');
+  const histCard=document.getElementById('goalHistoryCard');
+  const months=Object.keys(data).sort().reverse();
+  if(months.length>0){
+    histCard.style.display='block';
+    histEl.innerHTML=months.map(m=>{
+      const g=data[m];
+      const [y,mo]=m.split('-');
+      return `<div style="text-align:center;padding:12px 8px;border-radius:var(--radius-sm);background:${g.achieved?'var(--gl)':'var(--card)'};border:1px solid ${g.achieved?'var(--gb)':'var(--border)'}">
+        <div style="font-size:11px;color:var(--muted)">${y}.${mo}</div>
+        <div style="font-size:20px;margin:4px 0">${g.achieved?'✅':'📖'}</div>
+        <div style="font-size:11px;color:${g.achieved?'var(--g)':'var(--muted)'};font-weight:600">${g.target}권</div>
+      </div>`;
+    }).join('');
+  }else{histCard.style.display='none';}
 }
 
 // ========== 가이드 텍스트 보강 ==========
