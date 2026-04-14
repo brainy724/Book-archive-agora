@@ -816,7 +816,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="fg">
  <label>내용 사진 첨부 (인상 깊은 구절, 필사 등 · 여러 장 가능)</label>
  <div class="iua" onclick="document.getElementById('imgIn').click()">
- <input type="file" id="imgIn" accept="image/jpeg,image/png,image/gif,image/webp" multiple onchange="onImgSel(event)"/>
+ <input type="file" id="imgIn" accept="image/*" multiple onchange="onImgSel(event)"/>
  <div style="font-size:26px;margin-bottom:6px"></div>
  <div style="font-size:13px;color:var(--br);font-weight:600">사진 추가하기</div>
  <div style="font-size:12px;color:var(--muted);margin-top:3px">탭하여 갤러리에서 선택</div>
@@ -958,7 +958,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      </div>
      <div style="margin-bottom:10px">
        <div onclick="document.getElementById('pilsaImgIn').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='var(--border)'">
-         <input type="file" id="pilsaImgIn" accept="image/jpeg,image/png,image/gif,image/webp" onchange="previewPilsaImg(event)" style="display:none"/>
+         <input type="file" id="pilsaImgIn" accept="image/*" onchange="previewPilsaImg(event)" style="display:none"/>
          <div style="font-size:22px;margin-bottom:4px">✍️</div>
          <div style="font-size:12px;color:var(--muted)">손글씨 사진을 올려주세요</div>
        </div>
@@ -1043,7 +1043,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
           </div>
           <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;border:2px solid var(--card)">✎</div>
         </div>
-        <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" onchange="uploadAvatar(event)"/>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)"/>
         <div id="profileNameDisplay" style="font-size:15px;font-weight:600;color:var(--txt)"></div>
       </div>
       <div style="margin-bottom:12px">
@@ -1862,8 +1862,8 @@ async function ok(u){
  load(false);
  history.replaceState({tab:'library',page:'library'},'',location.href);
  for(let _i=0;_i<20;_i++) history.pushState({tab:'library',page:'library'},'',location.href);
- const _loginBadge=u.badge||localStorage.getItem('agora_myBadge')||'';
- if(u.badge)localStorage.setItem('agora_myBadge',u.badge); else if(!u.badge&&!localStorage.getItem('agora_myBadge'))localStorage.removeItem('agora_myBadge');
+ const _loginBadge=u.badge||'';
+ if(u.badge)localStorage.setItem('agora_myBadge',u.badge); else localStorage.removeItem('agora_myBadge');
  const navU=document.getElementById('navUser');if(navU)navU.textContent=(_loginBadge?_loginBadge+' ':'')+(u.username||'');upPts(u.points||0);
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  updateNavTabs();
