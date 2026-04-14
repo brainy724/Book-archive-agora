@@ -529,7 +529,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
    </div>
    <div id="notifList" style="overflow-y:auto;max-height:380px"></div>
  </div>
- <span id="navUser" onclick="go('points')" style="font-size:11px;font-weight:500;color:var(--txt);cursor:pointer;padding:3px 4px;border-radius:6px;transition:background .15s;white-space:nowrap;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;max-width:56px;" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''"></span>
+ <div onclick="go('points')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 6px;border-radius:8px;transition:background .15s;flex-shrink:1;overflow:hidden" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background=''">
+   <div id="navAvatar" style="width:22px;height:22px;border-radius:50%;background:var(--gl);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--g);border:1px solid var(--gb)">
+     <img id="navAvatarImg" src="" style="width:100%;height:100%;object-fit:cover;display:none"/>
+     <span id="navAvatarIcon" style="font-size:10px">👤</span>
+   </div>
+   <span id="navUser" style="font-size:11px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50px"></span>
+ </div>
  <button class="btn-sm" onclick="logout()">로그아웃</button>
  </div>
  </nav>
@@ -1820,6 +1826,10 @@ async function ok(u){
  const _loginBadge=u.badge||localStorage.getItem('agora_myBadge')||'';
  if(u.badge)localStorage.setItem('agora_myBadge',u.badge); else if(!u.badge&&!localStorage.getItem('agora_myBadge'))localStorage.removeItem('agora_myBadge');
  const navU=document.getElementById('navUser');if(navU)navU.textContent=(_loginBadge?_loginBadge+' ':'')+(u.username||'');upPts(u.points||0);
+ // 네비바 아바타
+ const _navAImg=document.getElementById('navAvatarImg');const _navAIcon=document.getElementById('navAvatarIcon');
+ if(u.avatar_url&&_navAImg){_navAImg.src=u.avatar_url;_navAImg.style.display='block';if(_navAIcon)_navAIcon.style.display='none';}
+ else if(_navAImg){_navAImg.style.display='none';if(_navAIcon)_navAIcon.style.display='block';}
  if(u.isAdmin){const navA=document.getElementById('navAdm');if(navA)navA.style.display='inline';const sbAdm=document.getElementById('sb-admin');if(sbAdm)sbAdm.style.display='block';const nAdmin=document.getElementById('n-admin');if(nAdmin)nAdmin.style.display='inline';const tAdmin=document.getElementById('t-admin');if(tAdmin)tAdmin.style.display='flex';}
  updateNavTabs();
  // 무료체험 팝업: 관리자 제외, 이미 시작했거나 한 세션당 1번만
@@ -3190,16 +3200,17 @@ async function rPub(){
     sb.from('agora_books').select('*').eq('is_public',true).order('created_at',{ascending:false}),
     sb.from('agora_hearts').select('*'),
     sb.from('agora_book_images').select('*').order('sort_order',{ascending:true}),
-    sb.from('agora_users').select('id,username,badge')
+    sb.from('agora_users').select('id,username,badge,avatar_url')
   ]);
   load(false);
-  const userMap={};const badgeMap={};(ud||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';});
+  const userMap={};const badgeMap={};const avatarMap={};(ud||[]).forEach(u=>{userMap[u.id]=u.username;badgeMap[u.id]=u.badge||'';avatarMap[u.id]=u.avatar_url||'';});
   let allBooks=(bd||[]).map(b=>({
     ...b,
     hearts:(hd||[]).filter(h=>h.book_id===b.id).map(h=>h.user_id),
     images:(imgd||[]).filter(i=>i.book_id===b.id),
     username:userMap[b.user_id]||'',
-    userBadge:badgeMap[b.user_id]||''
+    userBadge:badgeMap[b.user_id]||'',
+    userAvatar:avatarMap[b.user_id]||''
   }));
   await renderPubFolders(allBooks);
   const pubQ=(document.getElementById('pubSearch')||{value:''}).value.trim().toLowerCase();
@@ -3243,7 +3254,7 @@ async function rPub(){
       ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        ${showName?`<div onclick="event.stopPropagation();filterByUser('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${b.userBadge?b.userBadge+' ':''}${esc(b.username)}</div>`:'<div></div>'}
+        ${showName?`<div onclick="event.stopPropagation();filterByUser('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;display:flex;align-items:center;gap:3px">${b.userAvatar?`<img src="${b.userAvatar}" style="width:14px;height:14px;border-radius:50%;object-fit:cover"/>`:''}${b.userBadge?b.userBadge+' ':''}${esc(b.username)}</div>`:'<div></div>'}
         <button onclick="event.stopPropagation();toggleCardHeart('${b.id}','${b.user_id}')" style="background:none;border:none;cursor:pointer;font-size:12px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px;display:flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="${liked?'#C0392B':'none'}" stroke="${liked?'#C0392B':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${b.hearts.length}</button>
       </div>
     </div>`;
@@ -6754,64 +6765,20 @@ function doGlobalSearch(){
 }
 </script>
 
-<!-- ========== 온보딩 슬라이드 ========== -->
+<!-- ========== 온보딩 메시지 ========== -->
 <div id="onboardingOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:20px;max-width:360px;width:100%;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25)">
-    <div id="onboardSlides" style="display:flex;transition:transform .4s ease;width:500%">
-      <div style="width:20%;flex-shrink:0;padding:36px 28px;text-align:center">
-        <div style="font-family:var(--font-serif);font-size:26px;font-weight:600;color:var(--g);letter-spacing:4px;margin-bottom:18px">AGORA</div>
-        <div style="font-size:13px;color:var(--txt);line-height:2;word-break:keep-all">아고라는 어떠한 방해 없이<br>여성들이 지적 활동에 집중할 수 있도록<br>만들어진 공간입니다.<br><br>독서활동에만 집중하실 수 있도록<br>어플을 운영할 것을 약속드립니다.</div>
-      </div>
-      <div style="width:20%;flex-shrink:0;padding:36px 28px;text-align:center">
-        <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--txt);margin-bottom:10px">내 서재</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8">읽은 책을 기록하고 관리해요.<br>독서 목표, 타이머, 캘린더로<br>독서 습관을 만들어보세요.</div>
-      </div>
-      <div style="width:20%;flex-shrink:0;padding:36px 28px;text-align:center">
-        <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--txt);margin-bottom:10px">광장</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8">다른 회원들의 서재를 둘러보고<br>토론하고, 독서모임에 참여하고<br>필사로 문장을 기록해보세요.</div>
-      </div>
-      <div style="width:20%;flex-shrink:0;padding:36px 28px;text-align:center">
-        <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--txt);margin-bottom:10px">마일스톤 & 추천</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8">책을 읽을수록 뱃지를 획득하고<br>취향 매칭으로 새로운 책을<br>추천받아보세요.</div>
-      </div>
-      <div style="width:20%;flex-shrink:0;padding:36px 28px;text-align:center">
-        <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--txt);margin-bottom:10px">준비 완료!</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8">이제 나만의 독서 공간을<br>만들어볼까요?</div>
-      </div>
-    </div>
-    <div style="padding:0 28px 28px;text-align:center">
-      <div id="onboardDots" style="display:flex;justify-content:center;gap:8px;margin-bottom:18px">
-        <div class="ob-dot on" style="width:8px;height:8px;border-radius:50%;background:var(--g);transition:all .3s"></div>
-        <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s"></div>
-        <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s"></div>
-        <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s"></div>
-        <div class="ob-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s"></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button id="onboardSkip" onclick="closeOnboarding()" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-body)">건너뛰기</button>
-        <button id="onboardNext" onclick="nextOnboardSlide()" style="flex:2;padding:12px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body)">다음</button>
-      </div>
-    </div>
+  <div style="background:#fff;border-radius:20px;max-width:360px;width:100%;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25);padding:40px 28px;text-align:center">
+    <div style="font-family:var(--font-serif);font-size:26px;font-weight:600;color:var(--g);letter-spacing:4px;margin-bottom:24px">AGORA</div>
+    <div style="font-size:13px;color:var(--txt);line-height:2;word-break:keep-all">아고라는 어떠한 방해 없이<br>여성들이 지적 활동에 집중할 수 있도록<br>만들어진 공간입니다.<br><br>독서활동에만 집중하실 수 있도록<br>어플을 운영할 것을 약속드립니다.</div>
+    <button onclick="closeOnboarding()" style="margin-top:28px;width:100%;padding:14px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body)">시작하기</button>
   </div>
 </div>
 <script>
-let _obSlide=0;
-function nextOnboardSlide(){
-  _obSlide++;
-  if(_obSlide>=5){closeOnboarding();return;}
-  document.getElementById('onboardSlides').style.transform=`translateX(-${_obSlide*20}%)`;
-  document.querySelectorAll('.ob-dot').forEach((d,i)=>{d.style.background=i===_obSlide?'var(--g)':'var(--border)';});
-  if(_obSlide===4) document.getElementById('onboardNext').textContent='시작하기';
-}
 function closeOnboarding(){
   document.getElementById('onboardingOverlay').style.display='none';
   localStorage.setItem('agora_onboarded','1');
 }
 function showOnboarding(){
-  _obSlide=0;
-  document.getElementById('onboardSlides').style.transform='translateX(0)';
-  document.querySelectorAll('.ob-dot').forEach((d,i)=>{d.style.background=i===0?'var(--g)':'var(--border)';});
-  document.getElementById('onboardNext').textContent='다음';
   document.getElementById('onboardingOverlay').style.display='flex';
 }
 </script>
