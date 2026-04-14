@@ -1711,7 +1711,10 @@ async function loginApple(){
   try{
     const{data,error}=await sb.auth.signInWithOAuth({
       provider:'apple',
-      options:{redirectTo:location.origin+location.pathname}
+      options:{
+        redirectTo:location.origin+location.pathname,
+        queryParams:{state:'apple_login'}
+      }
     });
     if(error){nt('Apple 로그인 실패: '+error.message,'err');load(false);}
   }catch(e){
@@ -4850,15 +4853,15 @@ window.onload=async()=>{
  const ts=document.createElement('script');ts.src='https://js.tosspayments.com/v2/standard';document.head.appendChild(ts);
  // 카카오 콜백
  const kkParams=new URLSearchParams(location.search);
- if(kkParams.get('code')&&!kkParams.get('state')){const done=await handleKakao();if(done)return;}
- if(location.hash.includes('access_token')){await handleNaver();return;}
+ // Apple OAuth 세션 먼저 확인 (code+state=apple_login 또는 Supabase 세션)
  const{data:{session}}=await sb.auth.getSession();
  if(session){
-   // Apple 로그인 콜백 확인
    const appleHandled=await handleAppleCallback();
    if(appleHandled)return;
    await handleOAuth(session);return;
  }
+ if(kkParams.get('code')&&!kkParams.get('state')){const done=await handleKakao();if(done)return;}
+ if(location.hash.includes('access_token')){await handleNaver();return;}
  const params=new URLSearchParams(location.search);
  if(params.get('payment')){
  const sess=localStorage.getItem('agora_sess');if(sess){try{CU=JSON.parse(sess);}catch{}}
