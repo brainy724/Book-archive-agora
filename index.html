@@ -408,12 +408,14 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
         카카오로 시작하기
       </button>
       <div style="height:10px"></div>
-      <button onclick="loginGuest()" style="width:100%;border-radius:12px;padding:13px 16px;font-size:14px;background:var(--gl);color:var(--g);border:1px solid var(--gb);cursor:pointer;font-family:var(--font-body);font-weight:500;transition:all .2s">
-        둘러보기 (게스트)
+      <button onclick="loginApple()" style="width:100%;border-radius:12px;padding:14px 16px;font-size:15px;background:#000;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Apple로 시작하기
       </button>
+      <div style="height:10px"></div>
       <div style="height:14px"></div>
       <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7">
-        카카오 계정 하나로 간편하게<br>
+        간편하게 로그인하고<br>
         나만의 독서 공간을 만들어보세요
       </div>
     </div>
@@ -814,7 +816,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="fg">
  <label>내용 사진 첨부 (인상 깊은 구절, 필사 등 · 여러 장 가능)</label>
  <div class="iua" onclick="document.getElementById('imgIn').click()">
- <input type="file" id="imgIn" accept="image/*" multiple onchange="onImgSel(event)"/>
+ <input type="file" id="imgIn" accept="image/jpeg,image/png,image/gif,image/webp" multiple onchange="onImgSel(event)"/>
  <div style="font-size:26px;margin-bottom:6px"></div>
  <div style="font-size:13px;color:var(--br);font-weight:600">사진 추가하기</div>
  <div style="font-size:12px;color:var(--muted);margin-top:3px">탭하여 갤러리에서 선택</div>
@@ -956,7 +958,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
      </div>
      <div style="margin-bottom:10px">
        <div onclick="document.getElementById('pilsaImgIn').click()" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--g)'" onmouseout="this.style.borderColor='var(--border)'">
-         <input type="file" id="pilsaImgIn" accept="image/*" onchange="previewPilsaImg(event)" style="display:none"/>
+         <input type="file" id="pilsaImgIn" accept="image/jpeg,image/png,image/gif,image/webp" onchange="previewPilsaImg(event)" style="display:none"/>
          <div style="font-size:22px;margin-bottom:4px">✍️</div>
          <div style="font-size:12px;color:var(--muted)">손글씨 사진을 올려주세요</div>
        </div>
@@ -1041,7 +1043,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
           </div>
           <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;border:2px solid var(--card)">✎</div>
         </div>
-        <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="uploadAvatar(event)"/>
+        <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" onchange="uploadAvatar(event)"/>
         <div id="profileNameDisplay" style="font-size:15px;font-weight:600;color:var(--txt)"></div>
       </div>
       <div style="margin-bottom:12px">
@@ -1703,6 +1705,45 @@ async function loginGuest(){
   go('library');
   nt('게스트 모드로 둘러보고 있어요. 기록을 저장하려면 카카오 로그인이 필요해요.');
 }
+// ══ Apple 로그인 ══
+async function loginApple(){
+  load(true);
+  try{
+    const{data,error}=await sb.auth.signInWithOAuth({
+      provider:'apple',
+      options:{redirectTo:location.origin+location.pathname}
+    });
+    if(error){nt('Apple 로그인 실패: '+error.message,'err');load(false);}
+  }catch(e){
+    nt('Apple 로그인 오류','err');load(false);
+  }
+}
+// Apple OAuth 콜백 처리
+async function handleAppleCallback(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session)return false;
+  const provider=session.user?.app_metadata?.provider;
+  if(provider!=='apple')return false;
+  load(true);
+  const aid=session.user.id;
+  const email=session.user.email||'';
+  const un=email?email.split('@')[0].slice(0,12):'apple_'+aid.slice(0,6);
+  // 기존 유저 확인
+  const{data:eu}=await sb.from('agora_users').select('*').eq('auth_id',aid).maybeSingle();
+  if(eu){
+    if(eu.banned){nt('이용이 제한된 계정입니다.','err');load(false);return true;}
+    await ok({...eu,isAdmin:eu.is_admin});
+    return true;
+  }
+  // 신규 유저 생성
+  const premiumUntil=new Date();premiumUntil.setFullYear(premiumUntil.getFullYear()+99);
+  const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:null,premium_until:premiumUntil.toISOString()};
+  const{error:ie}=await sb.from('agora_users').insert(nu);
+  if(ie){nt('계정 생성 실패: '+ie.message,'err');load(false);return true;}
+  await ok({...nu,isAdmin:false});
+  return true;
+}
+
 function loginKakao(){
  if(KK_REST_KEY==='YOUR_KAKAO_REST_KEY'){nt('카카오 REST API 키를 설정해주세요','err');return;}
  // 카카오 인가 코드 요청 (성별, 생년월일 동의 포함)
@@ -2022,7 +2063,7 @@ function go(name){
 }
 
 // ══ 이미지 ══
-function onImgSel(e){Array.from(e.target.files).forEach(f=>{if(!pFiles.find(p=>p.name===f.name&&p.size===f.size))pFiles.push(f);});rImgPrev();e.target.value='';}
+function onImgSel(e){try{Array.from(e.target.files||[]).forEach(f=>{if(!pFiles.find(p=>p.name===f.name&&p.size===f.size))pFiles.push(f);});rImgPrev();}catch(err){console.error('이미지 선택 오류:',err);}e.target.value='';}
 function rImgPrev(){const w=document.getElementById('ipl');w.innerHTML=eUrls.map((u,i)=>`<div class="ipw"><img src="${u}"/><button class="idl" onclick="rmEImg(${i})">✕</button></div>`).join('')+pFiles.map((f,i)=>`<div class="ipw"><img src="${URL.createObjectURL(f)}"/><button class="idl" onclick="rmPImg(${i})">✕</button></div>`).join('');}
 function rmEImg(i){eUrls.splice(i,1);rImgPrev();}
 function rmPImg(i){pFiles.splice(i,1);rImgPrev();}
@@ -4812,7 +4853,12 @@ window.onload=async()=>{
  if(kkParams.get('code')&&!kkParams.get('state')){const done=await handleKakao();if(done)return;}
  if(location.hash.includes('access_token')){await handleNaver();return;}
  const{data:{session}}=await sb.auth.getSession();
- if(session){await handleOAuth(session);return;}
+ if(session){
+   // Apple 로그인 콜백 확인
+   const appleHandled=await handleAppleCallback();
+   if(appleHandled)return;
+   await handleOAuth(session);return;
+ }
  const params=new URLSearchParams(location.search);
  if(params.get('payment')){
  const sess=localStorage.getItem('agora_sess');if(sess){try{CU=JSON.parse(sess);}catch{}}
@@ -6535,6 +6581,7 @@ function loadPilsa(){
 }
 let _pilsaImgData=null;
 function previewPilsaImg(e){
+  try{
   const file=e.target.files[0];
   if(!file)return;
   const reader=new FileReader();
@@ -6544,6 +6591,7 @@ function previewPilsaImg(e){
     document.getElementById('pilsaImgPreview').style.display='block';
   };
   reader.readAsDataURL(file);
+  }catch(err){console.error('필사 이미지 오류:',err);}
 }
 function clearPilsaImg(){
   _pilsaImgData=null;
