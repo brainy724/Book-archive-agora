@@ -3045,9 +3045,10 @@ function filterByUser(userId,userName){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 async function showUserProfile(userId,userName){
+  try{
   // 유저 정보 가져오기
-  const{data:u}=await sb.from('agora_users').select('id,username,badge,avatar_url').eq('id',userId).single();
-  if(!u) return;
+  const{data:u,error:ue}=await sb.from('agora_users').select('id,username,badge,avatar_url').eq('id',userId).single();
+  if(ue||!u){nt('프로필을 불러올 수 없어요','err');return;}
   const bio=userId===CU.id?(localStorage.getItem('agora_bio_'+CU.id)||''):'';
   const genres=userId===CU.id?JSON.parse(localStorage.getItem('agora_genres_'+CU.id)||'[]'):[];
   // 읽은 책 수
@@ -3065,6 +3066,7 @@ async function showUserProfile(userId,userName){
       <button onclick="closeUserProfile();filterByUser('${userId}','${esc(u.username).replace(/'/g,"\\'")}')" style="margin-top:20px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body)">${esc(u.username)}님의 공개서재 모아보기</button>
     </div>`;
   el.style.display='flex';
+  }catch(e){console.error('프로필 로드 오류:',e);nt('프로필을 불러올 수 없어요','err');}
 }
 function closeUserProfile(){
   document.getElementById('userProfileModal').style.display='none';
@@ -6726,7 +6728,7 @@ function closeGuide(){
   </div>
 </div>
 <!-- ========== 유저 프로필 모달 ========== -->
-<div id="userProfileModal" onclick="if(event.target===this)closeUserProfile()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9996;align-items:center;justify-content:center;padding:20px">
+<div id="userProfileModal" onclick="if(event.target===this)closeUserProfile()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
   <div id="userProfileContent" style="background:var(--card);border-radius:20px;max-width:340px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.2);overflow:hidden"></div>
 </div>
 
