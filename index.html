@@ -2241,7 +2241,7 @@ async function openBook(id){
       }
       <div style="font-size:20px;font-family:var(--font-serif);font-weight:600;margin-bottom:6px">${esc(b.title)}</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${[b.author,b.publisher].filter(Boolean).map(esc).join(' · ')}</div>
-      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':`by <span onclick="closeBookModal();filterByUser('${b.user_id}','${esc(uname).replace(/'/g,"\\\\'")}');go('forum')" style="color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(uname)}</span>`}</div>`:''}
+      ${uname?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${b.is_anonymous?'익명의 독서가':`by <span onclick="showUserProfile('${b.user_id}','${esc(uname).replace(/'/g,"\\\\'")}')" style="color:var(--g);cursor:pointer;text-decoration:underline;text-underline-offset:2px">${esc(uname)}</span>`}</div>`:''}
       ${stars?`<div style="font-size:20px;color:#E8A020;letter-spacing:3px;margin-bottom:4px">${stars}</div>`:''}
       ${b.category?`<span class="cat-badge">${esc(b.category)}</span>`:''}
     </div>
@@ -3063,7 +3063,7 @@ async function showUserProfile(userId,userName){
       <div style="font-size:12px;color:var(--muted);margin-top:4px">공개 서재 ${bookCount}권</div>
       ${bio?`<div style="font-size:13px;color:var(--txt);margin-top:12px;line-height:1.6;background:var(--gl);padding:10px 14px;border-radius:10px">${esc(bio)}</div>`:''}
       ${genres.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px">${genres.map(g=>`<span style="padding:4px 10px;border-radius:12px;font-size:11px;background:var(--gl);color:var(--g);border:1px solid var(--gb)">${g}</span>`).join('')}</div>`:''}
-      <button onclick="closeUserProfile();filterByUser('${userId}','${esc(u.username).replace(/'/g,"\\'")}')" style="margin-top:20px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body)">${esc(u.username)}님의 공개서재 모아보기</button>
+      <button onclick="closeUserProfile();try{closeBookModalBtn()}catch(e){};filterByUser('${userId}','${esc(u.username).replace(/'/g,"\\'")}')" style="margin-top:20px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body)">${esc(u.username)}님의 공개서재 모아보기</button>
     </div>`;
   el.style.display='flex';
   }catch(e){console.error('프로필 로드 오류:',e);nt('프로필을 불러올 수 없어요','err');}
@@ -3316,7 +3316,7 @@ async function rPub(){
       ${stars?`<div style="font-size:11px;color:#E8A020;letter-spacing:1px">${stars}</div>`:''}
       ${b.category?`<div class="cat-badge">${esc(b.category)}</div>`:''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        ${showName?`<div onclick="event.stopPropagation();showUserProfile('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;display:flex;align-items:center;gap:3px">${b.userBadge?b.userBadge+' ':''}${esc(b.username)}</div>`:'<div></div>'}
+        ${showName?`<div onclick="event.stopPropagation();showUserProfile('${b.user_id}','${esc(b.username).replace(/'/g,"\\\\'")}')" style="font-size:10px;color:var(--g);cursor:pointer;display:flex;align-items:center;gap:3px;padding:4px 0;min-height:28px">${b.userBadge?b.userBadge+' ':''}${esc(b.username)}</div>`:'<div></div>'}
         <button onclick="event.stopPropagation();toggleCardHeart('${b.id}','${b.user_id}')" style="background:none;border:none;cursor:pointer;font-size:12px;color:${liked?'#C0392B':'var(--muted)'};padding:2px 4px;display:flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="${liked?'#C0392B':'none'}" stroke="${liked?'#C0392B':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${b.hearts.length}</button>
       </div>
     </div>`;
