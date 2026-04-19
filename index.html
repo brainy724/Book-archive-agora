@@ -351,6 +351,102 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  .h1{font-size:24px;}
 }
 @media(min-width:601px){.btab{display:none!important;}}
+
+/* ═══════════════════════════════════
+   AI 독서토론 (광장 서브탭)
+   ═══════════════════════════════════ */
+.ai-book-chip{
+  flex-shrink:0;min-width:130px;max-width:150px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:10px;cursor:pointer;
+  transition:all .2s;display:flex;flex-direction:column;gap:6px;
+}
+.ai-book-chip:hover{border-color:var(--g);transform:translateY(-2px);box-shadow:0 4px 12px rgba(212,184,120,.15);}
+.ai-book-chip.selected{border-color:var(--g);background:var(--gl);}
+.ai-book-chip .bchip-cover{
+  width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;
+  background:var(--gl);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-serif);font-size:10px;color:var(--muted);text-align:center;padding:4px;
+}
+.ai-book-chip .bchip-title{font-size:12px;font-weight:600;color:var(--txt);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.ai-book-chip .bchip-author{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.ai-msg{margin-bottom:18px;animation:aiFadeIn .35s ease-out;}
+@keyframes aiFadeIn{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.ai-msg.ai .speaker{
+  font-family:var(--font-serif);font-size:11px;letter-spacing:2px;
+  color:var(--g);margin-bottom:6px;font-weight:500;text-transform:uppercase;
+}
+.ai-msg.ai .text{
+  font-family:var(--font-serif);font-size:15.5px;line-height:1.85;color:var(--txt);
+  padding-left:14px;border-left:2px solid var(--g);
+}
+.ai-msg.user{display:flex;justify-content:flex-end;}
+.ai-msg.user .text{
+  background:var(--txt);color:var(--gl);padding:11px 15px;
+  border-radius:16px 16px 4px 16px;max-width:80%;
+  font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word;
+}
+.ai-typing{display:inline-flex;gap:4px;padding:4px 0 4px 14px;border-left:2px solid var(--g);}
+.ai-typing span{
+  width:6px;height:6px;border-radius:50%;background:var(--g);
+  animation:aiTyping 1.4s infinite;
+}
+.ai-typing span:nth-child(2){animation-delay:.2s;}
+.ai-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes aiTyping{
+  0%,60%,100%{opacity:.3;transform:translateY(0);}
+  30%{opacity:1;transform:translateY(-4px);}
+}
+#aiSendBtn:disabled{background:#D4C9B0;cursor:not-allowed;}
+#aiMessages::-webkit-scrollbar{width:5px;}
+#aiMessages::-webkit-scrollbar-thumb{background:var(--gb);border-radius:3px;}
+
+.ai-history-item{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;
+}
+.ai-history-item:hover{border-color:var(--g);background:var(--gl);}
+.ai-history-item .ai-hist-icon{font-size:16px;}
+.ai-history-item .ai-hist-body{flex:1;min-width:0;}
+.ai-history-item .ai-hist-title{font-family:var(--font-serif);font-size:14px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ai-history-item .ai-hist-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.ai-history-item .ai-hist-delete{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 8px;}
+.ai-history-item .ai-hist-delete:hover{color:var(--red);}
+
+/* AI 모드 카드 */
+.ai-mode-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(212,184,120,.12);}
+.ai-mode-card.selected{background:var(--gl)!important;border-color:var(--g)!important;}
+
+/* 토론방 모드 토글 (사람/AI) */
+.forum-mode-btn.on{background:var(--card)!important;color:var(--txt)!important;font-weight:600!important;box-shadow:0 2px 6px rgba(0,0,0,.06)!important;}
+
+/* 관점 칩 (다양한 관점 모드) */
+.ai-persp-chip{
+  padding:6px 12px;border:1px solid var(--border);border-radius:16px;
+  background:var(--card);font-size:12px;color:var(--muted);cursor:pointer;
+  transition:all .2s;font-family:var(--font-body);
+}
+.ai-persp-chip:hover{border-color:var(--g);color:var(--txt);}
+.ai-persp-chip.active{background:var(--g);color:#fff;border-color:var(--g);}
+
+/* 주제 추천 카드 */
+.ai-topic-card{
+  padding:12px 14px;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;cursor:pointer;margin-bottom:8px;transition:all .2s;
+  display:flex;align-items:center;gap:10px;
+}
+.ai-topic-card:hover{border-color:var(--g);background:var(--gl);transform:translateX(2px);}
+.ai-topic-card .topic-num{
+  font-family:var(--font-serif);font-size:18px;color:var(--g);font-weight:600;
+  flex-shrink:0;width:28px;
+}
+.ai-topic-card .topic-text{font-size:13.5px;color:var(--txt);line-height:1.5;}
+
 </style>
 <script>
 // PWA 스플래시 제거됨
@@ -855,6 +951,20 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
  <!-- 토론방 섹션 -->
  <div id="plazaPosts" style="display:none">
+
+ <!-- 사람 토론 / AI 토론 토글 -->
+ <div style="display:flex;gap:8px;margin-bottom:16px;background:var(--gl);padding:5px;border-radius:12px;border:1px solid var(--gb)">
+   <button class="forum-mode-btn on" id="forumMode-human" onclick="switchForumMode('human')" style="flex:1;padding:11px 14px;border:none;border-radius:9px;background:var(--card);color:var(--txt);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;gap:6px">
+     <span style="font-size:15px">👥</span> 사람들과 토론
+   </button>
+   <button class="forum-mode-btn" id="forumMode-ai" onclick="switchForumMode('ai')" style="flex:1;padding:11px 14px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px">
+     <span style="font-size:15px">✨</span> AI와 토론
+     <span id="aiPremBadge" style="font-size:9px;padding:1px 5px;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border-radius:6px;letter-spacing:0.5px">PREMIUM</span>
+   </button>
+ </div>
+
+ <!-- 사람 토론 영역 (기존 토론방) -->
+ <div id="forumHumanSection">
  <!-- 내 활동 탭 -->
  <div class="tab-bar" style="margin-bottom:14px">
    <button class="tab-btn on" id="forumTab-all" onclick="switchForumTab('all')">전체 글</button>
@@ -874,7 +984,218 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div id="forumMineSection" style="display:none">
    <div id="myForumActivity"></div>
  </div>
+ </div><!-- /forumHumanSection -->
+
+ <!-- AI 토론 영역 -->
+ <div id="forumAISection" style="display:none">
+
+   <!-- 인트로 배너 -->
+   <div style="background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);border-radius:14px;padding:18px 20px;margin-bottom:16px;text-align:center">
+     <div style="font-family:var(--font-serif);font-size:20px;font-weight:500;letter-spacing:1.5px;color:var(--g);margin-bottom:6px">AGORA × AI</div>
+     <div style="font-size:12.5px;color:var(--txt);line-height:1.7">
+       고대 광장의 사색처럼,<br>
+       AI와 함께 책 속 질문을 한 걸음 더 깊이 들어가 보세요.
+     </div>
+   </div>
+
+   <!-- API 키 상태 배너 (서비스 불가 시 표시) -->
+   <div id="aiApiBanner" style="display:none;background:#FFF8E8;border:1px solid #F0DFA8;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#8B6F2A;text-align:center">
+     ⚠️ AI 서비스가 일시적으로 이용할 수 없어요. 잠시 후 다시 시도해주세요.
+   </div>
+
+   <!-- 1단계: 모드 & 책 선택 화면 -->
+   <div id="aiSetupScreen">
+
+     <!-- 사용량 표시 (프리미엄 유저만 보임) -->
+     <div id="aiUsageSetupBanner" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+         <div>
+           <div style="font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:2px">이번 달 AI 대화 사용량</div>
+           <div id="aiUsageSetupText" style="font-size:14px;font-weight:600;color:var(--txt)">—</div>
+         </div>
+         <div id="aiUsageSetupBar" style="flex:1;max-width:140px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+           <div id="aiUsageSetupFill" style="height:100%;width:0%;background:var(--g);transition:width .4s"></div>
+         </div>
+       </div>
+     </div>
+
+     <!-- 대화 모드 선택 -->
+     <div style="margin-bottom:18px">
+       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">🎭 대화 방식 선택</div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+         <div class="ai-mode-card selected" data-mode="socratic" onclick="aiPickMode('socratic')" style="padding:12px;background:var(--gl);border:2px solid var(--g);border-radius:10px;cursor:pointer;transition:all .2s">
+           <div style="font-size:20px;margin-bottom:4px">💭</div>
+           <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">깊이 있는 대화</div>
+           <div style="font-size:11px;color:var(--muted);line-height:1.45">소크라테스식으로 내 생각을 차근차근 정리</div>
+         </div>
+         <div class="ai-mode-card" data-mode="perspectives" onclick="aiPickMode('perspectives')" style="padding:12px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+           <div style="font-size:20px;margin-bottom:4px">👥</div>
+           <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">다양한 관점 듣기</div>
+           <div style="font-size:11px;color:var(--muted);line-height:1.45">여러 입장의 AI와 균형 있게 토론</div>
+         </div>
+         <div class="ai-mode-card" data-mode="topics" onclick="aiPickMode('topics')" style="padding:12px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+           <div style="font-size:20px;margin-bottom:4px">❓</div>
+           <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">주제 추천받기</div>
+           <div style="font-size:11px;color:var(--muted);line-height:1.45">뭘 얘기할지 막막할 때 AI가 주제 제안</div>
+         </div>
+         <div class="ai-mode-card" data-mode="character" onclick="aiPickMode('character')" style="padding:12px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+           <div style="font-size:20px;margin-bottom:4px">🎭</div>
+           <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">등장인물과 만나기</div>
+           <div style="font-size:11px;color:var(--muted);line-height:1.45">책 속 캐릭터와 몰입형 대화</div>
+         </div>
+       </div>
+     </div>
+
+     <!-- 내 서재 책 선택 -->
+     <div style="margin-bottom:14px">
+       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">📚 내 서재에서 고르기</div>
+       <div id="aiBookPicker" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch">
+         <div style="color:var(--muted);font-size:12px;padding:14px">불러오는 중...</div>
+       </div>
+     </div>
+
+     <div style="display:flex;align-items:center;gap:10px;margin:18px 0 14px">
+       <div style="flex:1;height:1px;background:var(--border)"></div>
+       <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px">또는 직접 입력</div>
+       <div style="flex:1;height:1px;background:var(--border)"></div>
+     </div>
+
+     <!-- 책 정보 입력 -->
+     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px">
+       <div style="margin-bottom:12px">
+         <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px">책 제목 *</label>
+         <input type="text" id="aiBookTitleInput" placeholder="예: 데미안" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none;background:var(--card);color:var(--txt)" oninput="aiOnInputChange()"/>
+       </div>
+       <div style="margin-bottom:12px">
+         <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px">저자</label>
+         <input type="text" id="aiBookAuthorInput" placeholder="예: 헤르만 헤세" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none;background:var(--card);color:var(--txt)"/>
+       </div>
+       <!-- 캐릭터 모드 전용 입력 -->
+       <div id="aiCharacterField" style="display:none;margin-bottom:12px">
+         <label style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px">대화할 등장인물 이름 *</label>
+         <input type="text" id="aiCharacterInput" placeholder="예: 싱클레어" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none;background:var(--card);color:var(--txt)"/>
+         <div style="font-size:11px;color:var(--muted);margin-top:4px">AI가 이 인물이 되어 당신과 대화해요</div>
+       </div>
+       <div>
+         <label id="aiNoteLabel" style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px">인상 깊었던 부분 (선택)</label>
+         <textarea id="aiBookNoteInput" rows="3" placeholder="가장 기억에 남은 장면이나 문장이 있다면 적어주세요. 토론이 훨씬 풍부해져요." style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none;background:var(--card);color:var(--txt);resize:none;line-height:1.6"></textarea>
+         <div id="aiNoteHint" style="font-size:11px;color:var(--muted);margin-top:4px">비워두셔도 돼요. AI가 먼저 질문을 건넬게요.</div>
+       </div>
+     </div>
+
+     <button id="aiStartBtn" onclick="aiStartDiscussion()" style="width:100%;margin-top:14px;padding:14px;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:none;border-radius:12px;font-family:var(--font-serif);font-size:17px;font-weight:500;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 14px rgba(212,184,120,.25);transition:all .25s">
+       토론 시작하기
+     </button>
+
+     <!-- 과거 대화 기록 -->
+     <div id="aiHistoryList" style="margin-top:24px"></div>
+
+     <!-- 안내 -->
+     <div style="margin-top:20px;padding:14px 16px;background:var(--gl);border-radius:10px;border:1px solid var(--gb)">
+       <div style="font-size:12px;color:var(--g);font-weight:600;margin-bottom:6px">💡 AI 독서토론이란?</div>
+       <div style="font-size:12px;color:var(--txt);line-height:1.7">
+         AI가 당신의 생각에 귀 기울이며, 혼자 읽기 아쉬웠던 책을 더 깊이 탐구하도록 도와줍니다. 4가지 대화 방식 중 그날 기분에 맞는 걸 골라보세요.
+       </div>
+     </div>
+   </div>
+
+   <!-- 2단계: 대화 화면 -->
+   <div id="aiChatScreen" style="display:none">
+     <div style="display:flex;align-items:center;gap:10px;background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:12px 16px;margin-bottom:12px">
+       <div id="aiChatIcon" style="font-size:18px">💭</div>
+       <div style="flex:1;min-width:0">
+         <div id="aiCurrentBookTitle" style="font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+         <div id="aiCurrentBookAuthor" style="font-size:11px;color:var(--muted);margin-top:1px">—</div>
+       </div>
+       <div id="aiUsageIndicator" style="display:none;min-width:90px"></div>
+     </div>
+
+     <!-- 다양한 관점 모드 전용: 캐릭터 선택 -->
+     <div id="aiPerspectiveBar" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:10px">
+       <div style="font-size:11px;color:var(--muted);margin-right:4px;align-self:center;letter-spacing:0.5px">누구에게 질문할까요?</div>
+     </div>
+
+     <div id="aiMessages" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;min-height:320px;max-height:60vh;overflow-y:auto;margin-bottom:12px"></div>
+
+     <div style="display:flex;align-items:flex-end;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:5px 5px 5px 16px">
+       <textarea id="aiInputField" rows="1" placeholder="내 생각을 적어보세요..." onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)" style="flex:1;border:none;outline:none;background:none;resize:none;font-family:var(--font-body);font-size:14px;padding:9px 0;max-height:110px;color:var(--txt);line-height:1.5"></textarea>
+       <button id="aiSendBtn" onclick="aiSendMessage()" style="width:36px;height:36px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s">→</button>
+     </div>
+
+     <div style="display:flex;gap:8px;margin-top:10px">
+       <button onclick="aiOpenShareDialog()" style="flex:1;padding:10px;background:var(--card);border:1px solid var(--gb);border-radius:10px;color:var(--g);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='var(--card)'">
+         <span>💬</span> 토론방에 공유하기
+       </button>
+       <button onclick="aiEndDiscussion()" style="padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:var(--font-body);font-size:13px;cursor:pointer">
+         종료
+       </button>
+     </div>
+
+     <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6">
+       Enter로 전송 · Shift+Enter로 줄바꿈<br>
+       ✨ 프리미엄 회원 전용 기능 · 무제한 이용 가능
+     </div>
+   </div>
+
+ </div><!-- /forumAISection -->
+
+ <!-- AI 대화 공유 모달 -->
+ <div id="aiShareModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:950;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)aiCloseShareDialog()">
+   <div style="background:var(--card);border-radius:16px;max-width:500px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+     <!-- 헤더 -->
+     <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center">
+       <div style="flex:1">
+         <div style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--txt)">토론방에 공유하기</div>
+         <div style="font-size:12px;color:var(--muted);margin-top:3px">AI와 나눈 대화를 다른 회원들과 함께 나눠보세요</div>
+       </div>
+       <button onclick="aiCloseShareDialog()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1">✕</button>
+     </div>
+
+     <!-- 본문 -->
+     <div style="padding:18px 22px;overflow-y:auto;flex:1">
+       <!-- 글 제목 -->
+       <div style="margin-bottom:14px">
+         <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px">글 제목 *</label>
+         <input type="text" id="aiShareTitleInput" placeholder="예: 『데미안』 깊이 있는 대화 기록" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px;outline:none;background:var(--card);color:var(--txt)"/>
+       </div>
+
+       <!-- 공개 여부 -->
+       <div style="margin-bottom:14px;padding:12px 14px;background:var(--gl);border:1px solid var(--gb);border-radius:10px">
+         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+           <input type="checkbox" id="aiSharePublicCheck" checked style="margin-top:3px;accent-color:var(--g);flex-shrink:0"/>
+           <div>
+             <div style="font-size:13px;color:var(--txt);font-weight:600">토론방에 공개하기</div>
+             <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5">다른 회원들이 이 대화를 보고 댓글로 참여할 수 있어요. 체크 해제하면 본인 기록으로만 보관됩니다.</div>
+           </div>
+         </label>
+       </div>
+
+       <!-- 메시지 선택 -->
+       <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+         <label style="font-size:12px;color:var(--muted);letter-spacing:0.5px">공유할 내용 선택</label>
+         <div style="display:flex;gap:6px">
+           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=true)" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 선택</button>
+           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=false)" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 해제</button>
+         </div>
+       </div>
+       <div id="aiShareMsgList" style="max-height:300px;overflow-y:auto"></div>
+
+       <!-- 안내 -->
+       <div style="margin-top:14px;padding:10px 14px;background:#FFF8E8;border:1px solid #F0DFA8;border-radius:8px;font-size:11px;color:#8B6F2A;line-height:1.6">
+         💡 공유 시 본인의 회원 이름이 작성자로 표시돼요. 개인적인 내용은 선택 해제하세요. 2000자를 넘으면 자동 축약됩니다.
+       </div>
+     </div>
+
+     <!-- 하단 버튼 -->
+     <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+       <button onclick="aiCloseShareDialog()" class="btn2" style="font-size:13px;padding:10px 16px">취소</button>
+       <button onclick="aiShareSubmit()" class="btn" style="font-size:13px;padding:10px 20px">공유하기</button>
+     </div>
+   </div>
+ </div>
+
  </div><!-- /plazaPosts -->
+
 
  <!-- 공개 서재 섹션 (광장 안) -->
  <div id="plazaPublic">
@@ -1371,12 +1692,13 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <div class="sub">커뮤니티 관리</div>
  <div style="display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap" id="admStats"></div>
  <!-- 탭 -->
- <div class="tab-bar" style="margin-bottom:20px;display:flex;gap:0">
-   <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">신고<br>접수</button>
-   <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">1:1<br>문의</button>
-   <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">회원<br>목록</button>
-   <button class="tab-btn" id="admTab-notice" onclick="switchAdmTab('notice')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">공지</button>
-   <button class="tab-btn" id="admTab-dm" onclick="switchAdmTab('dm')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px">쪽지</button>
+ <div class="tab-bar" style="margin-bottom:20px;display:flex;gap:0;overflow-x:auto">
+   <button class="tab-btn on" id="admTab-reports" onclick="switchAdmTab('reports')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">신고<br>접수</button>
+   <button class="tab-btn" id="admTab-inquiries" onclick="switchAdmTab('inquiries')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">1:1<br>문의</button>
+   <button class="tab-btn" id="admTab-users" onclick="switchAdmTab('users')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">회원<br>목록</button>
+   <button class="tab-btn" id="admTab-premium" onclick="switchAdmTab('premium')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">프리미엄<br>관리</button>
+   <button class="tab-btn" id="admTab-notice" onclick="switchAdmTab('notice')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">공지</button>
+   <button class="tab-btn" id="admTab-dm" onclick="switchAdmTab('dm')" style="flex:1;text-align:center;padding:10px 4px;font-size:13px;white-space:nowrap">쪽지</button>
  </div>
  <!-- 신고 목록 -->
  <div id="admReportsSection">
@@ -1389,6 +1711,112 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  <!-- 회원 목록 -->
  <div id="admUsersSection" style="display:none">
    <div id="uList"></div>
+ </div>
+ <!-- 프리미엄 · AI 관리 -->
+ <div id="admPremiumSection" style="display:none">
+
+   <!-- 통계 카드 -->
+   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+     <div style="padding:14px;background:var(--gl);border:1px solid var(--gb);border-radius:10px;text-align:center">
+       <div style="font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px">✨ 프리미엄</div>
+       <div id="stPremCount" style="font-size:22px;font-family:var(--font-serif);color:var(--g);font-weight:600">—</div>
+     </div>
+     <div style="padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;text-align:center">
+       <div style="font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px">🎁 체험중</div>
+       <div id="stTrialCount" style="font-size:22px;font-family:var(--font-serif);color:var(--txt);font-weight:600">—</div>
+     </div>
+     <div style="padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;text-align:center">
+       <div style="font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px">👤 일반</div>
+       <div id="stFreeCount" style="font-size:22px;font-family:var(--font-serif);color:var(--muted);font-weight:600">—</div>
+     </div>
+   </div>
+
+   <!-- Cloudflare Worker 상태 -->
+   <div class="card" style="padding:18px 20px;margin-bottom:16px;border:1px solid #6B9AC4;background:linear-gradient(135deg,#E8F0FA,#F5F8FC)">
+     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+       <div style="font-size:16px">🛡</div>
+       <div style="font-size:14px;font-weight:600;color:var(--txt)">AI 프록시 서버 (Cloudflare Worker)</div>
+     </div>
+     <div id="admWorkerStatus" style="font-size:12px;color:var(--muted);line-height:1.7">불러오는 중...</div>
+     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+       <button class="btn2" style="padding:8px 14px;font-size:12px" onclick="admTestWorker()">연결 테스트</button>
+       <button class="btn2" style="padding:8px 14px;font-size:12px" onclick="admChangeWorkerUrl()">URL 변경</button>
+     </div>
+   </div>
+
+   <!-- Claude API 키 설정 -->
+   <div class="card" style="padding:18px 20px;margin-bottom:16px;border:1px solid var(--gb);background:linear-gradient(135deg,var(--gl),var(--card))">
+     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+       <div style="font-size:16px">🔑</div>
+       <div style="font-size:14px;font-weight:600;color:var(--txt)">Claude API 키 (공용)</div>
+     </div>
+     <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+       관리자가 설정한 API 키로 <b>모든 프리미엄 회원</b>이 AI 토론을 이용합니다. 비용은 관리자 계정으로 과금되니 프리미엄 구독료로 충당하세요. <a href="https://console.anthropic.com" target="_blank" style="color:var(--g)">콘솔 바로가기 ↗</a>
+     </div>
+     <div style="display:flex;gap:8px">
+       <input type="password" id="admApiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--card);color:var(--txt)"/>
+       <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="admSaveApiKey()">저장</button>
+     </div>
+     <div id="admApiKeyStatus" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+   </div>
+
+   <!-- 월별 AI 사용 한도 설정 -->
+   <div class="card" style="padding:18px 20px;margin-bottom:16px">
+     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+       <div style="font-size:16px">🛡</div>
+       <div style="font-size:14px;font-weight:600;color:var(--txt)">월별 AI 대화 한도</div>
+     </div>
+     <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+       프리미엄 회원 1명이 한 달에 이용할 수 있는 <b>대화 횟수</b>를 제한합니다. 비용 폭탄을 방지하는 마지막 방어선이에요. (기본값: 50회)
+     </div>
+
+     <div style="background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--txt);line-height:1.7">
+       💡 <b>비용 참고</b><br>
+       대화 1회 ≈ 50원 · 월 50회 ≈ 2,500원 · 월 100회 ≈ 5,000원<br>
+       구독료 6,900원 기준 → <b>50회가 적정 마진</b>
+     </div>
+
+     <div style="display:flex;gap:8px;align-items:center">
+       <input type="number" id="admLimitInput" placeholder="50" min="1" max="9999" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--card);color:var(--txt)"/>
+       <span style="font-size:12px;color:var(--muted);white-space:nowrap">회/월</span>
+       <button class="btn" style="padding:10px 16px;font-size:13px;white-space:nowrap" onclick="admSaveMonthlyLimit()">저장</button>
+     </div>
+     <div id="admLimitStatus" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+
+     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+       <button class="btn2" style="padding:8px 14px;font-size:12px" onclick="admShowTopUsers()">이번 달 상위 사용자 보기</button>
+     </div>
+   </div>
+
+   <!-- 프리미엄 유저 관리 -->
+   <div class="card" style="padding:18px 20px;margin-bottom:16px">
+     <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:10px">👥 프리미엄 유저 관리</div>
+     <div style="display:flex;gap:8px;margin-bottom:14px">
+       <input id="admPremSearch" placeholder="닉네임 검색..." oninput="admRenderPremUsers()" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--card);color:var(--txt)"/>
+       <select id="admPremFilter" onchange="admRenderPremUsers()" style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:13px;background:var(--card);color:var(--txt)">
+         <option value="all">전체</option>
+         <option value="premium">프리미엄</option>
+         <option value="trial">체험중</option>
+         <option value="free">일반</option>
+       </select>
+     </div>
+     <div id="admPremUserList" style="max-height:420px;overflow-y:auto"></div>
+   </div>
+
+   <!-- 일괄 작업 -->
+   <div class="card" style="padding:18px 20px;border:1px dashed var(--border);background:var(--card)">
+     <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:6px">🛠 일괄 작업</div>
+     <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6">주의: 이 작업은 되돌릴 수 없어요. 신중하게 사용하세요.</div>
+     <div style="display:flex;flex-direction:column;gap:8px">
+       <button class="btn2" style="padding:11px;font-size:13px;text-align:left" onclick="admMakeAgoraPremium()">
+         🏛 "아고라" 계정에 1년 프리미엄 부여
+       </button>
+       <button class="btnd" style="padding:11px;font-size:13px;text-align:left;background:#fff" onclick="admResetAllToFree()">
+         🔄 모든 일반 회원을 free 등급으로 재설정 <span style="font-size:11px;color:var(--muted)">(is_admin 제외)</span>
+       </button>
+     </div>
+   </div>
+
  </div>
  <!-- 공지사항 -->
  <div id="admNoticeSection" style="display:none">
@@ -1427,7 +1855,11 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <button onclick="closeMembershipModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="mmSub"></div>
-    <div id="mmCurrentStatus" style="background:var(--gl);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:var(--txt)"></div>
+    <div id="mmCurrentStatus" style="background:var(--gl);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--txt)"></div>
+    <!-- 실수 방지 안내 -->
+    <div style="background:#FFF8E8;border:1px solid #F0DFA8;border-radius:8px;padding:10px 12px;margin-bottom:18px;font-size:11px;color:#8B6F2A;line-height:1.55">
+      ⚠️ 아래 버튼을 누르면 <b>한 번 더 확인창</b>이 열려요.<br>신중하게 진행해주세요.
+    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <button class="btn" style="padding:12px;font-size:13px" onclick="grantTrial()">30일 무료체험 부여</button>
       <div style="display:flex;gap:8px">
@@ -1671,8 +2103,8 @@ async function handleOAuth(session){
  else{
  const m=session.user.user_metadata||{};
  const un=m.full_name||m.name||session.user.email?.split('@')[0]||'user_'+ID().slice(0,6);
- const premiumUntil=new Date();premiumUntil.setFullYear(premiumUntil.getFullYear()+99);
- const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null,premium_until:premiumUntil.toISOString()};
+ // 신규 유저는 free 등급으로 생성 (프리미엄은 결제 or 관리자 부여 시에만)
+ const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null,premium_until:null};
  const{error}=await sb.from('agora_users').insert(nu);
  if(error){nt('계정 생성 오류: '+error.message,'err');load(false);return;}
  await ok({...nu,isAdmin:false});
@@ -1738,9 +2170,8 @@ async function handleAppleCallback(){
     await ok({...eu,isAdmin:eu.is_admin});
     return true;
   }
-  // 신규 유저 생성
-  const premiumUntil=new Date();premiumUntil.setFullYear(premiumUntil.getFullYear()+99);
-  const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:null,premium_until:premiumUntil.toISOString()};
+  // 신규 유저 생성 (free 등급)
+  const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:null,premium_until:null};
   const{error:ie}=await sb.from('agora_users').insert(nu);
   if(ie){nt('계정 생성 실패: '+ie.message,'err');load(false);return true;}
   await ok({...nu,isAdmin:false});
@@ -1810,8 +2241,8 @@ async function handleNaver(){
  if(eu){if(eu.banned){nt('이용이 제한된 계정입니다.','err');nl.logout();return;}await ok({...eu,isAdmin:eu.is_admin});}
  else{
  const un=nu.getName()||nu.getEmail()?.split('@')[0]||'user_'+ID().slice(0,6);
- const premUntil=new Date();premUntil.setFullYear(premUntil.getFullYear()+99);
- const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null,premium_until:premUntil.toISOString()};
+ // 신규 유저는 free 등급 (프리미엄은 결제 or 관리자 부여 시에만)
+ const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null,premium_until:null};
  const{error}=await sb.from('agora_users').insert(newU);
  if(error){nt('계정 생성 오류','err');return;}
  await ok({...newU,isAdmin:false});
@@ -2274,6 +2705,9 @@ async function openBook(id){
       <div style="font-size:15px;line-height:1.65;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;align-items:center">
+      <button onclick="event.stopPropagation();aiStartFromBook('${b.id}')" style="background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);border-radius:24px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--g);font-weight:600;display:flex;align-items:center;gap:5px;font-family:var(--font-body)">
+        <span>✨</span> AI와 대화
+      </button>
       <button onclick="event.stopPropagation();toggleBookHeart('${b.id}','${b.user_id}')"
         style="background:#fff;border:1px solid ${liked?'#E8A0A0':'var(--border)'};border-radius:24px;padding:8px 18px;cursor:pointer;font-size:14px;color:${liked?'#C0392B':'var(--muted)'};display:flex;align-items:center;gap:6px;transition:all .2s">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="${liked?'#C0392B':'none'}" stroke="${liked?'#C0392B':'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -2349,6 +2783,9 @@ async function openBookModal(id){
       <div style="font-size:15px;line-height:1.65;color:var(--txt);white-space:pre-wrap;max-height:300px;overflow-y:auto;padding-right:4px">${esc(b.review)}</div>
     </div>`:''}
     <div style="display:flex;gap:8px;padding:16px 24px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn2" style="font-size:13px;padding:9px 16px;background:linear-gradient(135deg,var(--gl),var(--gb));border:1px solid var(--gb);color:var(--g);font-weight:600;display:flex;align-items:center;gap:5px" onclick="aiStartFromBook('${b.id}')">
+        <span>✨</span> AI와 대화
+      </button>
       <button class="btn2" style="font-size:13px;padding:9px 16px" onclick="openAddToFolder('${b.id}','mybook')">폴더</button>
       ${isOwn?`
         <button class="btn2" style="font-size:13px;padding:9px 16px" onclick="closeBookModal();openEdit('${b.id}')">수정</button>
@@ -3779,8 +4216,10 @@ async function unban(uid){await sb.from('agora_users').update({banned:false,stri
 
 // ══ 멤버십 부여 모달 ══
 let _mmUserId=null;
+let _mmUserName=null;
 async function openMembershipModal(uid,username){
   _mmUserId=uid;
+  _mmUserName=username;
   document.getElementById('mmTitle').textContent=username+' 님';
   document.getElementById('mmSub').textContent='멤버십을 부여하거나 초기화할 수 있어요';
   const{data:u}=await sb.from('agora_users').select('trial_started_at,premium_until').eq('id',uid).single();
@@ -3806,27 +4245,44 @@ async function openMembershipModal(uid,username){
 function closeMembershipModal(){
   document.getElementById('membershipModal').style.display='none';
   _mmUserId=null;
+  _mmUserName=null;
 }
 async function grantTrial(){
   if(!_mmUserId)return;
+  // 더블체크
+  if(!confirm(`✅ 확인\n\n"${_mmUserName}" 님에게\n📆 30일 무료체험을 부여할까요?\n\n취소는 [취소] 또는 ESC`))return;
   const now=new Date().toISOString();
   await sb.from('agora_users').update({trial_started_at:now}).eq('id',_mmUserId);
-  nt('30일 무료체험이 부여됐습니다.');
+  nt(`✨ ${_mmUserName}님께 30일 무료체험 부여 완료`);
   closeMembershipModal();rAdmin();
+  if(typeof admRenderPremUsers==='function') admRenderPremUsers();
 }
 async function grantPremium(months){
   if(!_mmUserId)return;
+  // 더블체크 (1년은 특히 강조)
+  const monthLabel = months===12 ? '1년 (12개월)' : `${months}개월`;
+  const warning = months===12 ? '\n\n⚠️ 1년은 장기간 권한 부여입니다. 정말 맞나요?' : '';
+  if(!confirm(`✅ 확인\n\n"${_mmUserName}" 님에게\n✨ 프리미엄 ${monthLabel}을 부여할까요?${warning}\n\n취소는 [취소] 또는 ESC`))return;
   const until=new Date();until.setMonth(until.getMonth()+months);
   await sb.from('agora_users').update({premium_until:until.toISOString()}).eq('id',_mmUserId);
-  nt(`프리미엄 ${months}개월이 부여됐습니다.`);
+  nt(`✨ ${_mmUserName}님께 프리미엄 ${monthLabel} 부여 완료`);
   closeMembershipModal();rAdmin();
+  if(typeof admRenderPremUsers==='function') admRenderPremUsers();
 }
 async function revokeMembership(){
   if(!_mmUserId)return;
-  if(!confirm('멤버십을 초기화할까요?'))return;
+  // 2단계 더블체크 (위험한 작업)
+  if(!confirm(`⚠️ 경고\n\n"${_mmUserName}" 님의 모든 멤버십을 초기화할까요?\n\n다음이 NULL이 됩니다:\n• premium_until (프리미엄 만료일)\n• trial_started_at (체험 시작일)\n\n즉, 이 유저는 즉시 free 등급이 됩니다.\n\n계속하시겠어요?`))return;
+  // 두 번째 확인
+  const typed = prompt(`한 번 더 확인하겠습니다.\n\n"${_mmUserName}" 님의 멤버십을 정말로 초기화하시려면\n아래에 유저 닉네임을 그대로 입력해주세요:`);
+  if(typed !== _mmUserName){
+    nt('닉네임이 일치하지 않아 취소되었습니다.', 'err');
+    return;
+  }
   await sb.from('agora_users').update({trial_started_at:null,premium_until:null}).eq('id',_mmUserId);
-  nt('멤버십이 초기화됐습니다.');
+  nt(`🔄 ${_mmUserName}님의 멤버십이 초기화되었습니다`);
   closeMembershipModal();rAdmin();
+  if(typeof admRenderPremUsers==='function') admRenderPremUsers();
 }
 
 // ══ 신고 시스템 ══
@@ -3874,12 +4330,13 @@ async function submitReport(){
 
 // ══ 관리자 탭 전환 ══
 function switchAdmTab(tab){
-  ['reports','inquiries','users','notice','dm'].forEach(t=>{
+  ['reports','inquiries','users','premium','notice','dm'].forEach(t=>{
     const btn=document.getElementById('admTab-'+t);
     const sec=document.getElementById('adm'+t.charAt(0).toUpperCase()+t.slice(1)+'Section');
     if(btn)btn.classList.toggle('on',t===tab);
     if(sec)sec.style.display=t===tab?'block':'none';
   });
+  if(tab==='premium') admLoadPremiumPanel();
 }
 
 
@@ -6769,6 +7226,1514 @@ async function showLikedBooks(){
     <div style="color:var(--red);font-size:16px;flex-shrink:0;align-self:center">♥</div>
   </div>`).join('');
 }
+
+// ═══════════════════════════════════════════
+//   AI 독서토론 기능 (토론방 내부)
+//   4가지 모드: socratic / perspectives / topics / character
+// ═══════════════════════════════════════════
+
+const AI_STATE = {
+  // Cloudflare Worker URL (프록시 서버 - API 키 보호)
+  // 비어있으면 직접 Claude API 호출 (폴백, 관리자 키 사용)
+  workerUrl: 'https://agora.kjwoo0708.workers.dev',
+  sharedApiKey: null,  // 관리자가 설정한 공용 키 (Worker 못 쓸 때 폴백)
+  mode: 'socratic',  // 'socratic' | 'perspectives' | 'topics' | 'character'
+  currentBook: { title:'', author:'', note:'', coverUrl:'', character:'' },
+  currentPerspective: 'literary',
+  history: [],
+  loading: false,
+  activeConversationId: null
+};
+
+// 관점 모드용 AI 캐릭터 정의
+const AI_PERSPECTIVES = {
+  literary: { name:'문학평론가', emoji:'📚', desc:'작품의 구조, 상징, 문학적 장치에 주목' },
+  feminist: { name:'페미니스트', emoji:'♀', desc:'젠더와 권력 관계 관점에서 해석' },
+  philosopher: { name:'철학자', emoji:'🤔', desc:'존재, 윤리, 가치의 근본 질문 제기' },
+  historian: { name:'역사학자', emoji:'📜', desc:'시대적 맥락과 사회사적 의미 탐구' },
+  psychologist: { name:'심리학자', emoji:'🧠', desc:'인물의 심리와 동기에 집중' },
+  reader: { name:'일반 독자', emoji:'💗', desc:'공감과 개인적 감상을 나눔' }
+};
+
+// 토론방 모드 전환 (사람 / AI)
+function switchForumMode(mode){
+  // AI 모드 접근 시 프리미엄 체크
+  if(mode === 'ai'){
+    const status = typeof getMembershipStatus === 'function' ? getMembershipStatus() : 'free';
+    if(status === 'free'){
+      // 프리미엄 게이트 표시 후 사람 토론으로 돌려놓기
+      if(typeof openPremGate === 'function'){
+        openPremGate(
+          '✨ AI 독서토론은 프리미엄 기능이에요',
+          '책 속 질문을 AI와 함께 깊이 탐구해보세요. 무료 체험을 시작하거나 프리미엄을 구독하세요.'
+        );
+      }else{
+        alert('AI 독서토론은 프리미엄 회원 전용 기능입니다.');
+      }
+      return;
+    }
+  }
+
+  document.getElementById('forumMode-human').classList.toggle('on', mode==='human');
+  document.getElementById('forumMode-ai').classList.toggle('on', mode==='ai');
+  // 버튼 스타일 업데이트
+  const humanBtn = document.getElementById('forumMode-human');
+  const aiBtn = document.getElementById('forumMode-ai');
+  if(mode==='human'){
+    humanBtn.style.cssText = 'flex:1;padding:11px 14px;border:none;border-radius:9px;background:var(--card);color:var(--txt);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;gap:6px';
+    aiBtn.style.cssText = 'flex:1;padding:11px 14px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px';
+  }else{
+    aiBtn.style.cssText = 'flex:1;padding:11px 14px;border:none;border-radius:9px;background:var(--card);color:var(--txt);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;gap:6px';
+    humanBtn.style.cssText = 'flex:1;padding:11px 14px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px';
+  }
+  document.getElementById('forumHumanSection').style.display = mode==='human' ? 'block' : 'none';
+  document.getElementById('forumAISection').style.display = mode==='ai' ? 'block' : 'none';
+  if(mode==='ai') aiInitPanel();
+
+  // FAB 처리 (AI 모드에선 글쓰기 FAB 숨김)
+  const _fab = document.getElementById('fabAdd');
+  if(_fab && window.innerWidth <= 600){
+    if(mode==='human'){ _fab.style.cssText='display:flex!important'; _fab.onclick=function(){go('addPost');}; }
+    else { _fab.style.cssText='display:none!important'; }
+  }
+}
+
+// 대화 모드 선택 (socratic/perspectives/topics/character)
+function aiPickMode(mode){
+  AI_STATE.mode = mode;
+  // 카드 선택 표시
+  document.querySelectorAll('.ai-mode-card').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.mode === mode);
+  });
+  // 캐릭터 모드 전용 필드 표시/숨김
+  const charField = document.getElementById('aiCharacterField');
+  if(charField) charField.style.display = mode === 'character' ? 'block' : 'none';
+
+  // 모드별 UI 문구 조정
+  const noteLabel = document.getElementById('aiNoteLabel');
+  const noteHint = document.getElementById('aiNoteHint');
+  const startBtn = document.getElementById('aiStartBtn');
+  const notes = {
+    socratic: { label:'인상 깊었던 부분 (선택)', hint:'비워두셔도 돼요. AI가 먼저 질문을 건넬게요.', btn:'토론 시작하기' },
+    perspectives: { label:'함께 이야기할 주제 (선택)', hint:'특정 주제가 있다면 적어주세요. 여러 관점을 들어볼 수 있어요.', btn:'여러 관점 들어보기' },
+    topics: { label:'관심 있는 방향 (선택)', hint:'예: "주인공의 선택에 대해", "결말 해석" 같은 힌트', btn:'토론 주제 받기' },
+    character: { label:'인물과 얘기하고 싶은 주제 (선택)', hint:'무엇에 대해 물어보고 싶으신가요?', btn:'인물과 대화하기' }
+  };
+  if(noteLabel) noteLabel.textContent = notes[mode].label;
+  if(noteHint) noteHint.textContent = notes[mode].hint;
+  if(startBtn) startBtn.textContent = notes[mode].btn;
+}
+
+// 패널 진입 시 초기화
+async function aiInitPanel(){
+  // Worker URL을 localStorage에서 복원 (관리자가 변경한 경우)
+  const savedWorkerUrl = localStorage.getItem('agora_worker_url');
+  if(savedWorkerUrl !== null){
+    AI_STATE.workerUrl = savedWorkerUrl || null;  // 빈 문자열이면 null
+  }
+
+  await aiLoadSharedApiKey();
+  aiUpdateApiBanner();
+  aiRenderBookPicker();
+  aiRenderHistory();
+  aiUpdateSetupUsageBanner();
+}
+
+// Setup 화면 사용량 배너 업데이트
+async function aiUpdateSetupUsageBanner(){
+  const banner = document.getElementById('aiUsageSetupBanner');
+  const textEl = document.getElementById('aiUsageSetupText');
+  const fillEl = document.getElementById('aiUsageSetupFill');
+  if(!banner || !CU || CU.isGuest) return;
+
+  try{
+    const [used, limit] = await Promise.all([
+      aiGetMonthlyUsage(CU.id),
+      aiGetMonthlyLimit()
+    ]);
+    const remaining = Math.max(0, limit - used);
+    const percent = Math.min(100, (used / limit) * 100);
+    let color = 'var(--g)';
+    if(percent >= 90) color = 'var(--red)';
+    else if(percent >= 70) color = '#E89A4A';
+
+    textEl.innerHTML = `
+      <span style="color:${color}">${used}회</span>
+      <span style="color:var(--muted);font-weight:400;font-size:13px"> / ${limit}회</span>
+      ${remaining === 0
+        ? '<span style="color:var(--red);font-size:11px;font-weight:600;margin-left:6px">⚠️ 한도 도달</span>'
+        : remaining <= 5
+          ? `<span style="color:#E89A4A;font-size:11px;font-weight:600;margin-left:6px">· ${remaining}회 남음</span>`
+          : ''
+      }
+    `;
+    fillEl.style.width = percent + '%';
+    fillEl.style.background = color;
+    banner.style.display = 'block';
+  }catch(e){
+    banner.style.display = 'none';
+  }
+}
+
+// 관리자가 설정한 공용 API 키 로드
+async function aiLoadSharedApiKey(){
+  try{
+    const { data } = await sb.from('agora_settings')
+      .select('value')
+      .eq('key', 'claude_api_key')
+      .maybeSingle();
+    if(data?.value){
+      AI_STATE.sharedApiKey = data.value;
+      return;
+    }
+  }catch(e){
+    console.warn('Settings table not available:', e.message);
+  }
+  // 폴백: 관리자 로컬에만 저장된 키 (임시)
+  AI_STATE.sharedApiKey = localStorage.getItem('agora_claude_key_admin') || null;
+}
+
+function aiUpdateApiBanner(){
+  const el = document.getElementById('aiApiBanner');
+  if(!el) return;
+  // Worker 쓰면 배너 숨김 (API 키는 Worker가 관리)
+  if(AI_STATE.workerUrl){
+    el.style.display = 'none';
+    return;
+  }
+  // Worker 없으면 공용 키 상태 체크
+  if(!AI_STATE.sharedApiKey){
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ AI 서비스가 일시적으로 이용할 수 없어요. 잠시 후 다시 시도해주세요.';
+    el.style.color = '#8B6F2A';
+  }else{
+    el.style.display = 'none';
+  }
+}
+
+// 내 서재에서 책 고르기
+async function aiRenderBookPicker(){
+  const picker = document.getElementById('aiBookPicker');
+  if(!picker) return;
+  try{
+    const { data:bd } = await sb.from('agora_books')
+      .select('id,title,author,cover_url')
+      .eq('user_id', CU.id)
+      .order('created_at', { ascending:false })
+      .limit(20);
+    const books = bd || [];
+    if(!books.length){
+      picker.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:14px">내 서재에 책을 먼저 추가해보세요. 또는 아래에서 직접 입력하세요.</div>`;
+      return;
+    }
+    picker.innerHTML = books.map(b=>{
+      const cover = b.cover_url
+        ? `<img src="${b.cover_url}" class="bchip-cover" loading="lazy"/>`
+        : `<div class="bchip-cover">${esc((b.title||'').slice(0,12))}</div>`;
+      return `<div class="ai-book-chip" onclick="aiPickBook(${JSON.stringify(b).replace(/"/g,'&quot;')})">
+        ${cover}
+        <div class="bchip-title">${esc(b.title||'')}</div>
+        <div class="bchip-author">${esc(b.author||'')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.warn('aiRenderBookPicker:', e);
+    picker.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:14px">책 목록을 불러올 수 없어요.</div>`;
+  }
+}
+
+function aiPickBook(book){
+  document.getElementById('aiBookTitleInput').value = book.title || '';
+  document.getElementById('aiBookAuthorInput').value = book.author || '';
+  AI_STATE.currentBook.coverUrl = book.cover_url || '';
+  document.querySelectorAll('.ai-book-chip').forEach(c=>c.classList.remove('selected'));
+  if(event && event.currentTarget) event.currentTarget.classList.add('selected');
+  nt('『' + (book.title||'') + '』 선택됨');
+}
+
+function aiOnInputChange(){
+  document.querySelectorAll('.ai-book-chip').forEach(c=>c.classList.remove('selected'));
+  AI_STATE.currentBook.coverUrl = '';
+}
+
+// 과거 대화 기록
+function aiRenderHistory(){
+  const el = document.getElementById('aiHistoryList');
+  if(!el) return;
+  const all = aiLoadAllConversations();
+  if(!all.length){ el.innerHTML = ''; return; }
+  const modeIcons = { socratic:'💭', perspectives:'👥', topics:'❓', character:'🎭' };
+  el.innerHTML = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">🗂 이어하기</div>
+    ${all.slice(0,5).map(c=>{
+      const dateStr = new Date(c.updatedAt).toLocaleDateString('ko-KR',{month:'short',day:'numeric'});
+      const turns = Math.floor(c.history.length/2);
+      const icon = modeIcons[c.mode || 'socratic'] || '💭';
+      const extra = c.mode === 'character' && c.book.character ? ` · ${esc(c.book.character)}` : '';
+      return `<div class="ai-history-item" onclick="aiResumeConversation('${c.id}')">
+        <div class="ai-hist-icon">${icon}</div>
+        <div class="ai-hist-body">
+          <div class="ai-hist-title">${esc(c.book.title)}</div>
+          <div class="ai-hist-meta">${esc(c.book.author||'')}${extra} · ${turns}번의 대화 · ${dateStr}</div>
+        </div>
+        <button class="ai-hist-delete" onclick="event.stopPropagation();aiDeleteConversation('${c.id}')" title="삭제">×</button>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function aiLoadAllConversations(){
+  try{
+    const raw = localStorage.getItem('agora_ai_conversations_' + CU.id);
+    const arr = raw ? JSON.parse(raw) : [];
+    return arr.sort((a,b)=> b.updatedAt - a.updatedAt);
+  }catch(e){ return []; }
+}
+
+function aiSaveConversation(){
+  if(!AI_STATE.activeConversationId) return;
+  try{
+    const all = aiLoadAllConversations();
+    const existing = all.findIndex(c=>c.id === AI_STATE.activeConversationId);
+    const record = {
+      id: AI_STATE.activeConversationId,
+      mode: AI_STATE.mode,
+      book: { ...AI_STATE.currentBook },
+      history: AI_STATE.history,
+      updatedAt: Date.now()
+    };
+    if(existing >= 0) all[existing] = record; else all.unshift(record);
+    const trimmed = all.slice(0, 30);
+    localStorage.setItem('agora_ai_conversations_' + CU.id, JSON.stringify(trimmed));
+  }catch(e){ console.warn('aiSaveConversation:', e); }
+}
+
+function aiResumeConversation(id){
+  const all = aiLoadAllConversations();
+  const conv = all.find(c=>c.id === id);
+  if(!conv) return;
+  AI_STATE.mode = conv.mode || 'socratic';
+  AI_STATE.currentBook = { ...conv.book };
+  AI_STATE.history = conv.history || [];
+  AI_STATE.activeConversationId = id;
+  aiEnterChatMode();
+  const cont = document.getElementById('aiMessages');
+  cont.innerHTML = '';
+  AI_STATE.history.forEach(m=>{
+    aiAddMessage(m.role === 'assistant' ? 'ai' : 'user', m.content, false);
+  });
+  setTimeout(()=>{ cont.scrollTop = cont.scrollHeight; }, 50);
+}
+
+function aiDeleteConversation(id){
+  if(!confirm('이 대화 기록을 삭제할까요?')) return;
+  const all = aiLoadAllConversations().filter(c=>c.id !== id);
+  localStorage.setItem('agora_ai_conversations_' + CU.id, JSON.stringify(all));
+  aiRenderHistory();
+  nt('삭제되었습니다');
+}
+
+// 토론 시작
+async function aiStartDiscussion(){
+  const title = document.getElementById('aiBookTitleInput').value.trim();
+  const author = document.getElementById('aiBookAuthorInput').value.trim();
+  const note = document.getElementById('aiBookNoteInput').value.trim();
+  const character = document.getElementById('aiCharacterInput').value.trim();
+
+  if(!title){ nt('책 제목을 입력해주세요.', 'err'); return; }
+  if(AI_STATE.mode === 'character' && !character){ nt('대화할 등장인물 이름을 입력해주세요.', 'err'); return; }
+
+  // Worker가 설정되어 있으면 API 키 체크 스킵 (Worker가 처리함)
+  // Worker 없으면 관리자 공용 키 필요
+  if(!AI_STATE.workerUrl){
+    if(!AI_STATE.sharedApiKey){
+      await aiLoadSharedApiKey();
+      if(!AI_STATE.sharedApiKey){
+        nt('AI 서비스가 일시적으로 이용할 수 없어요. 관리자에게 문의해주세요.', 'err');
+        return;
+      }
+    }
+  }
+
+  AI_STATE.currentBook = {
+    title, author, note, character,
+    coverUrl: AI_STATE.currentBook.coverUrl || ''
+  };
+  AI_STATE.history = [];
+  AI_STATE.activeConversationId = 'aiconv_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  AI_STATE.currentPerspective = 'literary';
+
+  aiEnterChatMode();
+  document.getElementById('aiMessages').innerHTML = '';
+
+  // 입력창 초기화
+  document.getElementById('aiBookTitleInput').value = '';
+  document.getElementById('aiBookAuthorInput').value = '';
+  document.getElementById('aiBookNoteInput').value = '';
+  document.getElementById('aiCharacterInput').value = '';
+
+  // 모드별 첫 메시지
+  const firstContext = aiBuildFirstContext();
+  await aiRequestClaude(firstContext);
+}
+
+// 모드별 첫 컨텍스트 생성
+function aiBuildFirstContext(){
+  const b = AI_STATE.currentBook;
+  switch(AI_STATE.mode){
+    case 'socratic':
+      return b.note
+        ? `사용자가 이 책을 읽고 이런 부분이 인상 깊었다고 합니다:\n\n"${b.note}"\n\n이 내용을 바탕으로 따뜻하게 첫 질문을 건네주세요.`
+        : `사용자와 이 책에 대한 깊이 있는 대화를 시작해주세요. 책에 대한 첫 질문을 따뜻하게 건네주세요.`;
+    case 'perspectives':
+      const persp = AI_PERSPECTIVES[AI_STATE.currentPerspective];
+      return `사용자와 이 책에 대해 다양한 관점에서 토론을 시작합니다. 먼저 ${persp.name} 관점으로 대화를 시작합니다. ${b.note ? `사용자의 관심사: "${b.note}"\n\n` : ''}${persp.name}의 시선에서 이 책에 대한 흥미로운 관점을 하나 제시하고, 사용자의 생각을 물어봐주세요.`;
+    case 'topics':
+      return `사용자가 이 책에 대한 토론 주제를 추천받고 싶어합니다. ${b.note ? `사용자의 관심 방향: "${b.note}"\n\n` : ''}이 책에 대해 깊이 있게 토론할 수 있는 주제 5가지를 제안해주세요. 각 주제는 번호와 함께 한 줄로 간결하게 제시하고, 맨 아래 "어떤 주제로 이야기 나눠볼까요?"라고 물어봐주세요. 주제는 "1. [주제명]" 형식으로 적어주세요.`;
+    case 'character':
+      return `당신은 지금부터 『${b.title}』에 등장하는 "${b.character}"가 되어 사용자와 대화합니다. ${b.note ? `사용자가 관심 있는 주제: "${b.note}"\n\n` : ''}인물의 말투, 성격, 배경에 충실하게 몰입해서 대화해주세요. 먼저 당신이 ${b.character}임을 암시하는 짧은 인사와 함께, 사용자에게 무엇을 궁금해하는지 물어봐주세요.`;
+  }
+}
+
+function aiEnterChatMode(){
+  document.getElementById('aiSetupScreen').style.display = 'none';
+  document.getElementById('aiChatScreen').style.display = 'block';
+  document.getElementById('aiCurrentBookTitle').textContent = AI_STATE.currentBook.title || '—';
+
+  const b = AI_STATE.currentBook;
+  let subInfo = b.author || '저자 미상';
+  if(AI_STATE.mode === 'character' && b.character) subInfo += ` · ${b.character}`;
+  document.getElementById('aiCurrentBookAuthor').textContent = subInfo;
+
+  const icons = { socratic:'💭', perspectives:'👥', topics:'❓', character:'🎭' };
+  document.getElementById('aiChatIcon').textContent = icons[AI_STATE.mode] || '💭';
+
+  // 사용량 표시 업데이트
+  aiUpdateUsageIndicator();
+
+  // 관점 모드: 상단에 관점 칩 표시
+  const perspBar = document.getElementById('aiPerspectiveBar');
+  if(AI_STATE.mode === 'perspectives'){
+    perspBar.style.display = 'flex';
+    let html = `<div style="font-size:11px;color:var(--muted);margin-right:4px;align-self:center;letter-spacing:0.5px">누구에게 질문할까요?</div>`;
+    Object.entries(AI_PERSPECTIVES).forEach(([key, p])=>{
+      const active = key === AI_STATE.currentPerspective ? 'active' : '';
+      html += `<button class="ai-persp-chip ${active}" onclick="aiSwitchPerspective('${key}')" title="${p.desc}">${p.emoji} ${p.name}</button>`;
+    });
+    perspBar.innerHTML = html;
+  }else{
+    perspBar.style.display = 'none';
+  }
+}
+
+function aiSwitchPerspective(key){
+  AI_STATE.currentPerspective = key;
+  const persp = AI_PERSPECTIVES[key];
+  // 칩 상태 갱신
+  document.querySelectorAll('#aiPerspectiveBar .ai-persp-chip').forEach((c,i)=>{
+    c.classList.remove('active');
+  });
+  if(event && event.currentTarget) event.currentTarget.classList.add('active');
+  nt(`${persp.emoji} ${persp.name}의 관점으로 전환`);
+}
+
+function aiEndDiscussion(){
+  if(AI_STATE.history.length > 0 && !confirm('대화를 종료하시겠어요? 기록은 저장됩니다.')) return;
+  aiSaveConversation();
+  document.getElementById('aiChatScreen').style.display = 'none';
+  document.getElementById('aiSetupScreen').style.display = 'block';
+  AI_STATE.history = [];
+  AI_STATE.activeConversationId = null;
+  aiRenderHistory();
+}
+
+// 시스템 프롬프트 (모드별)
+function aiBuildSystemPrompt(){
+  const b = AI_STATE.currentBook;
+  const baseBook = `[지금 대화 중인 책]\n제목: ${b.title}\n저자: ${b.author || '(알려주지 않음)'}`;
+
+  // 모든 모드 공통: 독서 관련만 응답
+  const scopeRule = `
+[대화 범위 제한]
+• 이 대화는 오직 "${b.title}"이라는 책과 관련된 내용만 다룹니다.
+• 사용자가 책과 무관한 요청을 할 때 (코드 작성, 숙제, 일반 지식 질문, 번역, 챗봇 대화, 요리법, 점성술, 상담, 다른 소프트웨어 사용법 등) 정중히 거절하고 책 이야기로 돌아오세요.
+• 거절 예시: "그 주제는 책 이야기에서 벗어나 있어요. 지금 『${b.title}』에 집중해서 이야기를 이어가 볼까요? [책 관련 후속 질문]"
+• 단, 책의 주제·배경·시대·장르를 이해하는 데 필요한 배경지식(역사, 철학, 과학 등)은 책과 연결해서 제공해도 좋습니다.
+• 사용자가 책의 문장을 길게 인용 요청하거나, 책 전체 요약/줄거리 전체를 달라고 하면: 저작권 존중 차원에서 해당 요청은 거절하고, 대신 그 부분에 대한 감상/생각을 나누자고 제안하세요.
+• 민감한 정치 주제로 빠지면 중립적으로 다양한 관점을 균형 있게 제시합니다.`;
+
+  switch(AI_STATE.mode){
+    case 'socratic':
+      return `당신은 AGORA라는 여성 전용 독서 아카이브의 AI 독서 파트너입니다.
+고대 그리스 광장(아고라)에서 사색하는 지혜로운 친구의 자세로, 사용자와 책에 대해 깊이 이야기합니다.
+
+${baseBook}
+${scopeRule}
+
+[대화 원칙]
+1. 소크라테스식 대화법: 정답을 알려주기보다 사용자 스스로 생각을 발견하도록 질문을 건넵니다.
+2. 한 번에 질문 하나씩, 짧고 명료하게 (3~5문장 이내).
+3. 사용자의 답변에서 흥미로운 지점을 포착해 더 깊이 파고듭니다.
+4. 따뜻하고 차분한 존댓말. 친밀한 독서 친구처럼.
+5. 이모지 사용 안 함. 텍스트만으로 품격 있게.
+6. 책을 모를 수 있습니다. 모르면 사용자에게 소개받으며 대화를 이끕니다. 아는 척하지 않습니다.`;
+
+    case 'perspectives':
+      const persp = AI_PERSPECTIVES[AI_STATE.currentPerspective];
+      return `당신은 AGORA의 AI 독서 파트너이며, 지금은 "${persp.name}" 관점으로 사용자와 대화합니다.
+
+${baseBook}
+${scopeRule}
+
+[당신의 관점]
+${persp.name}: ${persp.desc}
+
+[대화 원칙]
+1. ${persp.name}의 시선으로 책을 해석하고 의견을 제시합니다.
+2. 단, 균형감을 잃지 않습니다. 다른 관점도 유효하다는 것을 인정합니다.
+3. 사용자의 생각을 존중하며 건설적으로 토론합니다.
+4. 3~5문장 이내로 간결하게, 1회당 질문 하나.
+5. 따뜻한 존댓말, 이모지 없음.
+6. 정치적으로 한쪽으로 치우치지 않고, 여러 주장의 논리적 근거를 공정하게 제시합니다.
+7. 책을 모르면 솔직히 말하고 사용자에게 물어봅니다.
+8. 답변 맨 앞에 "[${persp.name}]" 같은 꼬리표를 붙이지 마세요. 자연스럽게 그 관점으로 말해주세요.`;
+
+    case 'topics':
+      return `당신은 AGORA의 AI 독서 파트너입니다. 사용자에게 깊이 있는 토론 주제를 제안하고, 선택한 주제로 함께 탐구합니다.
+
+${baseBook}
+${scopeRule}
+
+[대화 원칙]
+1. 첫 메시지에서는 번호를 매긴 토론 주제 5가지를 제안합니다 ("1. 주제명" 형식).
+2. 사용자가 번호를 고르거나 주제를 선택하면, 그 주제로 깊이 있게 대화를 시작합니다.
+3. 주제 선택 후에는 사용자의 생각을 먼저 물어보고, 답변에 따라 대화를 이끕니다.
+4. 3~5문장 이내, 따뜻한 존댓말, 이모지 없음.
+5. 책을 모르면 사용자에게 설명을 요청합니다.`;
+
+    case 'character':
+      return `당신은 『${b.title}』의 등장인물 "${b.character}"입니다. 이 인물이 되어 사용자와 대화해주세요.
+
+${baseBook}
+인물: ${b.character}
+${scopeRule}
+
+[역할 연기 원칙]
+1. "${b.character}"의 성격, 말투, 시대적 배경, 가치관에 충실하게 연기합니다.
+2. 이 인물이 모르는 정보(현대 기술, 미래 사건 등)는 모른다고 합니다.
+3. 질문을 던지며 사용자와 깊이 있는 대화를 이어갑니다.
+4. 3~5문장 이내로 자연스럽게.
+5. 이모지 사용 안 함.
+6. 만약 이 인물에 대한 정보가 거의 없으면, 책 제목과 인물 설정에 기반해 합리적으로 연기합니다.
+7. 역할에서 완전히 벗어나지 말되, 사용자가 불편해하거나 해로운 요청을 하면 부드럽게 거절합니다.
+8. 사용자가 책과 무관한 현대적 주제(프로그래밍, 최신 이슈 등)를 물어보면, 인물답게 "그건 잘 모르겠어요" 또는 "저의 시대에는 그런 게 없었어요"라고 답하며 책 속 주제로 돌아오게 유도하세요.`;
+  }
+}
+
+// Claude API 호출
+async function aiRequestClaude(userMessage){
+  if(AI_STATE.loading) return;
+
+  // 실제 유저 메시지인지 판단:
+  // - history에 이미 assistant 응답이 있으면 → 유저가 진짜 보낸 것
+  // - 없으면 → 토론 시작 시 자동 생성된 첫 컨텍스트 (카운트 안 함)
+  const isRealUserMsg = AI_STATE.history.some(m => m.role === 'assistant');
+
+  // ─── 월별 사용량 체크 (실제 유저 메시지만 카운트) ───
+  if(isRealUserMsg && CU && CU.id && !CU.isGuest){
+    const [used, limit] = await Promise.all([
+      aiGetMonthlyUsage(CU.id),
+      aiGetMonthlyLimit()
+    ]);
+
+    if(used >= limit){
+      aiAddMessage('ai',
+        `⚠️ 이번 달 AI 대화 한도(${limit}회)에 도달했어요.\n\n` +
+        `다음 달 1일에 자동으로 초기화됩니다. 천천히 읽으시면서 다시 만나요.\n\n` +
+        `(남은 횟수를 확인하려면 화면 상단을 참고하세요.)`
+      );
+      return;
+    }
+  }
+
+  AI_STATE.loading = true;
+  const sendBtn = document.getElementById('aiSendBtn');
+  if(sendBtn) sendBtn.disabled = true;
+
+  const typingId = aiShowTyping();
+  AI_STATE.history.push({ role:'user', content:userMessage });
+
+  try{
+    // Worker 경유 vs 직접 호출 결정
+    const useWorker = !!AI_STATE.workerUrl;
+    let response;
+
+    if(useWorker){
+      // ═══ Worker 경유 (권장 - API 키 보호) ═══
+      response = await fetch(AI_STATE.workerUrl + '/v1/messages', {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'X-User-Id': CU?.id || '',
+          'X-User-Token': CU?.auth_id || CU?.id || '',
+        },
+        body: JSON.stringify({
+          max_tokens: 1024,
+          system: aiBuildSystemPrompt(),
+          messages: AI_STATE.history
+        })
+      });
+    } else {
+      // ═══ 직접 호출 (폴백 - 관리자 공용 키 사용) ═══
+      if(!AI_STATE.sharedApiKey){
+        aiRemoveTyping(typingId);
+        aiAddMessage('ai', '⚠️ AI 서비스가 일시적으로 이용할 수 없어요. 관리자에게 문의해주세요.');
+        AI_STATE.history.pop();
+        AI_STATE.loading = false;
+        if(sendBtn) sendBtn.disabled = false;
+        return;
+      }
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key': AI_STATE.sharedApiKey,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body: JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          system: aiBuildSystemPrompt(),
+          messages: AI_STATE.history
+        })
+      });
+    }
+
+    aiRemoveTyping(typingId);
+
+    if(!response.ok){
+      const errText = await response.text();
+      let friendly = 'AI 응답을 받지 못했어요.';
+      if(response.status === 401) friendly = 'AI 서비스 인증 오류. 관리자에게 문의해주세요.';
+      else if(response.status === 403) friendly = '프리미엄 회원만 이용 가능해요. 관리자에게 문의해주세요.';
+      else if(response.status === 429){
+        // Worker가 한도 초과 시 { limit, used } 반환
+        try {
+          const errData = JSON.parse(errText);
+          if(errData.limit) friendly = `⚠️ 이번 달 AI 대화 한도(${errData.limit}회)에 도달했어요.\n\n다음 달 1일에 자동 초기화됩니다.`;
+          else friendly = '요청이 너무 많아요. 잠시 후 다시 시도해주세요.';
+        } catch { friendly = '요청이 너무 많아요. 잠시 후 다시 시도해주세요.'; }
+      }
+      else if(response.status === 400) friendly = '요청 형식 오류. ' + errText.slice(0,150);
+      else if(response.status === 529 || response.status === 503) friendly = 'AI 서버가 혼잡해요. 잠시 후 다시 시도해주세요.';
+      throw new Error(friendly);
+    }
+
+    const data = await response.json();
+    const aiText = data.content?.[0]?.text || '(응답을 받지 못했어요)';
+    AI_STATE.history.push({ role:'assistant', content:aiText });
+    aiAddMessage('ai', aiText);
+    aiSaveConversation();
+
+    // 성공한 호출 카운트 +1 (실제 유저 메시지일 때만, 첫 AI 인사는 무료)
+    if(isRealUserMsg && CU && CU.id && !CU.isGuest){
+      await aiIncrementUsage(CU.id);
+      aiUpdateUsageIndicator();
+    }
+
+  }catch(err){
+    aiRemoveTyping(typingId);
+    aiAddMessage('ai', '⚠️ ' + err.message + '\n\n다시 시도하시려면 메시지를 다시 입력해주세요.');
+    AI_STATE.history.pop();
+  }finally{
+    AI_STATE.loading = false;
+    if(sendBtn) sendBtn.disabled = false;
+  }
+}
+
+async function aiSendMessage(){
+  const input = document.getElementById('aiInputField');
+  const text = input.value.trim();
+  if(!text || AI_STATE.loading) return;
+  input.value = '';
+  input.style.height = 'auto';
+  aiAddMessage('user', text);
+  await aiRequestClaude(text);
+}
+
+// UI 헬퍼
+function aiAddMessage(role, text, scroll=true){
+  const c = document.getElementById('aiMessages');
+  if(!c) return;
+  const msg = document.createElement('div');
+  msg.className = 'ai-msg ' + role;
+  const escaped = esc(text).replace(/\n/g,'<br>');
+
+  // 주제 추천 모드의 첫 응답이면 번호 클릭 가능하게 처리
+  if(role === 'ai' && AI_STATE.mode === 'topics' && AI_STATE.history.length <= 2){
+    // 간단한 번호 주제 파싱
+    const topicMatches = text.match(/^\s*\d+\.\s+.+$/gm);
+    if(topicMatches && topicMatches.length >= 2){
+      let html = `<div class="speaker">AGORA</div>`;
+      // 인트로 부분 (숫자 리스트 앞)
+      const firstIdx = text.indexOf(topicMatches[0]);
+      if(firstIdx > 0){
+        const intro = esc(text.slice(0, firstIdx).trim()).replace(/\n/g,'<br>');
+        if(intro) html += `<div class="text">${intro}</div>`;
+      }
+      // 주제 카드들
+      html += `<div style="margin-top:10px">`;
+      topicMatches.forEach((t,i)=>{
+        const cleaned = t.replace(/^\s*\d+\.\s*/, '').trim();
+        const numMatch = t.match(/^\s*(\d+)/);
+        const num = numMatch ? numMatch[1] : (i+1);
+        html += `<div class="ai-topic-card" onclick="aiPickTopic('${esc(cleaned).replace(/'/g,'&#39;')}')">
+          <div class="topic-num">${num}.</div>
+          <div class="topic-text">${esc(cleaned)}</div>
+        </div>`;
+      });
+      html += `</div>`;
+      // 엔딩 부분
+      const lastTopic = topicMatches[topicMatches.length-1];
+      const lastIdx = text.lastIndexOf(lastTopic) + lastTopic.length;
+      const outro = text.slice(lastIdx).trim();
+      if(outro){
+        html += `<div class="text" style="margin-top:10px;border-left:none;padding-left:0;font-size:13px;color:var(--muted)">${esc(outro).replace(/\n/g,'<br>')}</div>`;
+      }
+      msg.innerHTML = html;
+      c.appendChild(msg);
+      if(scroll) setTimeout(()=>{ c.scrollTop = c.scrollHeight; }, 50);
+      return;
+    }
+  }
+
+  if(role === 'ai'){
+    msg.innerHTML = `<div class="speaker">${AI_STATE.mode === 'character' && AI_STATE.currentBook.character ? esc(AI_STATE.currentBook.character).toUpperCase() : 'AGORA'}</div><div class="text">${escaped}</div>`;
+  }else{
+    msg.innerHTML = `<div class="text">${escaped}</div>`;
+  }
+  c.appendChild(msg);
+  if(scroll) setTimeout(()=>{ c.scrollTop = c.scrollHeight; }, 50);
+}
+
+// 주제 카드 클릭 시 선택
+function aiPickTopic(topic){
+  const input = document.getElementById('aiInputField');
+  input.value = topic + ' — 이 주제로 이야기하고 싶어요.';
+  aiSendMessage();
+}
+
+function aiShowTyping(){
+  const c = document.getElementById('aiMessages');
+  const id = 'ai-typing-' + Date.now();
+  const el = document.createElement('div');
+  el.id = id;
+  el.className = 'ai-msg ai';
+  const speaker = AI_STATE.mode === 'character' && AI_STATE.currentBook.character
+    ? esc(AI_STATE.currentBook.character).toUpperCase()
+    : 'AGORA';
+  el.innerHTML = `<div class="speaker">${speaker}</div>
+    <div class="ai-typing"><span></span><span></span><span></span></div>`;
+  c.appendChild(el);
+  setTimeout(()=>{ c.scrollTop = c.scrollHeight; }, 50);
+  return id;
+}
+
+function aiRemoveTyping(id){
+  const el = document.getElementById(id);
+  if(el) el.remove();
+}
+
+function aiAutoResize(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+// ─── 월별 사용량 관리 ───
+function aiGetCurrentMonthKey(){
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+}
+
+// 월별 사용량 조회
+async function aiGetMonthlyUsage(userId){
+  try{
+    const monthKey = aiGetCurrentMonthKey();
+    const { data } = await sb.from('agora_ai_usage')
+      .select('count')
+      .eq('user_id', userId)
+      .eq('year_month', monthKey)
+      .maybeSingle();
+    return data?.count || 0;
+  }catch(e){
+    console.warn('aiGetMonthlyUsage:', e);
+    return 0; // 테이블이 없으면 0 반환 (차단 안 함)
+  }
+}
+
+// 사용 제한 조회 (관리자 설정값 or 기본 50)
+async function aiGetMonthlyLimit(){
+  try{
+    const { data } = await sb.from('agora_settings')
+      .select('value')
+      .eq('key', 'ai_monthly_limit')
+      .maybeSingle();
+    const val = parseInt(data?.value);
+    return isNaN(val) ? 50 : val;
+  }catch(e){
+    return 50;
+  }
+}
+
+// 사용량 +1 증가 (대화 완료 후 호출)
+async function aiIncrementUsage(userId){
+  try{
+    const monthKey = aiGetCurrentMonthKey();
+    // 기존 행이 있으면 업데이트, 없으면 생성 (upsert)
+    const current = await aiGetMonthlyUsage(userId);
+    await sb.from('agora_ai_usage').upsert({
+      user_id: userId,
+      year_month: monthKey,
+      count: current + 1,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,year_month' });
+    return current + 1;
+  }catch(e){
+    console.warn('aiIncrementUsage:', e);
+    return -1;
+  }
+}
+
+// UI에 사용량 표시
+async function aiUpdateUsageIndicator(){
+  const el = document.getElementById('aiUsageIndicator');
+  if(!el || !CU) return;
+  try{
+    const [used, limit] = await Promise.all([
+      aiGetMonthlyUsage(CU.id),
+      aiGetMonthlyLimit()
+    ]);
+    const remaining = Math.max(0, limit - used);
+    const percent = Math.min(100, (used / limit) * 100);
+    let color = 'var(--g)';
+    if(percent >= 90) color = 'var(--red)';
+    else if(percent >= 70) color = '#E89A4A';
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+        <span>이번 달</span>
+        <span style="color:${color};font-weight:600">${used}/${limit}회</span>
+        ${remaining === 0 ? '<span style="color:var(--red);font-weight:600">· 한도 도달</span>' : ''}
+      </div>
+      <div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden">
+        <div style="height:100%;width:${percent}%;background:${color};transition:width .3s"></div>
+      </div>
+    `;
+    el.style.display = 'block';
+  }catch(e){
+    el.style.display = 'none';
+  }
+}
+
+function aiHandleKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    aiSendMessage();
+  }
+}
+
+// ─── 책 모달 → AI 토론 바로 시작 ───
+async function aiStartFromBook(bookId){
+  // 프리미엄 체크
+  const status = typeof getMembershipStatus === 'function' ? getMembershipStatus() : 'free';
+  if(status === 'free'){
+    if(typeof closeBookModal === 'function') closeBookModal();
+    if(typeof openPremGate === 'function'){
+      openPremGate(
+        '✨ AI 독서토론은 프리미엄 기능이에요',
+        '이 책에 대해 AI와 깊이 있게 이야기해보세요. 무료 체험을 시작하거나 프리미엄을 구독하세요.'
+      );
+    }else{
+      alert('AI 독서토론은 프리미엄 회원 전용 기능입니다.');
+    }
+    return;
+  }
+
+  try{
+    load(true);
+    const { data:b } = await sb.from('agora_books')
+      .select('title,author,cover_url,review')
+      .eq('id', bookId)
+      .single();
+    load(false);
+    if(!b){ nt('책 정보를 불러올 수 없어요.', 'err'); return; }
+
+    // 책 모달 닫기 → 광장 → 토론방 → AI 모드로 이동
+    if(typeof closeBookModal === 'function') closeBookModal();
+    go('forum');
+    switchPlazaTab('posts');
+
+    // 조금 기다렸다가 AI 모드로 전환 (DOM 렌더 대기)
+    setTimeout(()=>{
+      switchForumMode('ai');
+      setTimeout(()=>{
+        // 책 정보 자동 채우기
+        const titleEl = document.getElementById('aiBookTitleInput');
+        const authorEl = document.getElementById('aiBookAuthorInput');
+        const noteEl = document.getElementById('aiBookNoteInput');
+        if(titleEl) titleEl.value = b.title || '';
+        if(authorEl) authorEl.value = b.author || '';
+        if(noteEl && b.review) noteEl.value = b.review.slice(0, 500); // 독후감 앞부분 자동 입력
+        AI_STATE.currentBook.coverUrl = b.cover_url || '';
+        aiOnInputChange();
+        // 화면 상단으로 스크롤
+        const aiSection = document.getElementById('forumAISection');
+        if(aiSection) aiSection.scrollIntoView({ behavior:'smooth', block:'start' });
+        nt('✨ 『' + (b.title||'') + '』에 대한 AI 토론을 시작해보세요');
+      }, 150);
+    }, 100);
+  }catch(e){
+    load(false);
+    console.warn('aiStartFromBook:', e);
+    nt('오류가 발생했어요.', 'err');
+  }
+}
+
+// ─── 대화를 토론방에 게시글로 업로드 ───
+function aiOpenShareDialog(){
+  if(!AI_STATE.history || AI_STATE.history.length < 2){
+    nt('대화 내용이 너무 짧아요. 조금 더 이야기해보세요.', 'err');
+    return;
+  }
+  // 모달 열기
+  const modal = document.getElementById('aiShareModal');
+  if(!modal) return;
+  modal.style.display = 'flex';
+
+  // 기본값: 제목은 책제목 기반 자동 제안
+  const b = AI_STATE.currentBook;
+  const modeNames = { socratic:'깊이 있는 대화', perspectives:'다양한 관점', topics:'주제 탐구', character:'인물과의 대화' };
+  const defaultTitle = `『${b.title}』 ${modeNames[AI_STATE.mode]||'AI 대화'} 기록`;
+  document.getElementById('aiShareTitleInput').value = defaultTitle;
+
+  // 미리보기 렌더
+  aiRenderSharePreview();
+}
+
+function aiCloseShareDialog(){
+  const modal = document.getElementById('aiShareModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 공유할 대화 내용 미리보기 (선택 가능)
+function aiRenderSharePreview(){
+  const list = document.getElementById('aiShareMsgList');
+  if(!list) return;
+  const msgs = AI_STATE.history;
+  list.innerHTML = msgs.map((m,i)=>{
+    const isAI = m.role === 'assistant';
+    const speaker = isAI
+      ? (AI_STATE.mode === 'character' && AI_STATE.currentBook.character ? AI_STATE.currentBook.character : 'AI')
+      : '나';
+    const preview = esc(m.content).replace(/\n/g,'<br>');
+    return `<label class="ai-share-msg" style="display:flex;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer">
+      <input type="checkbox" class="ai-share-chk" data-idx="${i}" checked style="margin-top:3px;flex-shrink:0;accent-color:var(--g)"/>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:${isAI?'var(--g)':'var(--muted)'};font-weight:600;margin-bottom:3px;letter-spacing:0.5px">${esc(speaker)}</div>
+        <div style="font-size:13px;color:var(--txt);line-height:1.55;max-height:80px;overflow:hidden">${preview}</div>
+      </div>
+    </label>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+//   관리자 · 프리미엄/AI 관리
+// ═══════════════════════════════════════════
+
+// 패널 진입
+async function admLoadPremiumPanel(){
+  admRefreshApiKeyStatus();
+  admRefreshLimitStatus();
+  admRefreshWorkerStatus();
+  await admRenderPremUsers();
+}
+
+// Worker 상태 표시
+async function admRefreshWorkerStatus(){
+  const el = document.getElementById('admWorkerStatus');
+  if(!el) return;
+  const url = AI_STATE.workerUrl;
+  if(!url){
+    el.innerHTML = `⚠️ <span style="color:var(--red)">Worker 비활성</span> — 직접 Claude API 호출 중 (보안 취약)<br><span style="font-size:11px">AI_STATE.workerUrl을 설정하면 프록시가 활성화돼요</span>`;
+    return;
+  }
+  el.innerHTML = `✅ <span style="color:#2A7A2A">Worker 활성</span><br><code style="font-size:11px;background:var(--gl);padding:2px 6px;border-radius:4px;color:var(--txt)">${esc(url)}</code><br><span style="font-size:11px;color:var(--muted)">API 키가 Worker에서 관리되어 브라우저에 노출되지 않아요</span>`;
+}
+
+// Worker 연결 테스트
+async function admTestWorker(){
+  if(!AI_STATE.workerUrl){
+    alert('Worker URL이 설정되지 않았어요.');
+    return;
+  }
+  load(true);
+  try{
+    const res = await fetch(AI_STATE.workerUrl + '/health', { method:'GET' });
+    load(false);
+    if(res.ok){
+      const data = await res.json();
+      alert(`✅ Worker 정상 작동 중!\n\n상태: ${data.status}\n응답 시간: ${new Date(data.timestamp).toLocaleString('ko-KR')}`);
+    }else{
+      alert(`⚠️ Worker 응답 오류\nHTTP ${res.status}\n\nCloudflare 대시보드에서 Worker가 배포되었는지 확인하세요.`);
+    }
+  }catch(e){
+    load(false);
+    alert(`❌ Worker 연결 실패\n\n${e.message}\n\n가능한 원인:\n• Worker URL이 잘못됨\n• Worker가 배포되지 않음\n• 네트워크 문제`);
+  }
+}
+
+// Worker URL 변경 (관리자용)
+function admChangeWorkerUrl(){
+  const current = AI_STATE.workerUrl || '(없음)';
+  const newUrl = prompt(
+    `Cloudflare Worker URL을 변경합니다.\n\n현재: ${current}\n\n새 URL을 입력하세요 (빈칸이면 Worker 사용 안 함):`,
+    AI_STATE.workerUrl || ''
+  );
+  if(newUrl === null) return;  // 취소
+  const trimmed = newUrl.trim();
+
+  if(trimmed && !trimmed.startsWith('https://')){
+    alert('URL은 https://로 시작해야 해요.');
+    return;
+  }
+
+  // 더블체크
+  if(!confirm(
+    `🛡 Worker URL 변경\n\n` +
+    `기존: ${current}\n` +
+    `변경: ${trimmed || '(없음 - 직접 호출로 전환)'}\n\n` +
+    `즉시 적용됩니다.\n계속하시겠어요?`
+  )) return;
+
+  AI_STATE.workerUrl = trimmed || null;
+  localStorage.setItem('agora_worker_url', trimmed);
+  admRefreshWorkerStatus();
+  aiUpdateApiBanner();
+  nt(trimmed ? '✅ Worker URL 변경됨' : '⚠️ Worker 사용 안 함 (직접 API 호출)');
+}
+
+// 공용 API 키 로드 (Supabase에서)
+async function admLoadSharedApiKey(){
+  try{
+    const { data } = await sb.from('agora_settings')
+      .select('value')
+      .eq('key', 'claude_api_key')
+      .maybeSingle();
+    return data?.value || null;
+  }catch(e){
+    // 테이블이 없으면 localStorage 폴백
+    return localStorage.getItem('agora_claude_key_admin') || null;
+  }
+}
+
+// 공용 API 키 저장
+async function admSaveApiKey(){
+  const input = document.getElementById('admApiKeyInput');
+  const key = input.value.trim();
+  if(!key){ nt('API 키를 입력해주세요.', 'err'); return; }
+  if(!key.startsWith('sk-ant-')){
+    if(!confirm('Anthropic API 키 형식(sk-ant-...)이 아닌 것 같아요. 그래도 저장할까요?')) return;
+  }
+
+  // 이전 키가 있으면 덮어쓰기 확인
+  const existingKey = await admLoadSharedApiKey();
+  if(existingKey){
+    const masked = existingKey.slice(0,8) + '...' + existingKey.slice(-6);
+    if(!confirm(
+      `🔑 API 키 교체 확인\n\n` +
+      `현재 저장된 키: ${masked}\n` +
+      `새로 저장할 키: ${key.slice(0,8)}...${key.slice(-6)}\n\n` +
+      `기존 키는 덮어쓰여집니다.\n` +
+      `계속하시겠어요?`
+    )) return;
+  }
+
+  load(true);
+  try{
+    const { error } = await sb.from('agora_settings')
+      .upsert({ key:'claude_api_key', value:key, updated_at:new Date().toISOString() }, { onConflict:'key' });
+
+    if(error){
+      localStorage.setItem('agora_claude_key_admin', key);
+      load(false);
+      nt('✅ API 키가 임시 저장되었어요 (이 기기에만)', 'ok');
+      alert(
+        '⚠️ Supabase에 "agora_settings" 테이블이 없어서 이 기기에만 저장했어요.\n\n' +
+        '모든 기기에서 공유되려면 Supabase SQL Editor에서 다음을 실행하세요:\n\n' +
+        'CREATE TABLE agora_settings (\n' +
+        '  key text primary key,\n' +
+        '  value text,\n' +
+        '  updated_at timestamptz default now()\n' +
+        ');'
+      );
+      admRefreshApiKeyStatus();
+      input.value = '';
+      return;
+    }
+    localStorage.setItem('agora_claude_key_admin', key);
+    load(false);
+    nt('✅ Claude API 키가 저장되었어요');
+    admRefreshApiKeyStatus();
+    input.value = '';
+  }catch(e){
+    load(false);
+    nt('저장 실패: ' + e.message, 'err');
+  }
+}
+
+async function admRefreshApiKeyStatus(){
+  const statusEl = document.getElementById('admApiKeyStatus');
+  if(!statusEl) return;
+  const key = await admLoadSharedApiKey();
+  if(key){
+    const masked = key.slice(0,8) + '...' + key.slice(-6);
+    statusEl.innerHTML = `✅ 현재 저장된 키: <code style="background:var(--gl);padding:2px 6px;border-radius:4px;font-size:11px">${masked}</code>`;
+    statusEl.style.color = 'var(--g)';
+  }else{
+    statusEl.innerHTML = '⚠️ 아직 저장된 키가 없어요. AI 토론 기능이 작동하지 않아요.';
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+// 월별 한도 저장
+async function admSaveMonthlyLimit(){
+  const input = document.getElementById('admLimitInput');
+  const value = parseInt(input.value);
+  if(isNaN(value) || value < 1 || value > 9999){
+    nt('1~9999 사이의 숫자를 입력해주세요.', 'err');
+    return;
+  }
+
+  // 현재 값과 비교
+  const current = await aiGetMonthlyLimit();
+  if(current === value){
+    nt('이미 같은 값이에요.', 'ok');
+    return;
+  }
+
+  // 더블체크
+  if(!confirm(
+    `🛡 월별 AI 대화 한도 변경\n\n` +
+    `현재: ${current}회\n` +
+    `변경: ${value}회\n\n` +
+    `다음 달부터가 아니라 즉시 적용됩니다.\n` +
+    `(이미 한도 초과한 유저는 계속 초과 상태)\n\n` +
+    `계속하시겠어요?`
+  )) return;
+
+  load(true);
+  try{
+    const { error } = await sb.from('agora_settings')
+      .upsert({ key:'ai_monthly_limit', value:String(value), updated_at:new Date().toISOString() }, { onConflict:'key' });
+    load(false);
+    if(error){
+      nt('저장 실패: ' + error.message + '\n\nagora_settings 테이블이 있는지 확인하세요.', 'err');
+      return;
+    }
+    nt(`✅ 월별 한도가 ${value}회로 설정되었어요`);
+    admRefreshLimitStatus();
+    input.value = '';
+  }catch(e){
+    load(false);
+    nt('저장 실패: ' + e.message, 'err');
+  }
+}
+
+async function admRefreshLimitStatus(){
+  const statusEl = document.getElementById('admLimitStatus');
+  if(!statusEl) return;
+  const limit = await aiGetMonthlyLimit();
+  statusEl.innerHTML = `✅ 현재 설정: <b style="color:var(--g)">월 ${limit}회</b>`;
+}
+
+// 이번 달 상위 사용자
+async function admShowTopUsers(){
+  load(true);
+  try{
+    const monthKey = aiGetCurrentMonthKey();
+    const { data } = await sb.from('agora_ai_usage')
+      .select('user_id,count')
+      .eq('year_month', monthKey)
+      .order('count', { ascending:false })
+      .limit(10);
+    load(false);
+
+    if(!data || !data.length){
+      alert('📊 이번 달 사용 기록이 없어요.');
+      return;
+    }
+
+    // 유저 이름 조회
+    const userIds = data.map(d=>d.user_id);
+    const { data: users } = await sb.from('agora_users')
+      .select('id,username')
+      .in('id', userIds);
+    const userMap = {};
+    (users||[]).forEach(u=>{ userMap[u.id] = u.username; });
+
+    const limit = await aiGetMonthlyLimit();
+    let msg = `📊 ${monthKey} 이번 달 AI 사용 순위\n(한도: ${limit}회/월)\n\n`;
+    data.forEach((d,i)=>{
+      const name = userMap[d.user_id] || '(알 수 없음)';
+      const mark = d.count >= limit ? ' 🔴' : (d.count >= limit*0.9 ? ' 🟡' : '');
+      msg += `${i+1}. ${name}: ${d.count}회${mark}\n`;
+    });
+    alert(msg);
+  }catch(e){
+    load(false);
+    alert('조회 오류: ' + e.message + '\n\nagora_ai_usage 테이블이 있는지 확인하세요.');
+  }
+}
+
+// 유저 목록 & 필터
+async function admRenderPremUsers(){
+  const listEl = document.getElementById('admPremUserList');
+  if(!listEl) return;
+  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">불러오는 중...</div>';
+
+  try{
+    const { data: users } = await sb.from('agora_users')
+      .select('id,username,premium_until,trial_started_at,is_admin,banned,created_at')
+      .order('created_at', { ascending:false });
+
+    const all = users || [];
+    const now = new Date();
+    const getStatus = u => {
+      if(u.premium_until && new Date(u.premium_until) > now) return 'premium';
+      if(u.trial_started_at){
+        const end = new Date(u.trial_started_at);
+        end.setDate(end.getDate() + 30);
+        if(now < end) return 'trial';
+      }
+      return 'free';
+    };
+
+    // 통계 업데이트
+    const stats = { premium:0, trial:0, free:0 };
+    all.forEach(u => { if(!u.is_admin) stats[getStatus(u)]++; });
+    document.getElementById('stPremCount').textContent = stats.premium;
+    document.getElementById('stTrialCount').textContent = stats.trial;
+    document.getElementById('stFreeCount').textContent = stats.free;
+
+    // 필터링
+    const q = document.getElementById('admPremSearch').value.trim().toLowerCase();
+    const filter = document.getElementById('admPremFilter').value;
+
+    let filtered = all.filter(u => !u.is_admin || u.username === '아고라');
+    if(q) filtered = filtered.filter(u => (u.username||'').toLowerCase().includes(q));
+    if(filter !== 'all') filtered = filtered.filter(u => getStatus(u) === filter);
+
+    if(!filtered.length){
+      listEl.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:12px">검색 결과가 없어요</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(u=>{
+      const s = getStatus(u);
+      const badges = {
+        premium: { bg:'var(--g)', fg:'#fff', label:'✨ 프리미엄' },
+        trial: { bg:'var(--gl)', fg:'var(--g)', label:'🎁 체험중' },
+        free: { bg:'var(--card)', fg:'var(--muted)', label:'👤 일반' }
+      };
+      const b = badges[s];
+      let detail = '';
+      if(s === 'premium'){
+        const daysLeft = Math.ceil((new Date(u.premium_until) - now) / 86400000);
+        detail = `<div style="font-size:11px;color:var(--muted)">남은 기간: ${daysLeft}일 (${new Date(u.premium_until).toLocaleDateString('ko-KR')}까지)</div>`;
+      }else if(s === 'trial'){
+        const end = new Date(u.trial_started_at);
+        end.setDate(end.getDate() + 30);
+        const daysLeft = Math.ceil((end - now) / 86400000);
+        detail = `<div style="font-size:11px;color:var(--muted)">체험 ${daysLeft}일 남음</div>`;
+      }else{
+        detail = `<div style="font-size:11px;color:var(--muted)">가입일: ${new Date(u.created_at).toLocaleDateString('ko-KR')}</div>`;
+      }
+      const isAgora = u.username === '아고라' ? ' 🏛' : '';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--card)">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px;color:var(--txt);margin-bottom:3px">${esc(u.username)}${isAgora}</div>
+          ${detail}
+        </div>
+        <span style="padding:4px 10px;background:${b.bg};color:${b.fg};border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid ${s==='free'?'var(--border)':'transparent'}">${b.label}</span>
+        <button onclick="admOpenMembership('${u.id}','${esc(u.username).replace(/'/g,'&#39;')}')" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:12px;color:var(--txt);cursor:pointer;font-family:var(--font-body);white-space:nowrap">관리</button>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error('admRenderPremUsers:', e);
+    listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red);font-size:12px">오류가 발생했어요: ' + esc(e.message) + '</div>';
+  }
+}
+
+// 유저별 멤버십 관리 모달 열기 (기존 openMembership 함수 사용)
+function admOpenMembership(userId, username){
+  if(typeof openMembership === 'function'){
+    openMembership(userId, username);
+  }else{
+    // 폴백
+    const action = prompt(
+      `${username}님에 대한 작업:\n\n` +
+      '1 = 프리미엄 1개월\n' +
+      '3 = 프리미엄 3개월\n' +
+      '12 = 프리미엄 1년\n' +
+      't = 30일 체험\n' +
+      'r = 멤버십 초기화\n\n' +
+      '번호를 입력하세요:'
+    );
+    if(!action) return;
+    admApplyMembership(userId, action);
+  }
+}
+
+// 폴백 멤버십 적용
+async function admApplyMembership(userId, action){
+  let payload = {};
+  let msg = '';
+  if(action === '1' || action === '3' || action === '12'){
+    const months = parseInt(action);
+    const until = new Date();
+    until.setMonth(until.getMonth() + months);
+    payload = { premium_until: until.toISOString(), trial_started_at: null };
+    msg = `프리미엄 ${months}개월 부여 완료`;
+  }else if(action === 't'){
+    payload = { trial_started_at: new Date().toISOString() };
+    msg = '30일 체험 부여 완료';
+  }else if(action === 'r'){
+    payload = { premium_until: null, trial_started_at: null };
+    msg = '멤버십 초기화 완료';
+  }else{
+    nt('잘못된 입력이에요.', 'err');
+    return;
+  }
+  load(true);
+  const { error } = await sb.from('agora_users').update(payload).eq('id', userId);
+  load(false);
+  if(error){ nt('오류: ' + error.message, 'err'); return; }
+  nt('✅ ' + msg);
+  admRenderPremUsers();
+}
+
+// "아고라" 계정에 1년 프리미엄
+async function admMakeAgoraPremium(){
+  load(true);
+  try{
+    // 현재 상태 먼저 확인
+    const { data: agoraUser } = await sb.from('agora_users')
+      .select('id,username,premium_until,trial_started_at')
+      .eq('username', '아고라')
+      .maybeSingle();
+    load(false);
+
+    if(!agoraUser){
+      nt('"아고라" 이름의 계정을 찾을 수 없어요.', 'err');
+      return;
+    }
+
+    // 현재 상태 표시
+    const now = new Date();
+    let currentStatus = '현재 상태: ';
+    if(agoraUser.premium_until && new Date(agoraUser.premium_until) > now){
+      const d = Math.ceil((new Date(agoraUser.premium_until) - now)/86400000);
+      currentStatus += `프리미엄 (${d}일 남음)`;
+    } else if(agoraUser.trial_started_at){
+      currentStatus += '체험중';
+    } else {
+      currentStatus += '일반(free)';
+    }
+
+    // 1단계: 작업 내용 확인
+    if(!confirm(
+      `🏛 아고라 계정 프리미엄 부여\n\n` +
+      `대상: "아고라"\n` +
+      `${currentStatus}\n` +
+      `작업: 오늘 기준 1년 프리미엄 부여\n` +
+      `만료 예정일: ${new Date(now.getFullYear()+1, now.getMonth(), now.getDate()).toLocaleDateString('ko-KR')}\n\n` +
+      `계속하시겠어요?`
+    )) return;
+
+    // 2단계: 타이핑 확인
+    const typed = prompt(`한 번 더 확인합니다.\n\n실행하려면 "아고라"를 그대로 입력해주세요:`);
+    if(typed !== '아고라'){
+      nt('입력이 일치하지 않아 취소되었습니다.', 'err');
+      return;
+    }
+
+    load(true);
+    const until = new Date();
+    until.setFullYear(until.getFullYear() + 1);
+    const { error } = await sb.from('agora_users')
+      .update({ premium_until: until.toISOString(), trial_started_at: null })
+      .eq('id', agoraUser.id);
+    load(false);
+    if(error){ nt('오류: ' + error.message, 'err'); return; }
+    nt('🏛 아고라 계정에 1년 프리미엄 부여 완료!');
+    admRenderPremUsers();
+
+    if(CU && CU.username === '아고라'){
+      CU.premium_until = until.toISOString();
+      CU.trial_started_at = null;
+    }
+  }catch(e){
+    load(false);
+    nt('오류: ' + e.message, 'err');
+  }
+}
+
+// 모든 일반 회원 free로 초기화 (3단계 더블체크)
+async function admResetAllToFree(){
+  // 1단계: 대상 유저 수 먼저 조회해서 보여주기
+  load(true);
+  const { data: targetUsers, error:e0 } = await sb.from('agora_users')
+    .select('id,username,premium_until,trial_started_at')
+    .eq('is_admin', false);
+  load(false);
+
+  if(e0){ nt('조회 오류: ' + e0.message, 'err'); return; }
+
+  const totalCount = (targetUsers||[]).length;
+  const now = new Date();
+  const premiumCount = (targetUsers||[]).filter(u=>u.premium_until && new Date(u.premium_until) > now).length;
+  const trialCount = (targetUsers||[]).filter(u=>{
+    if(!u.trial_started_at) return false;
+    const end = new Date(u.trial_started_at);
+    end.setDate(end.getDate() + 30);
+    return now < end;
+  }).length;
+  const affectedCount = premiumCount + trialCount;
+
+  if(affectedCount === 0){
+    nt('초기화할 대상이 없어요 (모두 이미 free 등급).', 'ok');
+    return;
+  }
+
+  // 2단계: 상세 정보와 함께 1차 확인
+  if(!confirm(
+    `⚠️ 일괄 초기화 경고\n\n` +
+    `영향받는 유저:\n` +
+    `• 프리미엄 회원: ${premiumCount}명\n` +
+    `• 체험 중 회원: ${trialCount}명\n` +
+    `• 총 초기화 대상: ${affectedCount}명\n` +
+    `• 변경 없음(이미 free): ${totalCount - affectedCount}명\n\n` +
+    `이 작업은 되돌릴 수 없어요.\n` +
+    `계속하시겠어요?`
+  )) return;
+
+  // 3단계: 타이핑 확인 (숫자 입력 요구 - 대상 인원수)
+  const typed = prompt(
+    `⚠️ 최종 확인\n\n` +
+    `${affectedCount}명의 회원을 free로 초기화합니다.\n\n` +
+    `실행하려면 대상 인원수인 "${affectedCount}"을 숫자로 입력해주세요:`
+  );
+  if(typed !== String(affectedCount)){
+    nt('입력이 일치하지 않아 취소되었습니다.', 'err');
+    return;
+  }
+
+  load(true);
+  try{
+    const { error } = await sb.from('agora_users')
+      .update({ premium_until: null, trial_started_at: null })
+      .eq('is_admin', false);
+    load(false);
+    if(error){ nt('오류: ' + error.message, 'err'); return; }
+    nt(`✅ ${affectedCount}명의 멤버십이 초기화되었어요`);
+    admRenderPremUsers();
+  }catch(e){
+    load(false);
+    nt('오류: ' + e.message, 'err');
+  }
+}
+
+// ═══════════════════════════════════════════
+//   AI 공유 기능
+// ═══════════════════════════════════════════
+
+// 실제 업로드
+async function aiShareSubmit(){
+  const title = document.getElementById('aiShareTitleInput').value.trim();
+  if(!title){ nt('글 제목을 입력해주세요.', 'err'); return; }
+
+  // 체크된 메시지만 수집
+  const checked = [...document.querySelectorAll('.ai-share-chk:checked')];
+  if(checked.length < 2){
+    nt('대화 2개 이상 선택해주세요.', 'err');
+    return;
+  }
+
+  const selectedMessages = checked.map(c=>{
+    const idx = parseInt(c.dataset.idx);
+    return AI_STATE.history[idx];
+  });
+
+  // 대화 포맷팅
+  const b = AI_STATE.currentBook;
+  const modeNames = { socratic:'깊이 있는 대화', perspectives:'다양한 관점 토론', topics:'주제 탐구', character:'인물과의 대화' };
+  const modeName = modeNames[AI_STATE.mode] || 'AI 대화';
+  const aiSpeaker = AI_STATE.mode === 'character' && b.character ? b.character : 'AI';
+
+  let content = `📖 『${b.title}』${b.author?' · '+b.author:''}\n🎭 모드: ${modeName}\n\n`;
+  content += '━━━━━━━━━━━━━━━━━━\n\n';
+  selectedMessages.forEach(m=>{
+    const speaker = m.role === 'assistant' ? aiSpeaker : '나';
+    content += `${speaker}:\n${m.content}\n\n`;
+  });
+  content += '━━━━━━━━━━━━━━━━━━\n';
+  content += '✨ AGORA AI 독서토론 with Claude';
+
+  // 2000자 초과 시 잘라내기
+  if(content.length > 1950){
+    content = content.slice(0, 1900) + '\n\n...(생략됨)';
+  }
+
+  // 공개 여부 체크
+  const isPublic = document.getElementById('aiSharePublicCheck').checked;
+  if(!isPublic){
+    nt('비공개 저장은 "이어하기" 기록에 이미 보관되어 있어요.', 'ok');
+    aiCloseShareDialog();
+    return;
+  }
+
+  load(true);
+  try{
+    const pid = ID();
+    const { error } = await sb.from('agora_posts').insert({
+      id: pid,
+      user_id: CU.id,
+      book_title: b.title,
+      author: b.author || null,
+      question: title,
+      content: content,
+      cover_url: b.coverUrl || null
+    });
+    load(false);
+    if(error){
+      nt('게시 오류: ' + error.message, 'err');
+      return;
+    }
+    nt('✨ 토론방에 공유되었어요!');
+    aiCloseShareDialog();
+
+    // 토론방으로 이동하기 물어보기
+    if(confirm('토론방에서 방금 올린 글을 확인하시겠어요?')){
+      switchForumMode('human');
+      if(typeof rForum === 'function') setTimeout(()=>rForum(), 200);
+    }
+  }catch(e){
+    load(false);
+    nt('업로드 실패: ' + e.message, 'err');
+  }
+}
+
 </script>
 
 <!-- ========== 통합 검색 모달 ========== -->
