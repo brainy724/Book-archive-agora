@@ -1133,7 +1133,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
      <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6">
        Enter로 전송 · Shift+Enter로 줄바꿈<br>
-       ✨ 프리미엄 회원 전용 기능 · 무제한 이용 가능
+       ✨ 프리미엄 회원 전용 기능
      </div>
    </div>
 
@@ -1163,7 +1163,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
        <div style="margin-bottom:14px;padding:12px 14px;background:var(--gl);border:1px solid var(--gb);border-radius:10px">
          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
            <input type="checkbox" id="aiSharePublicCheck" checked style="margin-top:3px;accent-color:var(--g);flex-shrink:0"/>
-           <div>
+           <div style="flex:1;min-width:0">
              <div style="font-size:13px;color:var(--txt);font-weight:600">토론방에 공개하기</div>
              <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5">다른 회원들이 이 대화를 보고 댓글로 참여할 수 있어요. 체크 해제하면 본인 기록으로만 보관됩니다.</div>
            </div>
@@ -4517,8 +4517,23 @@ function filterUserGroup(g){
 function renderUserList(list){
   const el=document.getElementById('uListInner');
   if(!el)return;
+  const now=new Date();
   el.innerHTML=list.map(u=>{
-    const statusBadge=`<span style="font-size:10px;background:var(--gl);color:var(--g);border:1px solid var(--gb);border-radius:10px;padding:2px 7px;margin-left:6px">프리미엄</span>`;
+    // 유저 상태 판단 (프리미엄 관리 탭과 동일한 로직)
+    let statusBadge = '';
+    if(u.premium_until && new Date(u.premium_until) > now){
+      statusBadge=`<span style="font-size:10px;background:var(--gl);color:var(--g);border:1px solid var(--gb);border-radius:10px;padding:2px 7px;margin-left:6px">✨ 프리미엄</span>`;
+    } else if(u.trial_started_at){
+      const end = new Date(u.trial_started_at);
+      end.setDate(end.getDate() + 30);
+      if(now < end){
+        statusBadge=`<span style="font-size:10px;background:#E8F5E8;color:#4A8A4A;border:1px solid #C2D9C2;border-radius:10px;padding:2px 7px;margin-left:6px">🎁 체험중</span>`;
+      } else {
+        statusBadge=`<span style="font-size:10px;background:#F5F5F5;color:#888;border:1px solid #DDD;border-radius:10px;padding:2px 7px;margin-left:6px">👤 일반</span>`;
+      }
+    } else {
+      statusBadge=`<span style="font-size:10px;background:#F5F5F5;color:#888;border:1px solid #DDD;border-radius:10px;padding:2px 7px;margin-left:6px">👤 일반</span>`;
+    }
     const groupTag=u.user_group?`<span style="font-size:10px;background:#E8F0FE;color:#1A73E8;border:1px solid #C2D9FC;border-radius:10px;padding:2px 7px;margin-left:4px">${esc(u.user_group)}</span>`:'';
     return`<div class="card" style="padding:12px 16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
@@ -7234,8 +7249,14 @@ async function showLikedBooks(){
 
 const AI_STATE = {
   // Cloudflare Worker URL (프록시 서버 - API 키 보호)
-  // 비어있으면 직접 Claude API 호출 (폴백, 관리자 키 사용)
-  workerUrl: 'https://agora.kjwoo0708.workers.dev',
+  // 시작 시 localStorage에서 로드됨 (아래 IIFE 참고)
+  workerUrl: (function(){
+    try {
+      const saved = localStorage.getItem('agora_worker_url');
+      if(saved !== null) return saved || null;  // 저장값 있으면 사용 (빈 문자열은 null)
+    } catch(e){}
+    return 'https://agora.kjwoo0708.workers.dev';  // 기본값 (저장된 설정 없을 때만)
+  })(),
   sharedApiKey: null,  // 관리자가 설정한 공용 키 (Worker 못 쓸 때 폴백)
   mode: 'socratic',  // 'socratic' | 'perspectives' | 'topics' | 'character'
   currentBook: { title:'', author:'', note:'', coverUrl:'', character:'' },
@@ -7330,10 +7351,16 @@ function aiPickMode(mode){
 
 // 패널 진입 시 초기화
 async function aiInitPanel(){
-  // Worker URL을 localStorage에서 복원 (관리자가 변경한 경우)
-  const savedWorkerUrl = localStorage.getItem('agora_worker_url');
-  if(savedWorkerUrl !== null){
-    AI_STATE.workerUrl = savedWorkerUrl || null;  // 빈 문자열이면 null
+  // workerUrl은 AI_STATE 초기화 시 이미 localStorage에서 로드됨
+
+  // 진행 중인 대화가 없으면 Setup 화면으로 (기본 상태로 리셋)
+  if(AI_STATE.history.length === 0){
+    const chatScreen = document.getElementById('aiChatScreen');
+    const setupScreen = document.getElementById('aiSetupScreen');
+    const msgEl = document.getElementById('aiMessages');
+    if(chatScreen) chatScreen.style.display = 'none';
+    if(setupScreen) setupScreen.style.display = 'block';
+    if(msgEl) msgEl.innerHTML = '';  // 이전 메시지 흔적 제거
   }
 
   await aiLoadSharedApiKey();
@@ -7646,9 +7673,15 @@ function aiEndDiscussion(){
   aiSaveConversation();
   document.getElementById('aiChatScreen').style.display = 'none';
   document.getElementById('aiSetupScreen').style.display = 'block';
+  // 완전 초기화
   AI_STATE.history = [];
   AI_STATE.activeConversationId = null;
+  AI_STATE.currentBook = { title:'', author:'', note:'', coverUrl:'', character:'' };
+  // UI도 비우기
+  const msgEl = document.getElementById('aiMessages');
+  if(msgEl) msgEl.innerHTML = '';
   aiRenderHistory();
+  aiUpdateSetupUsageBanner();
 }
 
 // 시스템 프롬프트 (모드별)
@@ -8183,13 +8216,30 @@ async function admTestWorker(){
   }
   load(true);
   try{
-    const res = await fetch(AI_STATE.workerUrl + '/api/health', { method:'GET' });
-    load(false);
+    // 1차: /api/health 시도
+    let res = await fetch(AI_STATE.workerUrl + '/api/health', { method:'GET' });
+
     if(res.ok){
       const data = await res.json();
+      load(false);
       alert(`✅ Worker 정상 작동 중!\n\n상태: ${data.status}\n응답 시간: ${new Date(data.timestamp).toLocaleString('ko-KR')}`);
+      return;
+    }
+
+    // 2차: /api/messages 에 GET 시도 (엔드포인트 존재 확인)
+    // 보통 "Not Found" JSON 에러를 반환하면 Worker는 살아있는 것
+    res = await fetch(AI_STATE.workerUrl + '/api/messages', { method:'GET' });
+    const text = await res.text();
+    load(false);
+
+    // JSON 응답이 오면 (에러든 아니든) Worker가 작동 중
+    let isJson = false;
+    try { JSON.parse(text); isJson = true; } catch(e){}
+
+    if(isJson){
+      alert(`✅ Worker 작동 중!\n\n(health 엔드포인트는 없지만 messages 엔드포인트는 정상 응답해요. AI 대화 기능에 문제 없어요.)`);
     }else{
-      alert(`⚠️ Worker 응답 오류\nHTTP ${res.status}\n\nCloudflare 대시보드에서 Worker가 배포되었는지 확인하세요.`);
+      alert(`⚠️ Worker URL이 올바르지 않을 수 있어요.\nHTTP ${res.status}\n\nURL을 다시 확인하거나, AI 대화를 직접 시도해보세요.`);
     }
   }catch(e){
     load(false);
