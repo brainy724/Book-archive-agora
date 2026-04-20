@@ -7774,7 +7774,7 @@ async function aiRequestClaude(userMessage){
 
     if(useWorker){
       // ═══ Worker 경유 (권장 - API 키 보호) ═══
-      response = await fetch(AI_STATE.workerUrl + '/v1/messages', {
+      response = await fetch(AI_STATE.workerUrl + '/api/messages', {
         method:'POST',
         headers:{
           'Content-Type':'application/json',
@@ -8183,7 +8183,7 @@ async function admTestWorker(){
   }
   load(true);
   try{
-    const res = await fetch(AI_STATE.workerUrl + '/health', { method:'GET' });
+    const res = await fetch(AI_STATE.workerUrl + '/api/health', { method:'GET' });
     load(false);
     if(res.ok){
       const data = await res.json();
