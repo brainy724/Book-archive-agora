@@ -142,11 +142,11 @@ body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min
 .search-center input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(212,184,120,.1);}
 /* 책 그리드 4열 */
 .book-grid4{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
-.book-card4{cursor:pointer;transition:all .3s;}
-.book-card4:hover{transform:translateY(-2px);}
-.book-card4-cover{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);display:block;background:var(--gl);box-shadow:var(--shadow-sm);}
-.book-card4-title{font-size:11px;font-weight:600;margin-top:6px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.book-card4-author{font-size:10px;color:var(--muted);}
+.book-card4{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .3s;box-shadow:var(--shadow-sm);}
+.book-card4:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);border-color:var(--gb);}
+.book-card4-cover{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--gl);}
+.book-card4-title{font-size:13px;font-weight:600;line-height:1.4;padding:12px 14px 3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.book-card4-author{font-size:11px;color:var(--muted);padding:0 14px 14px;}
 /* 광장 게시판 */
 .forum-row{padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .2s;}
 .forum-row:hover{opacity:.75;}
@@ -343,8 +343,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
  .nav{padding:0 12px;}
  .rf{flex-direction:column;gap:10px;}
  .bg{grid-template-columns:repeat(3,1fr);gap:10px;}
- .book-card4-title{font-size:10px;}
- .book-card4-author{font-size:9px;}
+ .book-card4-title{font-size:11px;padding:8px 10px 3px;}
+ .book-card4-author{font-size:10px;padding:0 10px 10px;}
  .bt2{font-size:11px;}
  .ba{font-size:10px;}
  .bin{padding:8px 10px 10px;}
