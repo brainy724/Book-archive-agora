@@ -7134,8 +7134,8 @@ async function deletePilsa(id){
   document.addEventListener('touchstart',function(e){
     touchStartX=e.changedTouches[0].screenX;
     touchStartY=e.changedTouches[0].screenY;
-    // 가로 스크롤 영역(책 선택 등)에서 시작한 스와이프는 탭 전환 무시
-    _swipeIgnore = !!e.target.closest('#aiBookPicker, .ai-history, .horizontal-scroll, [data-noswipe]');
+    // 가로 스크롤 영역(책 선택 등)이나 텍스트 입력 안에서 시작한 스와이프는 탭 전환 무시
+    _swipeIgnore = !!e.target.closest('#aiBookPicker, .ai-history, .horizontal-scroll, [data-noswipe], textarea, input, select, [contenteditable="true"]');
   },{passive:true});
 
   document.addEventListener('touchend',function(e){
@@ -7449,7 +7449,7 @@ async function aiRenderBookPicker(){
   if(!picker) return;
   try{
     const { data:bd } = await sb.from('agora_books')
-      .select('id,title,author,cover_url')
+      .select('id,title,author,cover_url,review,rating')
       .eq('user_id', CU.id)
       .order('created_at', { ascending:false })
       .limit(20);
@@ -7462,7 +7462,11 @@ async function aiRenderBookPicker(){
       const cover = b.cover_url
         ? `<img src="${b.cover_url}" class="bchip-cover" loading="lazy"/>`
         : `<div class="bchip-cover">${esc((b.title||'').slice(0,12))}</div>`;
-      return `<div class="ai-book-chip" onclick="aiPickBook(${JSON.stringify(b).replace(/"/g,'&quot;')})">
+      // 독서록이 있으면 표시 (책 chip에 작은 인디케이터)
+      const hasReview = b.review && b.review.trim().length > 0;
+      const reviewBadge = hasReview ? `<span style="position:absolute;top:4px;right:4px;background:var(--g);color:#fff;font-size:9px;padding:2px 5px;border-radius:8px;font-weight:600">📝</span>` : '';
+      return `<div class="ai-book-chip" style="position:relative" onclick="aiPickBook(${JSON.stringify(b).replace(/"/g,'&quot;')})">
+        ${reviewBadge}
         ${cover}
         <div class="bchip-title">${esc(b.title||'')}</div>
         <div class="bchip-author">${esc(b.author||'')}</div>
@@ -7477,15 +7481,27 @@ async function aiRenderBookPicker(){
 function aiPickBook(book){
   document.getElementById('aiBookTitleInput').value = book.title || '';
   document.getElementById('aiBookAuthorInput').value = book.author || '';
+  // 내가 작성한 독서록을 감상평 칸에 자동 입력 (있을 경우)
+  const noteEl = document.getElementById('aiBookNoteInput');
+  if(noteEl && book.review && book.review.trim()){
+    noteEl.value = book.review.trim().slice(0, 1500);  // 너무 길면 자르기
+  }
   AI_STATE.currentBook.coverUrl = book.cover_url || '';
+  AI_STATE.currentBook.userRating = book.rating || null;  // 평점도 저장
+  AI_STATE.currentBook.fromLibrary = true;  // 내 서재에서 선택했다는 플래그
   document.querySelectorAll('.ai-book-chip').forEach(c=>c.classList.remove('selected'));
   if(event && event.currentTarget) event.currentTarget.classList.add('selected');
-  nt('『' + (book.title||'') + '』 선택됨');
+  const msg = book.review && book.review.trim()
+    ? '『' + (book.title||'') + '』 선택됨 — 작성한 독서록을 자동으로 불러왔어요'
+    : '『' + (book.title||'') + '』 선택됨';
+  nt(msg);
 }
 
 function aiOnInputChange(){
   document.querySelectorAll('.ai-book-chip').forEach(c=>c.classList.remove('selected'));
   AI_STATE.currentBook.coverUrl = '';
+  AI_STATE.currentBook.userRating = null;
+  AI_STATE.currentBook.fromLibrary = false;
 }
 
 // 과거 대화 기록
@@ -7589,7 +7605,9 @@ async function aiStartDiscussion(){
 
   AI_STATE.currentBook = {
     title, author, note, character,
-    coverUrl: AI_STATE.currentBook.coverUrl || ''
+    coverUrl: AI_STATE.currentBook.coverUrl || '',
+    userRating: AI_STATE.currentBook.userRating || null,
+    fromLibrary: AI_STATE.currentBook.fromLibrary || false
   };
   AI_STATE.history = [];
   AI_STATE.activeConversationId = 'aiconv_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
@@ -7688,7 +7706,17 @@ function aiEndDiscussion(){
 // 시스템 프롬프트 (모드별)
 function aiBuildSystemPrompt(){
   const b = AI_STATE.currentBook;
-  const baseBook = `[지금 대화 중인 책]\n제목: ${b.title}\n저자: ${b.author || '(알려주지 않음)'}`;
+  let baseBook = `[지금 대화 중인 책]\n제목: ${b.title}\n저자: ${b.author || '(알려주지 않음)'}`;
+
+  // 내 서재에서 선택한 책이면 사용자의 독서 기록 추가
+  if(b.fromLibrary){
+    if(b.userRating && b.userRating > 0){
+      baseBook += `\n사용자 평점: ${b.userRating}/5점`;
+    }
+    if(b.note && b.note.trim()){
+      baseBook += `\n\n[사용자가 작성한 독서록]\n"${b.note.trim()}"\n\n위 독서록은 사용자가 직접 책을 읽고 남긴 감상입니다. 대화 중에 자연스럽게 참고해주세요. 단, 독서록 내용을 그대로 인용하거나 평가하기보다는, 거기에 담긴 사용자의 시선·감정·관심사를 헤아려 더 깊은 이야기로 이어가주세요.`;
+    }
+  }
 
   // 모든 모드 공통: 독서 관련만 응답
   const scopeRule = `
@@ -8101,7 +8129,7 @@ async function aiStartFromBook(bookId){
   try{
     load(true);
     const { data:b } = await sb.from('agora_books')
-      .select('title,author,cover_url,review')
+      .select('title,author,cover_url,review,rating')
       .eq('id', bookId)
       .single();
     load(false);
@@ -8122,13 +8150,17 @@ async function aiStartFromBook(bookId){
         const noteEl = document.getElementById('aiBookNoteInput');
         if(titleEl) titleEl.value = b.title || '';
         if(authorEl) authorEl.value = b.author || '';
-        if(noteEl && b.review) noteEl.value = b.review.slice(0, 500); // 독후감 앞부분 자동 입력
+        if(noteEl && b.review) noteEl.value = b.review.slice(0, 1500); // 독서록 자동 입력
         AI_STATE.currentBook.coverUrl = b.cover_url || '';
-        aiOnInputChange();
+        AI_STATE.currentBook.userRating = b.rating || null;
+        AI_STATE.currentBook.fromLibrary = true;  // 내 서재 책이라는 표시
         // 화면 상단으로 스크롤
         const aiSection = document.getElementById('forumAISection');
         if(aiSection) aiSection.scrollIntoView({ behavior:'smooth', block:'start' });
-        nt('✨ 『' + (b.title||'') + '』에 대한 AI 토론을 시작해보세요');
+        const msg = b.review
+          ? '✨ 『' + (b.title||'') + '』 — 작성한 독서록을 자동으로 불러왔어요'
+          : '✨ 『' + (b.title||'') + '』에 대한 AI 토론을 시작해보세요';
+        nt(msg);
       }, 150);
     }, 100);
   }catch(e){
@@ -8176,7 +8208,7 @@ function aiRenderSharePreview(){
       : '나';
     const preview = esc(m.content).replace(/\n/g,'<br>');
     return `<label class="ai-share-msg" style="display:flex;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer">
-      <input type="checkbox" class="ai-share-chk" data-idx="${i}" checked style="margin-top:3px;flex-shrink:0;accent-color:var(--g)"/>
+      <input type="checkbox" class="ai-share-chk" data-idx="${i}" checked style="margin-top:3px;flex-shrink:0;accent-color:var(--g);width:16px;height:16px"/>
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;color:${isAI?'var(--g)':'var(--muted)'};font-weight:600;margin-bottom:3px;letter-spacing:0.5px">${esc(speaker)}</div>
         <div style="font-size:13px;color:var(--txt);line-height:1.55;max-height:80px;overflow:hidden">${preview}</div>
