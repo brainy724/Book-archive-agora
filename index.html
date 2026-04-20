@@ -1021,7 +1021,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
      <!-- 대화 모드 선택 -->
      <div style="margin-bottom:18px">
-       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">🎭 대화 방식 선택</div>
+       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">대화 방식 선택</div>
        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
          <div class="ai-mode-card selected" data-mode="socratic" onclick="aiPickMode('socratic')" style="padding:12px;background:var(--gl);border:2px solid var(--g);border-radius:10px;cursor:pointer;transition:all .2s">
            <div style="font-size:20px;margin-bottom:4px">💭</div>
@@ -1048,7 +1048,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
      <!-- 내 서재 책 선택 -->
      <div style="margin-bottom:14px">
-       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">📚 내 서재에서 고르기</div>
+       <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">내 서재에서 고르기</div>
        <div id="aiBookPicker" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch">
          <div style="color:var(--muted);font-size:12px;padding:14px">불러오는 중...</div>
        </div>
@@ -1174,15 +1174,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
        <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
          <label style="font-size:12px;color:var(--muted);letter-spacing:0.5px">공유할 내용 선택</label>
          <div style="display:flex;gap:6px">
-           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=true)" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 선택</button>
-           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=false)" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 해제</button>
+           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=true);aiUpdateShareCount()" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 선택</button>
+           <button onclick="document.querySelectorAll('.ai-share-chk').forEach(c=>c.checked=false);aiUpdateShareCount()" style="padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-body)">전체 해제</button>
          </div>
        </div>
        <div id="aiShareMsgList" style="max-height:300px;overflow-y:auto"></div>
 
+       <!-- 글자 수 카운터 -->
+       <div id="aiShareCharCount" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">선택된 메시지: 0개 · 0자</div>
+
        <!-- 안내 -->
-       <div style="margin-top:14px;padding:10px 14px;background:#FFF8E8;border:1px solid #F0DFA8;border-radius:8px;font-size:11px;color:#8B6F2A;line-height:1.6">
-         💡 공유 시 본인의 회원 이름이 작성자로 표시돼요. 개인적인 내용은 선택 해제하세요. 2000자를 넘으면 자동 축약됩니다.
+       <div style="margin-top:10px;padding:10px 14px;background:#FFF8E8;border:1px solid #F0DFA8;border-radius:8px;font-size:11px;color:#8B6F2A;line-height:1.6">
+         💡 공유 시 본인의 회원 이름이 작성자로 표시돼요. 개인적인 내용은 선택 해제하세요. 너무 긴 대화(5000자 초과)는 메시지를 일부 해제해주세요.
        </div>
      </div>
 
@@ -3951,6 +3954,67 @@ async function savePost(){
   nt('토론이 등록됐습니다.');
   go('forum');
 }
+// AI 대화 콘텐츠를 채팅 풍선으로 변환 (마커 형식 자동 감지)
+function renderAIChatContent(rawContent){
+  if(!rawContent || !rawContent.includes('[[AICHAT_HEADER]]')){
+    // 마커 없으면 일반 텍스트로 표시
+    return `<div style="font-size:14px;line-height:1.9;color:var(--txt);white-space:pre-wrap;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px">${esc(rawContent)}</div>`;
+  }
+
+  // 헤더 추출
+  const headerMatch = rawContent.match(/\[\[AICHAT_HEADER\]\](.*?)\[\[\/AICHAT_HEADER\]\]/);
+  const truncated = rawContent.includes('[[AICHAT_TRUNCATED]]');
+  let headerHtml = '';
+  let aiSpeaker = 'AI';
+  if(headerMatch){
+    const parts = headerMatch[1].split('|');
+    const [bTitle, bAuthor, modeName, aiName] = [parts[0]||'', parts[1]||'', parts[2]||'', parts[3]||'AI'];
+    aiSpeaker = aiName;
+    headerHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;font-size:12px;color:var(--muted)">
+      <span style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:3px 10px">📖 『${esc(bTitle)}』${bAuthor?' · '+esc(bAuthor):''}</span>
+      <span style="background:var(--gl);border:1px solid var(--gb);border-radius:14px;padding:3px 10px">🎭 ${esc(modeName)}</span>
+    </div>`;
+  }
+
+  // 메시지 추출 - [[USR]] 또는 [[AI]]
+  const msgRegex = /\[\[(USR|AI)\]\]([\s\S]*?)\[\[\/\1\]\]/g;
+  const bubbles = [];
+  let m;
+  while((m = msgRegex.exec(rawContent)) !== null){
+    const isAI = m[1] === 'AI';
+    const text = m[2].trim();
+    if(isAI){
+      // AI 말풍선 (왼쪽)
+      bubbles.push(`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:14px">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;font-weight:600;letter-spacing:0.5px">✨</div>
+        <div style="flex:1;min-width:0;max-width:85%">
+          <div style="font-size:11px;color:var(--g);font-weight:600;margin-bottom:4px;letter-spacing:0.5px">${esc(aiSpeaker)}</div>
+          <div style="background:var(--gl);border:1px solid var(--gb);border-radius:14px 14px 14px 4px;padding:11px 14px;font-size:14px;line-height:1.7;color:var(--txt);white-space:pre-wrap;word-break:break-word">${esc(text)}</div>
+        </div>
+      </div>`);
+    }else{
+      // 사용자 말풍선 (오른쪽)
+      bubbles.push(`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;flex-direction:row-reverse">
+        <div style="width:32px;height:32px;border-radius:50%;background:#E8E8E8;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--muted);font-weight:600">나</div>
+        <div style="flex:1;min-width:0;max-width:85%;display:flex;flex-direction:column;align-items:flex-end">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;letter-spacing:0.5px">나</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px 14px 4px 14px;padding:11px 14px;font-size:14px;line-height:1.7;color:var(--txt);white-space:pre-wrap;word-break:break-word">${esc(text)}</div>
+        </div>
+      </div>`);
+    }
+  }
+
+  const truncatedMsg = truncated ? `<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px;font-style:italic">…이어지는 대화는 생략됨</div>` : '';
+  const footer = `<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);letter-spacing:0.5px">✨ AGORA AI 독서토론</div>`;
+
+  return `<div style="padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px">
+    ${headerHtml}
+    ${bubbles.join('')}
+    ${truncatedMsg}
+    ${footer}
+  </div>`;
+}
+
 async function openPost(id){
  aPid=id;load(true);
  const[{data:p},{data:ud}]=await Promise.all([
@@ -3968,7 +4032,7 @@ async function openPost(id){
  <div class="card" style="margin-bottom:16px">
    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">📖 ${esc(p.book_title)}${p.author?' · '+esc(p.author):''}</div>
    <div style="font-size:20px;font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.65;margin-bottom:${p.content?'12px':'10px'}">${esc(p.question)}</div>
-   ${p.content?`<div style="font-size:14px;line-height:1.9;color:var(--txt);white-space:pre-wrap;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:10px">${esc(p.content)}</div>`:''}
+   ${p.content?renderAIChatContent(p.content):''}
    <div style="display:flex;justify-content:space-between;align-items:center">
      <div style="font-size:12px;color:var(--muted)">익명 · ${ago(p.created_at)}</div>
      <div style="display:flex;gap:8px;align-items:center">
@@ -8208,13 +8272,32 @@ function aiRenderSharePreview(){
       : '나';
     const preview = esc(m.content).replace(/\n/g,'<br>');
     return `<label class="ai-share-msg" style="display:flex;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer">
-      <input type="checkbox" class="ai-share-chk" data-idx="${i}" checked style="margin-top:3px;flex-shrink:0;accent-color:var(--g);width:16px;height:16px"/>
+      <input type="checkbox" class="ai-share-chk" data-idx="${i}" checked onchange="aiUpdateShareCount()" style="margin-top:3px;flex-shrink:0;accent-color:var(--g);width:16px;height:16px"/>
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;color:${isAI?'var(--g)':'var(--muted)'};font-weight:600;margin-bottom:3px;letter-spacing:0.5px">${esc(speaker)}</div>
         <div style="font-size:13px;color:var(--txt);line-height:1.55;max-height:80px;overflow:hidden">${preview}</div>
       </div>
     </label>`;
   }).join('');
+  aiUpdateShareCount();
+}
+
+// 선택된 메시지 글자 수 카운터
+function aiUpdateShareCount(){
+  const el = document.getElementById('aiShareCharCount');
+  if(!el) return;
+  const checked = [...document.querySelectorAll('.ai-share-chk:checked')];
+  const totalChars = checked.reduce((sum, c) => {
+    const idx = parseInt(c.dataset.idx);
+    return sum + (AI_STATE.history[idx]?.content?.length || 0);
+  }, 0);
+  // 마커 오버헤드 약 50자 + 메시지당 약 20자
+  const estimated = totalChars + 50 + (checked.length * 20);
+  const MAX = 5000;
+  const isOver = estimated > MAX;
+  const color = isOver ? '#C0392B' : (estimated > MAX * 0.85 ? '#C9831A' : 'var(--muted)');
+  el.style.color = color;
+  el.innerHTML = `선택된 메시지: <b>${checked.length}개</b> · 약 <b>${estimated.toLocaleString()}자</b> / ${MAX.toLocaleString()}자${isOver ? ' ⚠️' : ''}`;
 }
 
 // ═══════════════════════════════════════════
@@ -8762,24 +8845,27 @@ async function aiShareSubmit(){
     return AI_STATE.history[idx];
   });
 
-  // 대화 포맷팅
+  // 대화 포맷팅 (특수 마커 사용 - 표시할 때 채팅 풍선으로 변환됨)
   const b = AI_STATE.currentBook;
   const modeNames = { socratic:'깊이 있는 대화', perspectives:'다양한 관점 토론', topics:'주제 탐구', character:'인물과의 대화' };
   const modeName = modeNames[AI_STATE.mode] || 'AI 대화';
   const aiSpeaker = AI_STATE.mode === 'character' && b.character ? b.character : 'AI';
 
-  let content = `📖 『${b.title}』${b.author?' · '+b.author:''}\n🎭 모드: ${modeName}\n\n`;
-  content += '━━━━━━━━━━━━━━━━━━\n\n';
+  // 마커 형식: [[AICHAT_HEADER]]책정보|모드|AI이름[[/AICHAT_HEADER]]
+  // 메시지: [[USR]]내용[[/USR]] 또는 [[AI]]내용[[/AI]]
+  let content = `[[AICHAT_HEADER]]${b.title}|${b.author||''}|${modeName}|${aiSpeaker}[[/AICHAT_HEADER]]\n`;
   selectedMessages.forEach(m=>{
-    const speaker = m.role === 'assistant' ? aiSpeaker : '나';
-    content += `${speaker}:\n${m.content}\n\n`;
+    const tag = m.role === 'assistant' ? 'AI' : 'USR';
+    content += `[[${tag}]]${m.content}[[/${tag}]]\n`;
   });
-  content += '━━━━━━━━━━━━━━━━━━\n';
-  content += '✨ AGORA AI 독서토론 with Claude';
+  content += '[[AICHAT_FOOTER]]✨ AGORA AI 독서토론[[/AICHAT_FOOTER]]';
 
-  // 2000자 초과 시 잘라내기
-  if(content.length > 1950){
-    content = content.slice(0, 1900) + '\n\n...(생략됨)';
+  // 너무 길면 → 자르지 말고 사용자에게 메시지 줄여달라고 요청
+  const MAX_LENGTH = 5000;
+  if(content.length > MAX_LENGTH){
+    const overflow = content.length - MAX_LENGTH;
+    nt(`대화가 너무 길어요 (${content.length}자, 최대 ${MAX_LENGTH}자). 약 ${Math.ceil(overflow/200)}개 메시지의 체크를 해제해주세요.`, 'err');
+    return;
   }
 
   // 공개 여부 체크
