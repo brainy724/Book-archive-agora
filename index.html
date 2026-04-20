@@ -7301,9 +7301,13 @@ function switchForumMode(mode){
 // 대화 모드 선택 (socratic/perspectives/topics/character)
 function aiPickMode(mode){
   AI_STATE.mode = mode;
-  // 카드 선택 표시
+  // 카드 선택 표시 (클래스 + 인라인 스타일 둘 다 업데이트)
   document.querySelectorAll('.ai-mode-card').forEach(c=>{
-    c.classList.toggle('selected', c.dataset.mode === mode);
+    const isSelected = c.dataset.mode === mode;
+    c.classList.toggle('selected', isSelected);
+    // 인라인 스타일도 함께 업데이트 (CSS 우선순위 충돌 방지)
+    c.style.background = isSelected ? 'var(--gl)' : 'var(--card)';
+    c.style.borderColor = isSelected ? 'var(--g)' : 'var(--border)';
   });
   // 캐릭터 모드 전용 필드 표시/숨김
   const charField = document.getElementById('aiCharacterField');
