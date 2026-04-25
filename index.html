@@ -5819,9 +5819,19 @@ async function loadReadingBooksFromDB(){
   const{data}=await sb.from('agora_users').select('reading_books').eq('id',CU.id).single();
   if(data&&data.reading_books){
     try{
-      _readingBooksCache=JSON.parse(data.reading_books);
-      // localStorage에도 동기화
-      localStorage.setItem('agora_reading_'+CU.id, JSON.stringify(_readingBooksCache));
+      const dbList = JSON.parse(data.reading_books);
+      const localList = JSON.parse(localStorage.getItem('agora_reading_'+CU.id)||'[]');
+      // 둘 중 더 많은 데이터를 가진 쪽을 우선 (데이터 보호)
+      if(localList.length > dbList.length){
+        // localStorage에 더 많은 데이터 → DB로 동기화 (DB가 빈 상태로 덮였을 때 복구)
+        _readingBooksCache = localList;
+        await sb.from('agora_users').update({reading_books:JSON.stringify(localList)}).eq('id',CU.id);
+        console.log('[reading_books] 로컬→DB 복구:', localList.length, '권');
+      }else{
+        _readingBooksCache = dbList;
+        // localStorage에도 동기화
+        localStorage.setItem('agora_reading_'+CU.id, JSON.stringify(_readingBooksCache));
+      }
     }catch{_readingBooksCache=[];}
   }else{
     // DB에 없으면 localStorage에서 마이그레이션
@@ -6150,23 +6160,37 @@ function completeReadingBook(idx){
   renderReadingBooks();
   // 독서록 작성 페이지로 이동 + 책 정보 자동 입력
   go('addBook');
-  setTimeout(()=>{
-    document.getElementById('bTitle').value=book.title||'';
-    document.getElementById('bAuthor').value=book.author||'';
-    document.getElementById('bPub').value=book.publisher||'';
+
+  // 폼 자동 채우기 (DOM 렌더 대기)
+  const fillForm = ()=>{
+    const titleEl = document.getElementById('bTitle');
+    const authorEl = document.getElementById('bAuthor');
+    const pubEl = document.getElementById('bPub');
+    const endEl = document.getElementById('bEnd');
+
+    if(!titleEl){ // DOM 아직 준비 안 됨, 재시도
+      setTimeout(fillForm, 100);
+      return;
+    }
+    titleEl.value = book.title || '';
+    if(authorEl) authorEl.value = book.author || '';
+    if(pubEl) pubEl.value = book.publisher || '';
+    if(endEl) endEl.value = new Date().toISOString().slice(0,10);
+
     if(book.cover){
-      document.getElementById('bCoverUrl').value=book.cover;
-      const sc=document.getElementById('selectedCover');
-      const si=document.getElementById('selectedCoverImg');
-      if(sc&&si){si.src=book.cover;sc.style.display='flex';}
+      const coverInput = document.getElementById('bCoverUrl');
+      if(coverInput) coverInput.value = book.cover;
+      const sc = document.getElementById('selectedCover');
+      const si = document.getElementById('selectedCoverImg');
+      if(sc && si){ si.src = book.cover; sc.style.display = 'flex'; }
     }
     if(book.category){
-      const catEl=document.getElementById('bCategory');
-      if(catEl) catEl.value=book.category;
+      const catEl = document.getElementById('bCategory');
+      if(catEl) catEl.value = book.category;
     }
-    document.getElementById('bEnd').value=new Date().toISOString().slice(0,10);
     nt('완독을 축하해요! 감상평을 남겨보세요.');
-  },200);
+  };
+  setTimeout(fillForm, 300);
 }
 function addReadingBook(book){
   const list=getReadingBooks();
