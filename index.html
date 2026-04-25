@@ -6710,7 +6710,7 @@ async function renderGoal(){
   const me=`${nm.getFullYear()}-${String(nm.getMonth()+1).padStart(2,'0')}-01`;
   let rc=0;
   if(typeof sb!=='undefined'&&CU){
-    const{data:b}=await sb.from('agora_books').select('id').eq('user_id',CU.id).gte('finished_at',ms).lt('finished_at',me);
+    const{data:b}=await sb.from('agora_books').select('id').eq('user_id',CU.id).gte('end_date',ms).lt('end_date',me);
     rc=(b||[]).length;
   }
   if(!goal){document.getElementById('goalSetup').style.display='block';document.getElementById('goalDisplay').style.display='none';return;}
@@ -6737,7 +6737,7 @@ let _calBooks=[];
 let _calTimers=[];
 async function loadCalBooks(){
   if(!CU)return;
-  const{data:books}=await sb.from('agora_books').select('id,title,finished_at').eq('user_id',CU.id);
+  const{data:books}=await sb.from('agora_books').select('id,title,end_date').eq('user_id',CU.id);
   _calBooks=books||[];
   const{data:timers}=await sb.from('timer_records').select('id,seconds,recorded_at').eq('user_id',CU.id);
   _calTimers=timers||[];
@@ -6748,8 +6748,8 @@ function onCalDayClick(dateStr){
   const monthKey=`${y}-${String(m).padStart(2,'0')}`;
   document.getElementById('calDayLabel').textContent=`${y}년 ${m}월 ${d}일`;
   // 해당 월/일 권수
-  const monthBooks=_calBooks.filter(b=>b.finished_at&&b.finished_at.slice(0,7)===monthKey);
-  const dayBooks=_calBooks.filter(b=>b.finished_at&&b.finished_at.slice(0,10)===dateStr);
+  const monthBooks=_calBooks.filter(b=>b.end_date&&b.end_date.slice(0,7)===monthKey);
+  const dayBooks=_calBooks.filter(b=>b.end_date&&b.end_date.slice(0,10)===dateStr);
   document.getElementById('calMonthCount').textContent=monthBooks.length;
   document.getElementById('calDayCount').textContent=dayBooks.length;
   // 해당 월/일 독서 시간
@@ -6773,14 +6773,14 @@ function onCalDayClick(dateStr){
 let _chartMonthBooks=null,_chartMonthTime=null,_chartCategory=null;
 async function renderStatsCharts(){
   if(!CU)return;
-  const{data:books}=await sb.from('agora_books').select('id,title,category,finished_at').eq('user_id',CU.id);
+  const{data:books}=await sb.from('agora_books').select('id,title,category,end_date').eq('user_id',CU.id);
   const allBooks=books||[];
   // 독서 요약
   const summEl=document.getElementById('statsSummary');
   if(summEl){
     const total=allBooks.length;
-    const thisYear=allBooks.filter(b=>b.finished_at&&b.finished_at.startsWith(new Date().getFullYear().toString())).length;
-    const thisMonth=allBooks.filter(b=>{if(!b.finished_at)return false;const n=new Date();return b.finished_at.startsWith(`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`);}).length;
+    const thisYear=allBooks.filter(b=>b.end_date&&b.end_date.startsWith(new Date().getFullYear().toString())).length;
+    const thisMonth=allBooks.filter(b=>{if(!b.end_date)return false;const n=new Date();return b.end_date.startsWith(`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`);}).length;
     summEl.innerHTML=`<div style="display:flex;gap:10px;text-align:center">`+
       `<div style="flex:1;padding:14px;background:var(--gl);border-radius:var(--radius-sm)"><div style="font-family:var(--font-serif);font-size:24px;font-weight:700;color:var(--g)">${total}</div><div style="font-size:11px;color:var(--muted)">전체</div></div>`+
       `<div style="flex:1;padding:14px;background:var(--gl);border-radius:var(--radius-sm)"><div style="font-family:var(--font-serif);font-size:24px;font-weight:700;color:var(--g)">${thisYear}</div><div style="font-size:11px;color:var(--muted)">올해</div></div>`+
@@ -6795,7 +6795,7 @@ async function renderStatsCharts(){
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     monthMap[k]=0;
   }
-  allBooks.forEach(b=>{if(b.finished_at){const k=b.finished_at.slice(0,7);if(monthMap[k]!==undefined) monthMap[k]++;}});
+  allBooks.forEach(b=>{if(b.end_date){const k=b.end_date.slice(0,7);if(monthMap[k]!==undefined) monthMap[k]++;}});
   const mLabels=Object.keys(monthMap).map(k=>k.slice(5)+'월');
   const mData=Object.values(monthMap);
   const ctx1=document.getElementById('chartMonthBooks');
