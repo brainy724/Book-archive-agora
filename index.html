@@ -23,21 +23,24 @@
 <script src="/pilsa-quotes.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=71d55f39fcded8ee230c53d4de64a2f4&libraries=services"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
- --g:#D4B878;--g2:#BFA562;--gl:#FFFCF5;--gb:#F0E8D4;
- --br:#2C1A2E;--brl:#F9F5FA;--brb:#E4D4EA;
- --card:#FFFFFF;--border:#F2ECE6;--txt:#3D3530;--muted:#A89E96;--red:#C0392B;
- --bg-page:#FFFCF9;--nav-h:56px;--tab-h:62px;
- --font-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+ --g:#A88A4E;--g2:#8E7338;--gl:#FBF7EE;--gb:#EADFC4;
+ --br:#1F1320;--brl:#F7F2F8;--brb:#E0D0E6;
+ --card:#FFFFFF;--border:#ECE5DB;--txt:#1F1A16;--muted:#8B8278;--red:#B23A2B;
+ --bg-page:#FAF6EE;--nav-h:56px;--tab-h:62px;
+ --font-body:'Pretendard Variable','Pretendard','Noto Sans KR','Apple SD Gothic Neo',sans-serif;
  --font-serif:'Cormorant Garamond',Georgia,serif;
- --gold:#D4B878;--gold2:#BFA562;
- --shadow-sm:0 1px 4px rgba(212,184,120,.06);
- --shadow-md:0 4px 16px rgba(212,184,120,.1);
- --shadow-lg:0 8px 32px rgba(212,184,120,.14);
- --radius:14px;--radius-sm:10px;--radius-lg:20px;
+ --gold:#A88A4E;--gold2:#8E7338;
+ --shadow-sm:0 1px 2px rgba(31,26,22,.04), 0 1px 1px rgba(31,26,22,.03);
+ --shadow-md:0 6px 20px -8px rgba(31,26,22,.12), 0 2px 6px -2px rgba(31,26,22,.06);
+ --shadow-lg:0 18px 48px -14px rgba(31,26,22,.22), 0 6px 16px -6px rgba(31,26,22,.08);
+ --radius:12px;--radius-sm:8px;--radius-lg:18px;
 }
 body.dark{
  --card:#1A1218;--border:#2E1E28;--txt:#F0E8F0;--muted:#9A7A90;--bg-page:#120D14;
@@ -46,7 +49,7 @@ body.dark{
 }
 body.dark .nav{background:rgba(18,13,20,.92)!important;}
 body.dark .btab{background:rgba(18,13,20,.95)!important;}
-body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;line-height:1.6;}
+body{background:var(--bg-page);font-family:var(--font-body);color:var(--txt);min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.55;font-weight:500;font-feature-settings:'ss01','cv01','cv11';letter-spacing:-0.012em;}
 .serif{font-family:var(--font-serif);}
 /* NAV */
 .nav{background:rgba(253,251,249,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-sizing:border-box;}
@@ -446,6 +449,95 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
   flex-shrink:0;width:28px;
 }
 .ai-topic-card .topic-text{font-size:13.5px;color:var(--txt);line-height:1.5;}
+
+/* ════════════════════════════════════════════════
+   리파인먼트 오버라이드 — 더 진한 타이포 + 정제된 분위기
+   ════════════════════════════════════════════════ */
+html{font-feature-settings:'ss01','cv01','cv11';}
+body{font-weight:500;letter-spacing:-0.012em;}
+strong,b{font-weight:700;}
+
+/* 로고 — 골드 유지, 더 묵직한 자간 */
+.logo{font-weight:700!important;letter-spacing:0.32em!important;color:var(--g)!important;font-size:20px!important;}
+
+/* 네비게이션 — 진한 본문, 더 또렷한 활성 상태 */
+.nl{color:#5a5048!important;font-weight:600!important;font-size:13px!important;letter-spacing:-0.01em;}
+.nl.on{color:var(--txt)!important;background:transparent!important;font-weight:700!important;position:relative;}
+.nl.on::after{content:'';position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--g);border-radius:1px;}
+.nl:hover{color:var(--txt)!important;background:rgba(168,138,78,.06)!important;}
+
+/* 사이드바 — 정돈된 느낌 */
+.sidebar{background:var(--bg-page)!important;border-right:1px solid var(--border)!important;}
+.sb-item{color:#6a6058!important;font-weight:600!important;font-size:13.5px!important;padding:11px 24px!important;letter-spacing:-0.01em;}
+.sb-item.on{color:var(--txt)!important;background:rgba(168,138,78,.07)!important;font-weight:700!important;border-left-color:var(--g)!important;}
+.sb-item:hover{color:var(--txt)!important;}
+
+/* 헤딩 — 세리프지만 더 단단하게 */
+.h1{font-family:var(--font-serif)!important;font-weight:600!important;font-size:32px!important;letter-spacing:-0.01em!important;color:var(--txt)!important;line-height:1.2!important;}
+.serif{font-weight:600!important;}
+.sub{color:#7a7068!important;font-size:13.5px!important;font-weight:500!important;letter-spacing:-0.005em;}
+
+/* 카드 — 더 얇은 보더, 부드러운 그림자 */
+.card{border-radius:12px!important;border-color:var(--border)!important;background:var(--card)!important;}
+.card:hover{border-color:#DFD3BA!important;}
+
+/* 책 그리드 카드 */
+.bi{border-radius:10px!important;}
+.bt2{font-size:13.5px!important;font-weight:700!important;letter-spacing:-0.015em;color:var(--txt)!important;line-height:1.35!important;}
+.ba{font-size:11.5px!important;color:#8b8278!important;font-weight:500!important;}
+.book-card4-title{font-size:12px!important;font-weight:700!important;letter-spacing:-0.015em;line-height:1.35!important;}
+.book-card4-author{font-size:11px!important;color:#8b8278!important;font-weight:500!important;}
+
+/* 정렬/카테고리 버튼 — 더 또렷하게 */
+.sort-btn,.cat-btn{font-size:12.5px!important;font-weight:600!important;letter-spacing:-0.01em;color:#6a6058!important;border-radius:999px!important;padding:7px 14px!important;}
+.sort-btn.on,.cat-btn.on{background:var(--txt)!important;color:#fff!important;border-color:var(--txt)!important;box-shadow:none!important;font-weight:700!important;}
+
+/* 탭 / 어드민 탭 */
+.tab-btn,.adm-tab{font-weight:600!important;font-size:14px!important;letter-spacing:-0.01em;color:#6a6058!important;}
+.tab-btn.on,.adm-tab.on{color:var(--txt)!important;border-bottom-color:var(--txt)!important;font-weight:700!important;}
+
+/* 폴더 카드 */
+.folder-card{border-radius:10px!important;}
+.folder-card.on{background:#fff!important;border-color:var(--txt)!important;box-shadow:var(--shadow-md)!important;}
+.folder-card-name{font-weight:700!important;font-size:12.5px!important;letter-spacing:-0.015em;}
+.folder-card-count{font-weight:500!important;color:#8b8278!important;}
+
+/* 포인트/뱃지 — 더 미니멀하게 */
+.nav-pts{background:transparent!important;border:1px solid var(--border)!important;color:var(--txt)!important;font-weight:700!important;font-size:12.5px!important;letter-spacing:-0.01em;border-radius:999px!important;padding:5px 12px!important;}
+.nav-pts:hover{background:var(--gl)!important;border-color:var(--g)!important;}
+
+/* 버튼 통일 */
+.btn-sm{font-weight:600!important;font-size:11.5px!important;letter-spacing:-0.005em;border-radius:6px!important;}
+
+/* 입력창 — 더 정돈된 보더 */
+input,textarea,select{font-family:var(--font-body)!important;font-weight:500!important;letter-spacing:-0.01em;border-radius:8px!important;}
+input:focus,textarea:focus{border-color:var(--txt)!important;box-shadow:0 0 0 3px rgba(31,26,22,.06)!important;}
+label{font-weight:600!important;font-size:12.5px!important;color:#6a6058!important;letter-spacing:0.02em;text-transform:uppercase;}
+
+/* 통계 숫자 — 세리프 유지, 더 진하게 */
+.sn,.pts-num{font-weight:700!important;letter-spacing:-0.02em!important;color:var(--txt)!important;}
+.sl{font-weight:600!important;color:#8b8278!important;letter-spacing:0.01em;}
+
+/* 로그인 카드 타이포 */
+.ltitle{font-weight:700!important;letter-spacing:0.18em!important;color:var(--txt)!important;font-size:38px!important;}
+.lsub{color:#6a6058!important;font-weight:500!important;letter-spacing:0.1em!important;}
+
+/* 빈화면 */
+.et{font-weight:600!important;color:var(--txt)!important;letter-spacing:-0.005em;}
+.es{color:#8b8278!important;font-weight:500!important;}
+
+/* 하단탭 — 진한 라벨 */
+.ti{font-weight:600!important;font-size:10.5px!important;letter-spacing:-0.005em;}
+.ti.on{font-weight:700!important;color:var(--txt)!important;}
+.ti.on svg{stroke:var(--txt)!important;}
+.ti.on::after{background:var(--txt)!important;}
+
+/* 다크모드 보정 */
+body.dark{--txt:#F2EBE0;--muted:#8a8278;--bg-page:#15110D;--card:#1C1814;--border:#2A2620;--gl:#221E18;--gb:#3A3128;}
+body.dark .logo,body.dark .nl,body.dark .nl.on,body.dark .sb-item,body.dark .sb-item.on,body.dark .h1,body.dark .bt2,body.dark .book-card4-title,body.dark .sort-btn,body.dark .cat-btn,body.dark .tab-btn,body.dark .tab-btn.on,body.dark .ti.on{color:var(--txt)!important;}
+body.dark .sort-btn.on,body.dark .cat-btn.on{background:var(--g)!important;border-color:var(--g)!important;color:#15110D!important;}
+body.dark .ti.on::after{background:var(--g)!important;}
+body.dark .ti.on svg{stroke:var(--g)!important;}
 
 </style>
 <script>
@@ -2102,40 +2194,16 @@ async function handleOAuth(session){
  else{
  const m=session.user.user_metadata||{};
  const un=m.full_name||m.name||session.user.email?.split('@')[0]||'user_'+ID().slice(0,6);
- // 신규 유저는 free 등급으로 생성 (프리미엄은 결제 or 관리자 부여 시에만)
- const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null,premium_until:null};
+ // 신규 유저는 free 등급으로 생성 (프리미엄은 결제 or 관리자 부여 시에만) - gender_confirmed:false 명시
+ const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:m.avatar_url||m.picture||null,premium_until:null,gender_confirmed:false};
  const{error}=await sb.from('agora_users').insert(nu);
  if(error){nt('계정 생성 오류: '+error.message,'err');load(false);return;}
  await ok({...nu,isAdmin:false});
  }
 }
 
-async function loginGuest(){
-  load(true);
-  const guestId='guest_'+Date.now();
-  const guestUser={
-    id:guestId,
-    username:'게스트',
-    is_admin:false,
-    isAdmin:false,
-    strikes:0,
-    banned:false,
-    points:0,
-    gender_confirmed:true,
-    premium_until:new Date(Date.now()+365*24*60*60*1000).toISOString(),
-    isGuest:true
-  };
-  CU=guestUser;
-  localStorage.setItem('agora_sess',JSON.stringify(guestUser));
-  document.getElementById('lw').classList.remove('active');
-  document.getElementById('lw').style.display='none';
-  document.getElementById('app').style.display='block';
-  load(false);
-  const navU=document.getElementById('navUser');if(navU)navU.textContent='게스트';
-  updateNavTabs();
-  go('library');
-  nt('게스트 모드로 둘러보고 있어요. 기록을 저장하려면 카카오 로그인이 필요해요.');
-}
+// 게스트 모드 제거됨 - 회원 가입(카카오/Apple)만 가능
+
 // ══ Apple 로그인 ══
 async function loginApple(){
   load(true);
@@ -2240,8 +2308,8 @@ async function handleNaver(){
  if(eu){if(eu.banned){nt('이용이 제한된 계정입니다.','err');nl.logout();return;}await ok({...eu,isAdmin:eu.is_admin});}
  else{
  const un=nu.getName()||nu.getEmail()?.split('@')[0]||'user_'+ID().slice(0,6);
- // 신규 유저는 free 등급 (프리미엄은 결제 or 관리자 부여 시에만)
- const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null,premium_until:null};
+ // 신규 유저는 free 등급 (프리미엄은 결제 or 관리자 부여 시에만) - gender_confirmed:false 명시
+ const newU={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:nid,points:0,avatar_url:nu.getProfileImage()||null,premium_until:null,gender_confirmed:false};
  const{error}=await sb.from('agora_users').insert(newU);
  if(error){nt('계정 생성 오류','err');return;}
  await ok({...newU,isAdmin:false});
@@ -7465,7 +7533,7 @@ async function aiUpdateSetupUsageBanner(){
   const banner = document.getElementById('aiUsageSetupBanner');
   const textEl = document.getElementById('aiUsageSetupText');
   const fillEl = document.getElementById('aiUsageSetupFill');
-  if(!banner || !CU || CU.isGuest) return;
+  if(!banner || !CU) return;
 
   try{
     const [used, limit] = await Promise.all([
@@ -7895,7 +7963,7 @@ async function aiRequestClaude(userMessage){
   const isRealUserMsg = AI_STATE.history.some(m => m.role === 'assistant');
 
   // ─── 월별 사용량 체크 (실제 유저 메시지만 카운트) ───
-  if(isRealUserMsg && CU && CU.id && !CU.isGuest){
+  if(isRealUserMsg && CU && CU.id){
     const [used, limit] = await Promise.all([
       aiGetMonthlyUsage(CU.id),
       aiGetMonthlyLimit()
@@ -7992,7 +8060,7 @@ async function aiRequestClaude(userMessage){
     aiSaveConversation();
 
     // 성공한 호출 카운트 +1 (실제 유저 메시지일 때만, 첫 AI 인사는 무료)
-    if(isRealUserMsg && CU && CU.id && !CU.isGuest){
+    if(isRealUserMsg && CU && CU.id){
       await aiIncrementUsage(CU.id);
       aiUpdateUsageIndicator();
     }
