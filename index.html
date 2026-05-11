@@ -2169,8 +2169,8 @@ async function handleAppleCallback(){
     await ok({...eu,isAdmin:eu.is_admin});
     return true;
   }
-  // 신규 유저 생성 (free 등급)
-  const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:null,premium_until:null};
+  // 신규 유저 생성 (free 등급) - gender_confirmed:false 명시하여 여성 인증 화면 강제
+  const nu={id:ID(),username:un,password:null,strikes:0,banned:false,is_admin:false,auth_id:aid,points:0,avatar_url:null,premium_until:null,gender_confirmed:false};
   const{error:ie}=await sb.from('agora_users').insert(nu);
   if(ie){nt('계정 생성 실패: '+ie.message,'err');load(false);return true;}
   await ok({...nu,isAdmin:false});
